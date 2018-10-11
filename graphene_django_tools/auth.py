@@ -18,7 +18,10 @@ class UserMutation(ModelMutaion):
     def premutate(cls, context, **arguments):
         super().premutate(context, **arguments)
         nodedata = context.data['nodedata']
-        validate_password(nodedata['password'])
+
+        password = nodedata.get('password')
+        if password:
+            validate_password(password)
 
     @classmethod
     def postmutate(cls, result: graphene.ObjectType,
