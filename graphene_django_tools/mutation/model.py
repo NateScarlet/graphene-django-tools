@@ -12,6 +12,7 @@ from django.db.models.fields.reverse_related import ForeignObjectRel
 from graphene_django.forms.converter import convert_form_field
 
 from . import core
+from ..core import get_modelnode
 from ..texttools import snake_case
 from .clientid import ClientIDMutation
 
@@ -93,8 +94,7 @@ class ModelMutaion(ClientIDMutation):
 
         ret = super()._make_fields(**options)
 
-        ret[options['nodename']] = graphene.Field(
-            core.get_model_nodetype(model))
+        ret[options['nodename']] = graphene.Field(get_modelnode(model))
         return ret
 
     @classmethod
