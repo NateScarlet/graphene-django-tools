@@ -1,14 +1,22 @@
-"""Predefined mutation for django auth.  """
+"""Example schema for django auth.  """
 
 import graphene
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 
-from .mutation import (ModelCreationMutaion, ModelMutaion, ModelUpdateMutaion,
-                       MutationContext)
+import graphene_django_tools as gdtools
+from graphene_django_tools.interfaces import MessageMutation
+
+if not gdtools.get_modelnode(User, is_autocreate=False):
+    gdtools.create_modelnode(
+        User,
+        filter_fields={
+            'id': ['exact'],
+            'username': ['exact', 'iexact', 'icontains', 'istartswith']})
 
 
-class UserMutation(ModelMutaion):
+class UserMutation(gdtools.ModelMutaion):
     """Addtional actions for user.  """
 
     class Meta:
@@ -25,7 +33,7 @@ class UserMutation(ModelMutaion):
 
     @classmethod
     def postmutate(cls, result: graphene.ObjectType,
-                   context: MutationContext,
+                   context: gdtools.MutationContext,
                    **arguments) -> graphene.ObjectType:
 
         nodedata = context.data['nodedata']
@@ -38,7 +46,7 @@ class UserMutation(ModelMutaion):
         return super().postmutate(result, context, **arguments)
 
 
-class UserCreation(UserMutation, ModelCreationMutaion):
+class UserCreation(UserMutation, gdtools.ModelCreationMutaion):
     """Create user.  """
 
     class Meta:
@@ -49,9 +57,40 @@ class UserCreation(UserMutation, ModelCreationMutaion):
                              'last_login')
 
 
-class UserUpdate(UserMutation, ModelUpdateMutaion):
+class UserUpdate(UserMutation, gdtools.ModelUpdateMutaion):
     """Update user.  """
 
     class Meta:
         model = User
         exclude_arguments = ('username', 'last_login')
+
+
+class Login(gdtools.Mutation):
+    """Login current user.  """
+
+    class Arguments:
+        username = graphene.String(required=True)
+        password = graphene.String(required=True)
+
+    class Meta:
+        interfaces = (MessageMutation,)
+
+    user = gdtools.ModelField(User)
+
+    def mutate(self, context: gdtools.MutationContext, **kwargs):
+        request = context.info.context
+        user = authenticate(**kwargs)
+        if not user:
+            raise ValueError('Login failed.')
+        login(request, user)
+        return self.__class__(user=user, message=f'Welcome back, {user}.')
+
+
+class Logout(gdtools.Mutation):
+    """Logout current user.  """
+    class Meta:
+        interfaces = (MessageMutation,)
+
+    def mutate(self, context: gdtools.MutationContext, **kwargs):
+        logout(context.info.context)
+        return self.__class__('Logout successed.')
