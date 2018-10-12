@@ -4,11 +4,12 @@
 
 import re
 from collections import OrderedDict
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, Union
 
 import django
 import graphene
 from django.db.models.fields.reverse_related import ForeignObjectRel
+from graphene.types.unmountedtype import UnmountedType
 from graphene_django.forms.converter import convert_form_field
 
 from . import core
@@ -49,25 +50,23 @@ class ModelMutaion(ClientIDMutation):
     @classmethod
     def _make_arguments(cls, **options) -> OrderedDict:
         options.setdefault('arguments', OrderedDict())
-        model = options['model']  # type: django.db.models.Model
-        nodename = options['nodename']
 
-        fields = model._meta.get_fields()  # pylint: disable=protected-access
-
+        node_dict = OrderedDict(
+            Meta=dict(description=f'Node data for {cls.__name__}'))
+        node_dict.update(cls.collect_node_arguments(**options))
         node_cls = type(
-            re.sub("Input$|$", "Input", cls.__name__),
+            re.sub("NodeData$|$", "NodeData", cls.__name__),
             (graphene.InputObjectType,),
-            {i.name: cls._convert_db_field(i, **options)
-             for i in cls.collect_arguments(fields, **options)})
+            node_dict)
         node = node_cls(required=True)  # type: graphene.InputObjectType
 
-        options['arguments'].update({nodename: node})
+        options['arguments']['data'] = node
 
         return super()._make_arguments(**options)
 
     @classmethod
-    def _convert_db_field(cls, field: django.db.models.Field, **options) \
-            -> Union[graphene.Field, None]:
+    def _convert_db_field(cls, field: django.db.models.Field, **options)\
+            -> Union[UnmountedType, None]:
         if isinstance(field, ForeignObjectRel):
             return None
         if field.name in options['exclude_arguments']:
@@ -99,24 +98,20 @@ class ModelMutaion(ClientIDMutation):
         return ret
 
     @classmethod
-    def collect_arguments(cls,
-                          fields: List[Union[django.db.models.Field, None]],
-                          **options)\
-            -> List[django.db.models.Field]:
-        """Collect mutation argument fields.
+    def collect_node_arguments(cls, **options)-> Dict[str, UnmountedType]:
+        """Collect mutation arguments for node.  """
 
-        Field.required attribute can be changed here.
-        """
-        # pylint: disable=unused-argument
-
-        ret = fields
-        ret = [i for i in ret if i]
+        model = options['model']  # type: django.db.models.Model
+        fields = model._meta.get_fields()  # pylint: disable=protected-access
+        ret = {i.name: cls._convert_db_field(i, **options)
+               for i in fields}
+        ret = graphene.types.utils.yank_fields_from_attrs(ret)
         return ret
 
     @classmethod
     def premutate(cls, context: core.MutationContext, **kwargs: Dict[str, Any]):
         super().premutate(context, **kwargs)
-        context.data['nodedata'] = kwargs[context.meta.nodename]
+        context.data['nodedata'] = kwargs['arguments']['data']
 
     @classmethod
     def mutate(cls, context: core.MutationContext, **kwargs: Dict[str, Any]) \
@@ -129,7 +124,6 @@ class ModelMutaion(ClientIDMutation):
     def postmutate(cls, context: core.MutationContext,
                    result: graphene.ObjectType,
                    **kwargs: Dict[str, Any]) -> graphene.ObjectType:
-
         ret = super().postmutate(context, result, **kwargs)
         context.data['instance'].save()
         return ret
@@ -142,8 +136,8 @@ class ModelCreationMutaion(ModelMutaion):
         abstract = True
 
     @classmethod
-    def premutate(cls, context: core.MutationContext, **arguments: Dict[str, Any]):
-        super().premutate(context, **arguments)
+    def premutate(cls, context: core.MutationContext, **kwargs: Dict[str, Any]):
+        super().premutate(context, **kwargs)
         instance = context.meta.model(**context.data['nodedata'])
         context.data['instance'] = instance
 
@@ -155,7 +149,27 @@ class ModelUpdateMutaion(ModelMutaion):
         abstract = True
 
     @classmethod
-    def premutate(cls, context: core.MutationContext, **arguments: Dict[str, Any]):
-        super().premutate(context, **arguments)
-        instance = context.meta.model.objects.get(**context.data['nodedata'])
-        context.data['instance'] = instance
+    def _make_arguments(cls, **options) -> OrderedDict:
+        options.setdefault('arguments', OrderedDict())
+        options['arguments'].update(
+            id=graphene.ID(required=True).Argument())
+        return super()._make_arguments(**options)
+
+    @classmethod
+    def premutate(cls, context: core.MutationContext, **kwargs):
+
+        arguments = kwargs['arguments']
+
+        super().premutate(context, **kwargs)
+        node = graphene.Node.get_node_from_global_id(
+            context.info, global_id=arguments['id'])
+
+        context.data['instance'] = node
+
+    @classmethod
+    def mutate(cls, context: core.MutationContext, **kwargs):
+        nodedata = context.data['nodedata']  # dict
+        instance = context.data['instance']
+        for k, v in nodedata.items():
+            setattr(instance, k, v)
+        return super().mutate(context, **kwargs)

@@ -29,7 +29,7 @@ class ClientIDMutation(Mutation):
         options.setdefault('arguments', OrderedDict())
         options.setdefault('input_nodename', 'arguments')
         options['arguments'].update(
-            client_mutation_id=graphene.Field.mounted(graphene.String()))
+            client_mutation_id=graphene.String().Field())
 
         arguments = super()._make_arguments(**options)
 
@@ -39,20 +39,21 @@ class ClientIDMutation(Mutation):
             arguments)
         node = node_cls(required=True)  # type: graphene.InputObjectType
 
-        ret = OrderedDict({options['input_nodename']: node})
+        ret = OrderedDict({
+            options['input_nodename']: node
+        })
         return ret
 
     @classmethod
     def _make_fields(cls, **options) -> OrderedDict:
         ret = super()._make_fields(**options)
-        ret['client_mutation_id'] = graphene.Field.mounted(graphene.String())
+        ret['client_mutation_id'] = graphene.String().Field()
         return ret
 
     @classmethod
     def postmutate(cls, context: core.MutationContext,
                    result: graphene.ObjectType,
                    **arguments: Dict[str, Any]) -> graphene.ObjectType:
-
-        result = super().postmutate(result, **arguments)
+        result = super().postmutate(context, result, **arguments)
         result.client_mutation_id = arguments.get("client_mutation_id")
         return result

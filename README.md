@@ -20,6 +20,8 @@ Map the user model with filter in 10 lines.
 ## Mutation
 
 - `ModelMutation`
+- `ModelCreateMutation`
+- `ModelUpdateMutation`
 
 example: [`graphene_django_tools.auth` module](./graphene_django_tools/auth.py)
 
@@ -27,3 +29,4 @@ Map the user model with password validation in 40 lines.
 
 ![](./pic/20181011195459.png)
 ![](./pic/20181011200840.png)
+![](./pic/20181012184432.png)

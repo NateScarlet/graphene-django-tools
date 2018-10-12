@@ -27,5 +27,5 @@ class MutationContext(NamedTuple):
     data: dict
 
 
-def _sorted_dict(obj: dict, key=None, reverse=None)->OrderedDict:
+def _sorted_dict(obj: dict, key=None, reverse=False)->OrderedDict:
     return OrderedDict(sorted(obj.items(), key=key, reverse=reverse))

@@ -81,9 +81,14 @@ class Mutation(graphene.ObjectType):
         """
 
         context = core.MutationContext(root, info, cls._meta, {})
-        cls.premutate(context, **kwargs)
-        ret = cls.mutate(context, **kwargs)
-        ret = cls.postmutate(context, result=ret, **kwargs)
+        try:
+            cls.premutate(context, **kwargs)
+            ret = cls.mutate(context, **kwargs)
+            ret = cls.postmutate(context, ret, **kwargs)
+        except:
+            import traceback
+            traceback.print_exc()
+            raise
         return ret
 
     @classmethod
@@ -112,7 +117,8 @@ class Mutation(graphene.ObjectType):
         """
         # pylint:disable=unused-argument
         assert isinstance(
-            result, graphene.ObjectType), f'Wrong result type: {type(result)}'
+            result, graphene.ObjectType), \
+            f'Wrong result type: {type(result)}'
         return result
 
     @classmethod

@@ -32,8 +32,8 @@ class UserMutation(gdtools.ModelMutaion):
             validate_password(password)
 
     @classmethod
-    def postmutate(cls, result: graphene.ObjectType,
-                   context: gdtools.MutationContext,
+    def postmutate(cls, context: gdtools.MutationContext,
+                   result: graphene.ObjectType,
                    **arguments) -> graphene.ObjectType:
 
         nodedata = context.data['nodedata']
@@ -43,7 +43,7 @@ class UserMutation(gdtools.ModelMutaion):
         if password:
             instance.set_password(password)
 
-        return super().postmutate(result, context, **arguments)
+        return super().postmutate(context, result, **arguments)
 
 
 class UserCreation(UserMutation, gdtools.ModelCreationMutaion):
