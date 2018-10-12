@@ -24,6 +24,9 @@ class Mutation(graphene.ObjectType):
     @classmethod
     def __init_subclass_with_meta__(cls, **options):
         # pylint: disable=W0221
+        if '_meta' not in options:
+            options['_meta'] = cls._construct_meta(**options)
+
         allowed_keys = ('_meta', 'name', 'description',
                         'interfaces', 'possible_types', 'default_resolver')
         options = {k: v for k, v in options.items() if k in allowed_keys}
@@ -70,7 +73,7 @@ class Mutation(graphene.ObjectType):
         return get_unbound_function(cls._resolver)
 
     @classmethod
-    def _resolver(cls, root, info: ResolveInfo, arguments: Dict[str, Any]):
+    def _resolver(cls, root, info: ResolveInfo, **kwargs: Dict[str, Any]):
         """Resolve the graphQL mutate.
 
         Only override this on abstract object.
@@ -78,29 +81,13 @@ class Mutation(graphene.ObjectType):
         """
 
         context = core.MutationContext(root, info, cls._meta, {})
-        cls.premutate(context, **arguments)
-        ret = cls.mutate(context, **arguments)
-        ret = cls.postmutate(ret, context, **arguments)
+        cls.premutate(context, **kwargs)
+        ret = cls.mutate(context, **kwargs)
+        ret = cls.postmutate(ret, context, **kwargs)
         return ret
 
     @classmethod
-    def Field(cls, **kwargs) -> graphene.Field:
-        """Create graphene Feild for the mutation.  """
-        # pylint: disable=invalid-name
-        assert issubclass(cls._meta.output, graphene.ObjectType), type(
-            cls._meta.output)
-        return graphene.Field(
-            type=cls._meta.output,
-            args=cls._meta.arguments,
-            resolver=cls._meta.resolver,
-            name=kwargs.get('name'),
-            required=kwargs.get('required', False),
-            default_value=kwargs.get('default_value'),
-            description=kwargs.get('description'),
-            deprecation_reason=kwargs.get('deprecation_reason'),)
-
-    @classmethod
-    def mutate(cls, context: core.MutationContext, **arguments: Dict[str, Any]) \
+    def mutate(cls, context: core.MutationContext, **kwargs: Dict[str, Any]) \
             -> graphene.ObjectType:
         """Do the mutation.  """
 
@@ -108,7 +95,7 @@ class Mutation(graphene.ObjectType):
             f'Method not implemented: {cls.__name__}.mutate')
 
     @classmethod
-    def premutate(cls, context: core.MutationContext, **arguments: Dict[str, Any]):
+    def premutate(cls, context: core.MutationContext, **kwargs: Dict[str, Any]):
         """Actions before mutation perform.
 
         raise a error to abort the mutation.
@@ -127,3 +114,19 @@ class Mutation(graphene.ObjectType):
         assert isinstance(
             result, graphene.ObjectType), f'Wrong result type: {type(result)}'
         return result
+
+    @classmethod
+    def Field(cls, **kwargs) -> graphene.Field:
+        """Create graphene Feild for the mutation.  """
+        # pylint: disable=invalid-name
+        assert issubclass(cls._meta.output, graphene.ObjectType), type(
+            cls._meta.output)
+        return graphene.Field(
+            type=cls._meta.output,
+            args=cls._meta.arguments,
+            resolver=cls._meta.resolver,
+            name=kwargs.get('name'),
+            required=kwargs.get('required', False),
+            default_value=kwargs.get('default_value'),
+            description=kwargs.get('description', cls.__doc__),
+            deprecation_reason=kwargs.get('deprecation_reason'),)
