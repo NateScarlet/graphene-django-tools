@@ -4,12 +4,26 @@ Only support python3.7
 
 # MainFeature
 
-## `ModelMutation` class for model mapping
+## Query
 
-example: [`graphene_django_tools.auth` module](./graphene_django_tools/auth.py) 
+- `ModelField`
+- `ModelConnectionField`
+- `ModelFilterConnectionField`
+
+[example schema](./test_site/api/schema.py)
+
+Map the user model with filter in 10 lines.
+
+![](./pic/20181012161945.png)
+![](./pic/20181012162201.png)
+
+## Mutation
+
+- `ModelMutation`
+
+example: [`graphene_django_tools.auth` module](./graphene_django_tools/auth.py)
 
 Map the user model with password validation in 40 lines.
 
 ![](./pic/20181011195459.png)
 ![](./pic/20181011200840.png)
-
