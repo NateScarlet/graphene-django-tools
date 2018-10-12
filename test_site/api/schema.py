@@ -19,7 +19,16 @@ class Mutation(graphene.ObjectType):
 
 class Query(graphene.ObjectType):
     """Query"""
-    user = gdtools.ModelField(auth.User)
+
+    viewer = gdtools.ModelField(auth.User, description='Current user.')
+
+    def resolve_viewer(self, info: gdtools.ResolveInfo):
+        user = info.context.user
+        if user.is_anonymous:
+            return None
+        return user
+
+    users = gdtools.ModelFilterConnectionField(auth.User)
 
 
 SCHEMA = graphene.Schema(
