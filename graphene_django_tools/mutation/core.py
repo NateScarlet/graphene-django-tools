@@ -11,29 +11,6 @@ from graphene.types.mutation import MutationOptions
 from graphene_django.registry import get_global_registry
 from graphql.execution.base import ResolveInfo
 
-
-def get_model_nodetype(model: Type[django.db.models.Model])\
-        -> Type[graphene_django.DjangoObjectType]:
-    """Get graphene node class from model clsss.
-
-    Args:
-        model (Type[django.db.models.Model])
-
-    Returns:
-        Type[graphene_django.DjangoObjectType]
-    """
-
-    registry = get_global_registry()
-    ret = registry.get_type_for_model(model)
-    if not ret:
-        ret = type(
-            re.sub('Type$|$', 'Type', model.__name__),
-            (graphene_django.DjangoObjectType,),
-            dict(Meta=dict(model=model)))
-    assert issubclass(ret, graphene_django.DjangoObjectType),\
-        ret.__mro__
-    return ret
-
 # pylint: disable=too-few-public-methods
 
 
