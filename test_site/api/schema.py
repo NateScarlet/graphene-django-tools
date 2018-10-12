@@ -9,8 +9,8 @@ from graphene_django_tools import auth
 class Mutation(graphene.ObjectType):
     """Mutation """
 
-    create_user = auth.UserCreation.Field()
-    update_user = auth.UserUpdate.Field()
+    create_user = auth.CreateUser.Field()
+    update_user = auth.UpdateUser.Field()
     login = auth.Login.Field()
     logout = auth.Logout.Field()
 

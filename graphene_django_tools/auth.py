@@ -23,46 +23,41 @@ class UserMutation(gdtools.ModelMutaion):
         model = User
 
     @classmethod
-    def premutate(cls, context, **arguments):
-        super().premutate(context, **arguments)
-        nodedata = context.data['nodedata']
+    def premutate(cls, context: gdtools.ModelMutaionContext):
 
-        password = nodedata.get('password')
+        super().premutate(context)
+        password = context.arguments.get('password')
         if password:
             validate_password(password)
 
     @classmethod
-    def postmutate(cls, context: gdtools.MutationContext,
-                   result: graphene.ObjectType,
-                   **arguments) -> graphene.ObjectType:
+    def postmutate(cls,
+                   context: gdtools.ModelMutaionContext,
+                   response: graphene.ObjectType) -> graphene.ObjectType:
 
-        nodedata = context.data['nodedata']
-        instance = context.data['instance']
-
-        password = nodedata.get('password')
+        password = context.arguments.get('password')
         if password:
-            instance.set_password(password)
+            context.instance.set_password(password)
+        return super().postmutate(context, response)
 
-        return super().postmutate(context, result, **arguments)
 
-
-class UserCreation(UserMutation, gdtools.ModelCreationMutaion):
+class CreateUser(UserMutation, gdtools.ModelCreationMutaion):
     """Create user.  """
 
     class Meta:
         model = User
-        require_arguments = ('username', 'password')
-        exclude_arguments = ('is_staff', 'is_superuser', 'is_active',
-                             'user_permissions', 'groups', 'date_joined',
-                             'last_login')
+        require = ('username', 'password')
+        exclude = ('is_staff', 'is_superuser', 'is_active',
+                   'user_permissions', 'groups', 'date_joined',
+                   'last_login')
 
 
-class UserUpdate(UserMutation, gdtools.ModelUpdateMutaion):
+class UpdateUser(UserMutation, gdtools.ModelUpdateMutaion):
     """Update user.  """
 
     class Meta:
         model = User
-        exclude_arguments = ('username', 'last_login')
+        exclude = ('username', 'last_login')
 
 
 class Login(gdtools.Mutation):
@@ -78,9 +73,9 @@ class Login(gdtools.Mutation):
     user = gdtools.ModelField(User)
 
     @classmethod
-    def mutate(cls, context: gdtools.MutationContext, **kwargs):
+    def mutate(cls, context: gdtools.ModelMutaionContext):
         request = context.info.context
-        user = authenticate(**kwargs)
+        user = authenticate(**context.arguments)
         if not user:
             raise ValueError('Login failed.')
         login(request, user)
@@ -93,6 +88,6 @@ class Logout(gdtools.Mutation):
         interfaces = (MessageMutation,)
 
     @classmethod
-    def mutate(cls, context: gdtools.MutationContext, **kwargs):
+    def mutate(cls, context: gdtools.ModelMutaionContext):
         logout(context.info.context)
         return cls('Logout successed.')

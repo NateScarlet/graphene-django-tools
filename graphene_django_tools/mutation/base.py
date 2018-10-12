@@ -1,6 +1,7 @@
 
 """Anothor implement for `graphene.Mutation`  """
 
+import re
 from collections import OrderedDict
 from typing import Any, Dict, Type
 
@@ -26,6 +27,8 @@ class Mutation(graphene.ObjectType):
         # pylint: disable=W0221
         if '_meta' not in options:
             options['_meta'] = cls._construct_meta(**options)
+        options.setdefault('name', cls.__name__)
+        options['name'] = re.sub("Response$|$", "Response", options['name'])
 
         allowed_keys = ('_meta', 'name', 'description',
                         'interfaces', 'possible_types', 'default_resolver')
@@ -36,20 +39,20 @@ class Mutation(graphene.ObjectType):
     def _construct_meta(cls, **options) -> graphene_django.forms.mutation.MutationOptions:
         ret = options.get(
             '_meta', graphene_django.forms.mutation.MutationOptions(cls))
-        ret.output = cls._make_output_nodetype(**options)
+        ret.output = cls._make_response_objecttype(**options)
         ret.resolver = cls._make_resolver(**options)
-        ret.arguments = cls._make_arguments(**options)
-        ret.fields = cls._make_fields(**options)
+        ret.arguments = cls._make_arguments_fields(**options)
+        ret.fields = cls._make_response_fields(**options)
         return ret
 
     @classmethod
-    def _make_output_nodetype(cls, **options) -> Type[graphene.ObjectType]:
+    def _make_response_objecttype(cls, **options) -> Type[graphene.ObjectType]:
         ret = options.get('output', getattr(cls, 'Output', cls))
         assert issubclass(ret, graphene.ObjectType), (cls, type(ret), options)
         return ret
 
     @classmethod
-    def _make_fields(cls, **options) -> OrderedDict:
+    def _make_response_fields(cls, **options) -> OrderedDict:
         if 'output' in options:
             return options['output'].fields
 
@@ -61,7 +64,7 @@ class Mutation(graphene.ObjectType):
         return ret
 
     @classmethod
-    def _make_arguments(cls, **options) -> OrderedDict:
+    def _make_arguments_fields(cls, **options) -> OrderedDict:
         ret = options.get('arguments', OrderedDict())
         if hasattr(cls, 'Arguments'):
             ret.update(props(getattr(cls, 'Arguments')))
@@ -73,26 +76,29 @@ class Mutation(graphene.ObjectType):
         return get_unbound_function(cls._resolver)
 
     @classmethod
-    def _resolver(cls, root, info: ResolveInfo, **kwargs: Dict[str, Any]):
+    def _make_context(cls, root, info: ResolveInfo, **kwargs):
+        return core.MutationContext(root=root, info=info, options=cls._meta, arguments=kwargs)
+
+    @classmethod
+    def _resolver(cls, *args, **kwargs: Dict[str, Any]):
         """Resolve the graphQL mutate.
 
         Only override this on abstract object.
         For schema, use `preform_mutate` instead.
         """
 
-        context = core.MutationContext(root, info, cls._meta, {})
         try:
-            cls.premutate(context, **kwargs)
-            ret = cls.mutate(context, **kwargs)
-            ret = cls.postmutate(context, ret, **kwargs)
+            context = cls._make_context(*args, **kwargs)
+            cls.premutate(context)
+            response = cls.mutate(context)
+            response = cls.postmutate(context, response)
+            return response
         except:
-            import traceback
-            traceback.print_exc()
+            core.handle_resolve_error()
             raise
-        return ret
 
     @classmethod
-    def mutate(cls, context: core.MutationContext, **kwargs: Dict[str, Any]) \
+    def mutate(cls, context: core.MutationContext) \
             -> graphene.ObjectType:
         """Do the mutation.  """
 
@@ -100,7 +106,7 @@ class Mutation(graphene.ObjectType):
             f'Method not implemented: {cls.__name__}.mutate')
 
     @classmethod
-    def premutate(cls, context: core.MutationContext, **kwargs: Dict[str, Any]):
+    def premutate(cls, context: core.MutationContext):
         """Actions before mutation perform.
 
         raise a error to abort the mutation.
@@ -108,8 +114,7 @@ class Mutation(graphene.ObjectType):
 
     @classmethod
     def postmutate(cls, context: core.MutationContext,
-                   result: graphene.ObjectType,
-                   **arguments: Dict[str, Any]) -> graphene.ObjectType:
+                   response: graphene.ObjectType) -> graphene.ObjectType:
         """Actions after mutation performed.
 
         Returns:
@@ -117,9 +122,9 @@ class Mutation(graphene.ObjectType):
         """
         # pylint:disable=unused-argument
         assert isinstance(
-            result, graphene.ObjectType), \
-            f'Wrong result type: {type(result)}'
-        return result
+            response, graphene.ObjectType), \
+            f'Wrong response type: {type(response)}'
+        return response
 
     @classmethod
     def Field(cls, **kwargs) -> graphene.Field:

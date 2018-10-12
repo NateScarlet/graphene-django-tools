@@ -18,42 +18,21 @@ class ClientIDMutation(Mutation):
         abstract = True
 
     @classmethod
-    def __init_subclass_with_meta__(cls, **options):
-        options.setdefault('name', cls.__name__)
-        options['name'] = re.sub("Payload$|$", "Payload", options['name'])
-        super().__init_subclass_with_meta__(**options)
-
-    @classmethod
-    def _make_arguments(cls, **options) -> OrderedDict:
-        options.setdefault('name', cls.__name__)
-        options.setdefault('arguments', OrderedDict())
-        options.setdefault('input_nodename', 'arguments')
-        options['arguments'].update(
-            client_mutation_id=graphene.String().Field())
-
-        arguments = super()._make_arguments(**options)
-
-        node_cls = type(
-            re.sub("Arguments$|$", "Arguments", options['name']),
-            (graphene.InputObjectType,),
-            arguments)
-        node = node_cls(required=True)  # type: graphene.InputObjectType
-
-        ret = OrderedDict({
-            options['input_nodename']: node
-        })
+    def _make_arguments_fields(cls, **options) -> OrderedDict:
+        ret = super()._make_arguments_fields(**options)
+        ret['client_mutation_id'] = graphene.String().Argument()
         return ret
 
     @classmethod
-    def _make_fields(cls, **options) -> OrderedDict:
-        ret = super()._make_fields(**options)
+    def _make_response_fields(cls, **options) -> OrderedDict:
+        ret = super()._make_response_fields(**options)
         ret['client_mutation_id'] = graphene.String().Field()
         return ret
 
     @classmethod
-    def postmutate(cls, context: core.MutationContext,
-                   result: graphene.ObjectType,
-                   **arguments: Dict[str, Any]) -> graphene.ObjectType:
-        result = super().postmutate(context, result, **arguments)
-        result.client_mutation_id = arguments.get("client_mutation_id")
-        return result
+    def postmutate(cls,
+                   context: core.MutationContext,
+                   response: graphene.ObjectType) -> graphene.ObjectType:
+        ret = super().postmutate(context, response)
+        ret.client_mutation_id = context.arguments.get("client_mutation_id")
+        return ret
