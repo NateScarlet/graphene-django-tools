@@ -113,23 +113,23 @@ class ModelMutaion(ClientIDMutation):
         return ret
 
     @classmethod
-    def premutate(cls, context: core.MutationContext, **arguments: Dict[str, Any]):
-        super().premutate(context, **arguments)
-        context.data['nodedata'] = arguments[context.meta.nodename]
+    def premutate(cls, context: core.MutationContext, **kwargs: Dict[str, Any]):
+        super().premutate(context, **kwargs)
+        context.data['nodedata'] = kwargs[context.meta.nodename]
 
     @classmethod
-    def mutate(cls, context: core.MutationContext, **arguments: Dict[str, Any]) \
+    def mutate(cls, context: core.MutationContext, **kwargs: Dict[str, Any]) \
             -> graphene.ObjectType:
 
         instance = context.data['instance']
         return cls(**{context.meta.nodename: instance})
 
     @classmethod
-    def postmutate(cls, result: graphene.ObjectType,
-                   context: core.MutationContext,
-                   **arguments: Dict[str, Any]) -> graphene.ObjectType:
+    def postmutate(cls, context: core.MutationContext,
+                   result: graphene.ObjectType,
+                   **kwargs: Dict[str, Any]) -> graphene.ObjectType:
 
-        ret = super().postmutate(result, context, **arguments)
+        ret = super().postmutate(context, result, **kwargs)
         context.data['instance'].save()
         return ret
 

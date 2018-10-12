@@ -83,7 +83,7 @@ class Mutation(graphene.ObjectType):
         context = core.MutationContext(root, info, cls._meta, {})
         cls.premutate(context, **kwargs)
         ret = cls.mutate(context, **kwargs)
-        ret = cls.postmutate(ret, context, **kwargs)
+        ret = cls.postmutate(context, result=ret, **kwargs)
         return ret
 
     @classmethod
@@ -102,8 +102,8 @@ class Mutation(graphene.ObjectType):
         """
 
     @classmethod
-    def postmutate(cls, result: graphene.ObjectType,
-                   context: core.MutationContext,
+    def postmutate(cls, context: core.MutationContext,
+                   result: graphene.ObjectType,
                    **arguments: Dict[str, Any]) -> graphene.ObjectType:
         """Actions after mutation performed.
 

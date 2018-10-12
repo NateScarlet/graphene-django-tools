@@ -49,10 +49,10 @@ class ClientIDMutation(Mutation):
         return ret
 
     @classmethod
-    def postmutate(cls, result: graphene.ObjectType,
-                   context: core.MutationContext,
+    def postmutate(cls, context: core.MutationContext,
+                   result: graphene.ObjectType,
                    **arguments: Dict[str, Any]) -> graphene.ObjectType:
 
-        result = super().postmutate(result, context, **arguments)
+        result = super().postmutate(result, **arguments)
         result.client_mutation_id = arguments.get("client_mutation_id")
         return result
