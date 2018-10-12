@@ -60,7 +60,7 @@ class UpdateUser(UserMutation, gdtools.ModelUpdateMutaion):
         exclude = ('username', 'last_login')
 
 
-class Login(gdtools.Mutation):
+class Login(gdtools.ClientIDMutation):
     """Login current user.  """
 
     class Arguments:
@@ -82,12 +82,10 @@ class Login(gdtools.Mutation):
         return cls(user=user, message=f'Welcome back, {user}.')
 
 
-class Logout(gdtools.Mutation):
+class Logout(gdtools.ClientIDMutation):
     """Logout current user.  """
-    class Meta:
-        interfaces = (MessageMutation,)
 
     @classmethod
     def mutate(cls, context: gdtools.ModelMutaionContext):
         logout(context.info.context)
-        return cls('Logout successed.')
+        return cls()
