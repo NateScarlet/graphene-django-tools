@@ -25,13 +25,6 @@ class ModelMutaion(ClientIDMutation):
         abstract = True
 
     @classmethod
-    def __init_subclass_with_meta__(cls, **options):
-        if '_meta' not in options:
-            options['_meta'] = cls._construct_meta(**options)
-
-        super().__init_subclass_with_meta__(**options)
-
-    @classmethod
     def _construct_meta(cls, **options) -> core.ModelMutationOptions:
         model = options['model']  # type: django.db.models.Model
 
@@ -49,8 +42,6 @@ class ModelMutaion(ClientIDMutation):
 
     @classmethod
     def _make_arguments_fields(cls, **options) -> OrderedDict:
-        ret = super()._make_arguments_fields(**options)
-
         field_dict = OrderedDict(
             Meta=dict(description=f'Mapping data for model: {cls.__name__}'))
         field_dict.update(cls.collect_model_fields(**options))
@@ -60,6 +51,7 @@ class ModelMutaion(ClientIDMutation):
             field_dict)
         field = field_objecttype(required=True)
 
+        ret = super()._make_arguments_fields(**options)
         ret['mapping'] = field
         return ret
 

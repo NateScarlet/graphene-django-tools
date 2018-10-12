@@ -1,12 +1,9 @@
 """Anothor implement for `graphene.relay.mutation.ClientIDMutation`  """
 
-import re
-from collections import OrderedDict
-from typing import Any, Dict
-
 import graphene
 
 from . import core
+from ..interfaces import ClientMutationID
 from .base import Mutation
 
 
@@ -18,16 +15,11 @@ class ClientIDMutation(Mutation):
         abstract = True
 
     @classmethod
-    def _make_arguments_fields(cls, **options) -> OrderedDict:
-        ret = super()._make_arguments_fields(**options)
-        ret['client_mutation_id'] = graphene.String().Argument()
-        return ret
+    def __init_subclass_with_meta__(cls, **options):
+        options.setdefault('interfaces', ())
+        options['interfaces'] += (ClientMutationID,)
 
-    @classmethod
-    def _make_response_fields(cls, **options) -> OrderedDict:
-        ret = super()._make_response_fields(**options)
-        ret['client_mutation_id'] = graphene.String().Field()
-        return ret
+        super().__init_subclass_with_meta__(**options)
 
     @classmethod
     def postmutate(cls,

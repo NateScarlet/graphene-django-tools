@@ -25,8 +25,7 @@ class Mutation(graphene.ObjectType):
     @classmethod
     def __init_subclass_with_meta__(cls, **options):
         # pylint: disable=W0221
-        if '_meta' not in options:
-            options['_meta'] = cls._construct_meta(**options)
+        options['_meta'] = cls._construct_meta(**options)
         options.setdefault('name', cls.__name__)
         options['name'] = re.sub("Response$|$", "Response", options['name'])
 
@@ -65,9 +64,16 @@ class Mutation(graphene.ObjectType):
 
     @classmethod
     def _make_arguments_fields(cls, **options) -> OrderedDict:
-        ret = options.get('arguments', OrderedDict())
-        if hasattr(cls, 'Arguments'):
-            ret.update(props(getattr(cls, 'Arguments')))
+        options.setdefault('interfaces', ())
+
+        def _get_aguments(interface):
+            if hasattr(interface, 'Arguments'):
+                return props(getattr(interface, 'Arguments'))
+            return {}
+
+        ret = {}
+        for i in options['interfaces'] + (cls,):
+            ret.update(_get_aguments(i))
         return ret
 
     @classmethod

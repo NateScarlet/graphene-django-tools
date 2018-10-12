@@ -6,4 +6,3 @@ __author__ = 'NateScarlet@Gmail.com'
 # TODO: Implement `ModelBulkUpdateMutation`
 # TODO: Sort field on nodemodel
 # TODO: Find documentation for MutationContext.root
-# TODO: Refactor ClientIDMutation to a interface.
