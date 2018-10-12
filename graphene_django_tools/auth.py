@@ -77,13 +77,14 @@ class Login(gdtools.Mutation):
 
     user = gdtools.ModelField(User)
 
-    def mutate(self, context: gdtools.MutationContext, **kwargs):
+    @classmethod
+    def mutate(cls, context: gdtools.MutationContext, **kwargs):
         request = context.info.context
         user = authenticate(**kwargs)
         if not user:
             raise ValueError('Login failed.')
         login(request, user)
-        return self.__class__(user=user, message=f'Welcome back, {user}.')
+        return cls(user=user, message=f'Welcome back, {user}.')
 
 
 class Logout(gdtools.Mutation):
@@ -91,6 +92,7 @@ class Logout(gdtools.Mutation):
     class Meta:
         interfaces = (MessageMutation,)
 
-    def mutate(self, context: gdtools.MutationContext, **kwargs):
+    @classmethod
+    def mutate(cls, context: gdtools.MutationContext, **kwargs):
         logout(context.info.context)
-        return self.__class__('Logout successed.')
+        return cls('Logout successed.')
