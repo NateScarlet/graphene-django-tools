@@ -66,7 +66,8 @@ class ModelMutaion(ClientIDMutation):
         return super()._make_arguments(**options)
 
     @classmethod
-    def _convert_db_field(cls, field: django.db.models.Field, **options) -> Union[graphene.Field, None]:
+    def _convert_db_field(cls, field: django.db.models.Field, **options) \
+            -> Union[graphene.Field, None]:
         if isinstance(field, ForeignObjectRel):
             return None
         if field.name in options['exclude_arguments']:

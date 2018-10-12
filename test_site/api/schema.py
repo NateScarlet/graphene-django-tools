@@ -1,8 +1,6 @@
 """GrapQl schema.  """
 
 import graphene
-import graphene_django
-from django.contrib.auth.models import User
 
 import graphene_django_tools as gdtools
 from graphene_django_tools import auth

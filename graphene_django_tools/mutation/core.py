@@ -1,14 +1,9 @@
 """Mutation tools. """
 
-import re
 from collections import OrderedDict
-from typing import Any, NamedTuple, Type
+from typing import Any, NamedTuple
 
-import django
-import graphene_django
-import graphene_django.forms.mutation
 from graphene.types.mutation import MutationOptions
-from graphene_django.registry import get_global_registry
 from graphql.execution.base import ResolveInfo
 
 # pylint: disable=too-few-public-methods
