@@ -3,7 +3,7 @@
 import graphene
 
 
-class MessageMutation(graphene.Interface):
+class Message(graphene.Interface):
     """Mutation with a message.  """
 
     message = graphene.String(description='Human-readable execution status.')

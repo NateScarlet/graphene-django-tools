@@ -6,7 +6,6 @@ from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 
 import graphene_django_tools as gdtools
-from graphene_django_tools.interfaces import MessageMutation
 
 if not gdtools.get_modelnode(User, is_autocreate=False):
     gdtools.create_modelnode(
@@ -68,7 +67,7 @@ class Login(gdtools.ClientIDMutation):
         password = graphene.String(required=True)
 
     class Meta:
-        interfaces = (MessageMutation,)
+        interfaces = (gdtools.interfaces.Message,)
 
     user = gdtools.ModelField(User)
 
