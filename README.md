@@ -30,3 +30,17 @@ Map the user model with password validation in 40 lines.
 ![](./pic/20181011195459.png)
 ![](./pic/20181011200840.png)
 ![](./pic/20181012184432.png)
+
+## Reimplemented `Mutation` class
+
+Supports arguments on interface.
+
+```python
+class ClientMutationID(graphene.Interface):
+    """Mutation with a client mutation id.  """
+
+    class Arguments:
+        client_mutation_id = graphene.String()
+
+    client_mutation_id = graphene.String()
+```
