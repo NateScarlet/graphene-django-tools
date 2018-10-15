@@ -7,7 +7,7 @@ import graphene_django
 from graphene_django.registry import get_global_registry
 
 
-def get_modelnode(model: Type[django.db.models.Model], is_autocreate=False)\
+def get_modelnode(model: Type[django.db.models.Model], is_autocreate=True)\
         -> Type[graphene_django.DjangoObjectType]:
     """Get graphene node class from model class.
 
@@ -28,7 +28,7 @@ def get_modelnode(model: Type[django.db.models.Model], is_autocreate=False)\
     if is_autocreate:
         return create_modelnode(model)
     raise RuntimeError(
-        f'Defined node type for first, or set `is_autocreate` to True: {model}')
+        f'Defined node type first, or set `is_autocreate` to True: {model}')
 
 
 def create_modelnode(model: Type[django.db.models.Model], bases=(), **meta_options) \
@@ -47,6 +47,10 @@ def create_modelnode(model: Type[django.db.models.Model], bases=(), **meta_optio
     from . import texttools
     meta_options.setdefault('model', model)
     meta_options.setdefault('interfaces', (graphene.Node,))
+    meta_options.setdefault(
+        'description', f'Auto created node type from model: {model.__name__}')
+    if graphene_django.utils.DJANGO_FILTER_INSTALLED:
+        meta_options.setdefault('filter_fields', '__all__')
     bases += (graphene_django.DjangoObjectType,)
-    clsname = texttools.camel_case(f'{model.__name__}Node')
+    clsname = texttools.camel_case(f'auto_{model.__name__}_node')
     return type(clsname, bases, dict(Meta=meta_options))

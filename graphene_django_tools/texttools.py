@@ -3,7 +3,7 @@
 import re
 
 
-def camel_case(text: str) -> str:
+def camel_case(text: str, is_lower=False) -> str:
     """Convert text to camel case.
 
     Args:
@@ -14,7 +14,8 @@ def camel_case(text: str) -> str:
     """
 
     components = text.split('_')
-    return components[0] + ''.join(x.title() for x in components[1:])
+    first = components[0].lower() if is_lower else components[0].title()
+    return first + ''.join(x.title() for x in components[1:])
 
 
 def snake_case(text: str) -> str:
