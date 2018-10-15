@@ -13,8 +13,8 @@ class UserNode(DjangoObjectType):
     class Meta:
         model = User
         filter_fields = {
-            'id': ['exact'],
-            'username': ['exact', 'iexact', 'icontains', 'istartswith']}
+            'username': ['icontains', 'istartswith', 'iendswith'],
+            'email': ['icontains', 'istartswith', 'iendswith'], }
         interfaces = (relay.Node,)
 
 
