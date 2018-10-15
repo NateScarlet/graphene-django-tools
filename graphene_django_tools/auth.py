@@ -7,12 +7,7 @@ from django.contrib.auth.password_validation import validate_password
 
 import graphene_django_tools as gdtools
 
-if not gdtools.get_modelnode(User, is_autocreate=False):
-    gdtools.create_modelnode(
-        User,
-        filter_fields={
-            'id': ['exact'],
-            'username': ['exact', 'iexact', 'icontains', 'istartswith']})
+gdtools.get_modelnode(User)  # Check if UserNode defined.
 
 
 class UserMutation(gdtools.ModelMutaion):

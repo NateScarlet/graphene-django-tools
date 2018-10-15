@@ -7,7 +7,7 @@ import graphene_django
 from graphene_django.registry import get_global_registry
 
 
-def get_modelnode(model: Type[django.db.models.Model], is_autocreate=True)\
+def get_modelnode(model: Type[django.db.models.Model], is_autocreate=False)\
         -> Type[graphene_django.DjangoObjectType]:
     """Get graphene node class from model class.
 
@@ -23,9 +23,12 @@ def get_modelnode(model: Type[django.db.models.Model], is_autocreate=True)\
     assert issubclass(model, django.db.models.Model), type(model)
     registry = get_global_registry()
     ret = registry.get_type_for_model(model)
-    if not ret and is_autocreate:
-        ret = create_modelnode(model)
-    return ret
+    if ret:
+        return ret
+    if is_autocreate:
+        return create_modelnode(model)
+    raise RuntimeError(
+        f'Defined node type for first, or set `is_autocreate` to True: {model}')
 
 
 def create_modelnode(model: Type[django.db.models.Model], bases=(), **meta_options) \
