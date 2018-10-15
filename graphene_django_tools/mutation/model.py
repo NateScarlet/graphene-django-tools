@@ -15,10 +15,10 @@ from graphene_django.forms.converter import convert_form_field
 from . import core
 from ..texttools import snake_case
 from ..types import ModelField
-from .clientid import ClientIDMutation
+from .node import NodeMutation
 
 
-class ModelMutaion(ClientIDMutation):
+class ModelMutaion(NodeMutation):
     """Mutate django model.  """
     # pylint: disable=abstract-method
     class Meta:
@@ -33,7 +33,7 @@ class ModelMutaion(ClientIDMutation):
         options.setdefault('require', ())
         options.setdefault('exclude', ())
 
-        ret = super()._construct_meta(**options)  # type: ModelMutationOptions
+        ret = super()._construct_meta(**options)  # type: core.ModelMutationOptions
         ret.model = model
         ret.node_fieldname = options['node_fieldname']
         ret.require = options['require']
@@ -42,17 +42,18 @@ class ModelMutaion(ClientIDMutation):
 
     @classmethod
     def _make_arguments_fields(cls, **options) -> OrderedDict:
-        field_dict = OrderedDict(
-            Meta=dict(description=f'Mapping data for model: {cls.__name__}'))
+        options.setdefault('arguments', {})
+        field_dict = OrderedDict(Meta=dict())
         field_dict.update(cls.collect_model_fields(**options))
         field_objecttype = type(
             re.sub("Mapping$|$", "Mapping", cls.__name__),
             (graphene.InputObjectType,),
             field_dict)
-        field = field_objecttype(required=True)
+        field = field_objecttype(required=True,
+                                 description=f'Mapping data for model: {cls.__name__}')
 
+        options['arguments'].update(mapping=field)
         ret = super()._make_arguments_fields(**options)
-        ret['mapping'] = field
         return ret
 
     @classmethod
@@ -80,9 +81,9 @@ class ModelMutaion(ClientIDMutation):
         return ret
 
     @classmethod
-    def _make_response_fields(cls, **options) -> OrderedDict:
+    def _make_payload_fields(cls, **options) -> OrderedDict:
         model = options['model']  # type: django.db.models.Model
-        ret = super()._make_response_fields(**options)
+        ret = super()._make_payload_fields(**options)
         ret[options['node_fieldname']] = ModelField(model)
         return ret
 
@@ -115,8 +116,8 @@ class ModelMutaion(ClientIDMutation):
     @classmethod
     def postmutate(cls,
                    context: core.ModelMutaionContext,
-                   response: graphene.ObjectType) -> graphene.ObjectType:
-        ret = super().postmutate(context, response)
+                   payload: graphene.ObjectType) -> graphene.ObjectType:
+        ret = super().postmutate(context, payload)
         context.instance.save()
         return ret
 
@@ -141,17 +142,34 @@ class ModelUpdateMutaion(ModelMutaion):
         abstract = True
 
     @classmethod
-    def _make_arguments_fields(cls, **options) -> OrderedDict:
-        ret = super()._make_arguments_fields(**options)
-        ret['id'] = graphene.ID(required=True).Argument()
+    def _construct_meta(cls, **options) -> core.ModelUpdateMutationOptions:
+        model = options['model']  # type: django.db.models.Model
+
+        options.setdefault('_meta', core.ModelUpdateMutationOptions(cls))
+        options.setdefault('id_fieldname', snake_case(f'{model.__name__}_id'))
+        ret = super()._construct_meta(**options) \
+            # type: core.ModelUpdateMutationOptions
+        ret.id_fieldname = options['id_fieldname']
         return ret
+
+    @classmethod
+    def _make_arguments_fields(cls, **options) -> OrderedDict:
+        model = options['model']
+        options.setdefault('arguments', {})
+
+        id_type = graphene.ID(
+            required=True,
+            description=f'ID for model: {model.__name__}')
+        options['arguments'][options['id_fieldname']] = id_type
+
+        return super()._make_arguments_fields(**options)
 
     @classmethod
     def premutate(cls, context: core.ModelMutaionContext):
 
         super().premutate(context)
         node = graphene.Node.get_node_from_global_id(
-            context.info, global_id=context.arguments['id'])
+            context.info, global_id=context.arguments[cls._meta.id_fieldname])
 
         context.instance = node
 

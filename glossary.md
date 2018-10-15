@@ -9,9 +9,10 @@ Extends [glossary from apollo](https://www.apollographql.com/docs/resources/grap
 | Mutation          | Delete    | Deleting data                                 |
 | Mutation          | context   | All required data for perform mutation        |
 | Mutation          | options   | Operation description provide by server       |
+| Mutation          | input     | Wrapped arguments for relay                   |
 | Mutation          | arguments | Operation description provide by client       |
-| Mutation          | response  | Client required operation return values       |
-| Mutation          | mutate    | Resolve operation and create response         |
+| Mutation          | payload   | Client required operation return values       |
+| Mutation          | mutate    | Resolve operation and create payload          |
 | ModelMutation     | model     | Django db model class for the mutation        |
 | ModelMutation     | instance  | Django db model instance for the mutation     |
 | ModelMutation     | mapping   | `dict` contains new field values for instance |

@@ -27,12 +27,12 @@ class UserMutation(gdtools.ModelMutaion):
     @classmethod
     def postmutate(cls,
                    context: gdtools.ModelMutaionContext,
-                   response: graphene.ObjectType) -> graphene.ObjectType:
+                   payload: graphene.ObjectType) -> graphene.ObjectType:
 
         password = context.arguments.get('password')
         if password:
             context.instance.set_password(password)
-        return super().postmutate(context, response)
+        return super().postmutate(context, payload)
 
 
 class CreateUser(UserMutation, gdtools.ModelCreationMutaion):
@@ -54,7 +54,7 @@ class UpdateUser(UserMutation, gdtools.ModelUpdateMutaion):
         exclude = ('username', 'last_login')
 
 
-class Login(gdtools.ClientIDMutation):
+class Login(gdtools.NodeMutation):
     """Login current user.  """
 
     class Arguments:
@@ -76,7 +76,7 @@ class Login(gdtools.ClientIDMutation):
         return cls(user=user, message=f'Welcome back, {user}.')
 
 
-class Logout(gdtools.ClientIDMutation):
+class Logout(gdtools.NodeMutation):
     """Logout current user.  """
 
     @classmethod

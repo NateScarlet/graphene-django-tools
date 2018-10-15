@@ -15,12 +15,18 @@ from dataclasses import dataclass
 
 
 class ModelMutationOptions(MutationOptions):
-    """`Meta` for `DjangoModelMutation`.  """
+    """`Meta` for `ModelMutation`.  """
 
     model = None  # type: django.db.models.Model
     node_fieldname = None  # type: str
     require = ()  # type: tuple[str]
     exclude = ()  # type: tuple[str]
+
+
+class ModelUpdateMutationOptions(ModelMutationOptions):
+    """`Meta` for `ModelUpdateMutation`.  """
+
+    id_fieldname = None  # type: str
 
 
 @dataclass

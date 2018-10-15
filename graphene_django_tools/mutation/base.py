@@ -27,7 +27,7 @@ class Mutation(graphene.ObjectType):
         # pylint: disable=W0221
         options['_meta'] = cls._construct_meta(**options)
         options.setdefault('name', cls.__name__)
-        options['name'] = re.sub("Response$|$", "Response", options['name'])
+        options['name'] = re.sub("Payload$|$", "Payload", options['name'])
 
         allowed_keys = ('_meta', 'name', 'description',
                         'interfaces', 'possible_types', 'default_resolver')
@@ -38,20 +38,20 @@ class Mutation(graphene.ObjectType):
     def _construct_meta(cls, **options) -> graphene_django.forms.mutation.MutationOptions:
         ret = options.get(
             '_meta', graphene_django.forms.mutation.MutationOptions(cls))
-        ret.output = cls._make_response_objecttype(**options)
+        ret.output = cls._make_payload_objecttype(**options)
         ret.resolver = cls._make_resolver(**options)
         ret.arguments = cls._make_arguments_fields(**options)
-        ret.fields = cls._make_response_fields(**options)
+        ret.fields = cls._make_payload_fields(**options)
         return ret
 
     @classmethod
-    def _make_response_objecttype(cls, **options) -> Type[graphene.ObjectType]:
+    def _make_payload_objecttype(cls, **options) -> Type[graphene.ObjectType]:
         ret = options.get('output', getattr(cls, 'Output', cls))
         assert issubclass(ret, graphene.ObjectType), (cls, type(ret), options)
         return ret
 
     @classmethod
-    def _make_response_fields(cls, **options) -> OrderedDict:
+    def _make_payload_fields(cls, **options) -> OrderedDict:
         if 'output' in options:
             return options['output'].fields
 
@@ -65,13 +65,14 @@ class Mutation(graphene.ObjectType):
     @classmethod
     def _make_arguments_fields(cls, **options) -> OrderedDict:
         options.setdefault('interfaces', ())
+        options.setdefault('arguments', {})
 
         def _get_aguments(interface):
             if hasattr(interface, 'Arguments'):
                 return props(getattr(interface, 'Arguments'))
             return {}
 
-        ret = {}
+        ret = options['arguments']
         for i in options['interfaces'] + (cls,):
             ret.update(_get_aguments(i))
         return ret
@@ -96,9 +97,9 @@ class Mutation(graphene.ObjectType):
         try:
             context = cls._make_context(*args, **kwargs)
             cls.premutate(context)
-            response = cls.mutate(context)
-            response = cls.postmutate(context, response)
-            return response
+            payload = cls.mutate(context)
+            payload = cls.postmutate(context, payload)
+            return payload
         except:
             core.handle_resolve_error()
             raise
@@ -120,7 +121,7 @@ class Mutation(graphene.ObjectType):
 
     @classmethod
     def postmutate(cls, context: core.MutationContext,
-                   response: graphene.ObjectType) -> graphene.ObjectType:
+                   payload: graphene.ObjectType) -> graphene.ObjectType:
         """Actions after mutation performed.
 
         Returns:
@@ -128,9 +129,9 @@ class Mutation(graphene.ObjectType):
         """
         # pylint:disable=unused-argument
         assert isinstance(
-            response, graphene.ObjectType), \
-            f'Wrong response type: {type(response)}'
-        return response
+            payload, graphene.ObjectType), \
+            f'Wrong payload type: {type(payload)}'
+        return payload
 
     @classmethod
     def Field(cls, **kwargs) -> graphene.Field:
