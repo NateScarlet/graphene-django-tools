@@ -39,9 +39,12 @@ class NodeMutation(Mutation):
         return dict(input=field)
 
     @classmethod
-    def premutate(cls, context: core.MutationContext):
-        super().premutate(context)
-        context.arguments = context.arguments['input']
+    def _make_context(cls, root, info: core.ResolveInfo, **kwargs):
+        arguments = kwargs['input']
+        return core.MutationContext(root=root,
+                                    info=info,
+                                    options=cls._meta,
+                                    arguments=arguments)
 
     @classmethod
     def postmutate(cls,

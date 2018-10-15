@@ -89,12 +89,13 @@ class ModelMutaion(NodeMutation):
 
     @classmethod
     def _make_context(cls, root, info: core.ResolveInfo, **kwargs):
+        arguments = kwargs['input']
         return core.ModelMutaionContext(
             root=root,
             info=info,
             options=cls._meta,
-            arguments=kwargs,
-            mapping=kwargs['mapping'])
+            arguments=arguments,
+            mapping=arguments['mapping'])
 
     @classmethod
     def collect_model_fields(cls, **options)-> Dict[str, UnmountedType]:
@@ -165,16 +166,17 @@ class ModelUpdateMutaion(ModelMutaion):
         return super()._make_arguments_fields(**options)
 
     @classmethod
-    def premutate(cls, context: core.ModelMutaionContext):
+    def premutate(cls, context: core.ModelUpdateMutaionContext):
 
         super().premutate(context)
         node = graphene.Node.get_node_from_global_id(
-            context.info, global_id=context.arguments[cls._meta.id_fieldname])
+            context.info,
+            global_id=context.arguments[context.options.id_fieldname])
 
         context.instance = node
 
     @classmethod
-    def mutate(cls, context: core.ModelMutaionContext):
+    def mutate(cls, context: core.ModelUpdateMutaionContext):
         for k, v in context.mapping.items():
             setattr(context.instance, k, v)
         return super().mutate(context)

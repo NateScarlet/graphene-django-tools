@@ -48,6 +48,13 @@ class ModelMutaionContext(MutationContext):
 
 
 @dataclass
+class ModelUpdateMutaionContext(ModelMutaionContext):
+    """Tuple data for model update mutation context.  """
+
+    options: ModelUpdateMutationOptions
+
+
+@dataclass
 class ModelBulkMutaionContext(MutationContext):
     """Tuple data for model bulk mutation context.  """
 
