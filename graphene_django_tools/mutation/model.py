@@ -156,13 +156,13 @@ class ModelUpdateMutaion(NodeUpdateMutation, ModelMutaion):
         return ret
 
     @classmethod
-    def premutate(cls, context: core.ModelUpdateMutaionContext):
+    def premutate(cls, context: core.ModelMutaionContext):
 
         super().premutate(context)
         context.instance = context.node
 
     @classmethod
-    def mutate(cls, context: core.ModelUpdateMutaionContext):
+    def mutate(cls, context: core.ModelMutaionContext):
         for k, v in context.mapping.items():
             setattr(context.instance, k, v)
         return super().mutate(context)

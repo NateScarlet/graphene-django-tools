@@ -18,9 +18,9 @@ class NodeMutation(Mutation):
 
     @classmethod
     def __init_subclass_with_meta__(cls, **options):
+        options.setdefault('node_fieldname', 'node')
         options.setdefault('interfaces', ())
         options['interfaces'] += (ClientMutationID,)
-
         super().__init_subclass_with_meta__(**options)
 
     @classmethod
@@ -67,6 +67,7 @@ class NodeUpdateMutation(NodeMutation):
     def _construct_meta(cls, **options) -> core.NodeUpdateMutationOptions:
         options.setdefault('_meta', core.NodeUpdateMutationOptions(cls))
         options.setdefault('id_fieldname', 'id')
+
         ret = super()._construct_meta(**options) \
             # type: core.ModelUpdateMutationOptions
         ret.id_fieldname = options['id_fieldname']

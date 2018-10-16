@@ -25,6 +25,7 @@ class Mutation(graphene.ObjectType):
     update_user = auth.UpdateUser.Field()
     login = auth.Login.Field()
     logout = auth.Logout.Field()
+    node_echo = auth.NodeEcho.Field()
 
 
 class Query(graphene.ObjectType):

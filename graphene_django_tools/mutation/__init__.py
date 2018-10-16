@@ -2,7 +2,6 @@
 
 from .base import Mutation
 from .core import (ModelBulkMutaionContext, ModelMutaionContext,
-                   ModelUpdateMutaionContext, MutationContext,
-                   NodeUpdateMutationContext)
+                   MutationContext, NodeMutationContext)
 from .model import ModelCreationMutaion, ModelMutaion, ModelUpdateMutaion
 from .node import NodeMutation, NodeUpdateMutation

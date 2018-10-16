@@ -14,13 +14,17 @@ from dataclasses import dataclass
 # pylint: disable=too-few-public-methods
 
 
-class NodeUpdateMutationOptions(MutationOptions):
+class NodeMutationOptions(MutationOptions):
+    """`Meta` for `NodeMutation`.  """
+
+
+class NodeUpdateMutationOptions(NodeMutationOptions):
     """`Meta` for `NodeUpdateMutation`.  """
 
     id_fieldname = None  # type: str
 
 
-class ModelMutationOptions(MutationOptions):
+class ModelMutationOptions(NodeMutationOptions):
     """`Meta` for `ModelMutation`.  """
 
     model = None  # type: django.db.models.Model
@@ -44,22 +48,17 @@ class MutationContext:
 
 
 @dataclass
-class NodeUpdateMutationContext(MutationContext):
+class NodeMutationContext(MutationContext):
 
     node: graphene.relay.Node
 
 
 @dataclass
-class ModelMutaionContext(MutationContext):
+class ModelMutaionContext(NodeMutationContext):
     """Tuple data for model mutation context.  """
 
     mapping: dict
     instance: graphene.ObjectType = None
-
-
-@dataclass
-class ModelUpdateMutaionContext(NodeUpdateMutationContext, MutationContext):
-    """Tuple data for model bulk mutation context.  """
 
 
 @dataclass

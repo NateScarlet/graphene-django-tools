@@ -83,3 +83,13 @@ class Logout(gdtools.NodeMutation):
     def mutate(cls, context: gdtools.ModelMutaionContext):
         logout(context.info.context)
         return cls()
+
+
+class NodeEcho(gdtools.NodeUpdateMutation):
+    """Example non-model mutation.  """
+
+    message = graphene.String(required=True)
+
+    @classmethod
+    def mutate(cls, context: gdtools.NodeUpdateMutation):
+        return cls(message=repr(context.node))
