@@ -87,7 +87,11 @@ class NodeUpdateMutation(NodeMutation):
     @classmethod
     def premutate(cls, context: core.ModelMutaionContext):
 
+        id_ = context.arguments[cls._meta.id_fieldname]
+
         super().premutate(context)
         node = graphene.Node.get_node_from_global_id(
-            context.info, global_id=context.arguments[cls._meta.id_fieldname])
+            context.info, global_id=id_)
+        if not node:
+            raise ValueError('No such node.', id_)
         context.node = node
