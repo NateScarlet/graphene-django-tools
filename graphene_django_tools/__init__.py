@@ -8,5 +8,6 @@ from .core import create_modelnode, get_modelnode
 from .mutation import (ModelBulkMutaionContext, ModelCreationMutaion,
                        ModelMutaion, ModelMutaionContext, ModelUpdateMutaion,
                        ModelUpdateMutaionContext, Mutation, MutationContext,
-                       NodeMutation)
+                       NodeMutation, NodeUpdateMutation,
+                       NodeUpdateMutationContext)
 from .types import ModelConnectionField, ModelField, ModelFilterConnectionField

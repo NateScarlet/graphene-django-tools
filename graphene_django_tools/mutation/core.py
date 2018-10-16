@@ -14,6 +14,12 @@ from dataclasses import dataclass
 # pylint: disable=too-few-public-methods
 
 
+class NodeUpdateMutationOptions(MutationOptions):
+    """`Meta` for `NodeUpdateMutation`.  """
+
+    id_fieldname = None  # type: str
+
+
 class ModelMutationOptions(MutationOptions):
     """`Meta` for `ModelMutation`.  """
 
@@ -23,10 +29,8 @@ class ModelMutationOptions(MutationOptions):
     exclude = ()  # type: tuple[str]
 
 
-class ModelUpdateMutationOptions(ModelMutationOptions):
+class ModelUpdateMutationOptions(NodeUpdateMutationOptions, ModelMutationOptions):
     """`Meta` for `ModelUpdateMutation`.  """
-
-    id_fieldname = None  # type: str
 
 
 @dataclass
@@ -40,6 +44,12 @@ class MutationContext:
 
 
 @dataclass
+class NodeUpdateMutationContext(MutationContext):
+
+    node: graphene.relay.Node
+
+
+@dataclass
 class ModelMutaionContext(MutationContext):
     """Tuple data for model mutation context.  """
 
@@ -48,10 +58,8 @@ class ModelMutaionContext(MutationContext):
 
 
 @dataclass
-class ModelUpdateMutaionContext(ModelMutaionContext):
-    """Tuple data for model update mutation context.  """
-
-    options: ModelUpdateMutationOptions
+class ModelUpdateMutaionContext(NodeUpdateMutationContext, MutationContext):
+    """Tuple data for model bulk mutation context.  """
 
 
 @dataclass

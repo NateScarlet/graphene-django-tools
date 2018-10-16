@@ -15,7 +15,7 @@ from graphene_django.forms.converter import convert_form_field
 from . import core
 from ..texttools import snake_case
 from ..types import ModelField
-from .node import NodeMutation
+from .node import NodeMutation, NodeUpdateMutation
 
 
 class ModelMutaion(NodeMutation):
@@ -42,15 +42,18 @@ class ModelMutaion(NodeMutation):
 
     @classmethod
     def _make_arguments_fields(cls, **options) -> OrderedDict:
+        model = options['model']
         options.setdefault('arguments', {})
-        field_dict = OrderedDict(Meta=dict())
+        field_dict = OrderedDict(
+            __doc__=f'Mapping data for mutation: {cls.__name__}',
+            Meta=dict())
         field_dict.update(cls.collect_model_fields(**options))
         field_objecttype = type(
             re.sub("Mapping$|$", "Mapping", cls.__name__),
             (graphene.InputObjectType,),
             field_dict)
         field = field_objecttype(required=True,
-                                 description=f'Mapping data for model: {cls.__name__}')
+                                 description=f'Mapping data for model: {model.__name__}')
 
         options['arguments'].update(mapping=field)
         ret = super()._make_arguments_fields(**options)
@@ -136,7 +139,7 @@ class ModelCreationMutaion(ModelMutaion):
         context.instance = instance
 
 
-class ModelUpdateMutaion(ModelMutaion):
+class ModelUpdateMutaion(NodeUpdateMutation, ModelMutaion):
     """Update model.  """
 
     class Meta:
@@ -150,30 +153,13 @@ class ModelUpdateMutaion(ModelMutaion):
         options.setdefault('id_fieldname', snake_case(f'{model.__name__}_id'))
         ret = super()._construct_meta(**options) \
             # type: core.ModelUpdateMutationOptions
-        ret.id_fieldname = options['id_fieldname']
         return ret
-
-    @classmethod
-    def _make_arguments_fields(cls, **options) -> OrderedDict:
-        model = options['model']
-        options.setdefault('arguments', {})
-
-        id_type = graphene.ID(
-            required=True,
-            description=f'ID for model: {model.__name__}')
-        options['arguments'][options['id_fieldname']] = id_type
-
-        return super()._make_arguments_fields(**options)
 
     @classmethod
     def premutate(cls, context: core.ModelUpdateMutaionContext):
 
         super().premutate(context)
-        node = graphene.Node.get_node_from_global_id(
-            context.info,
-            global_id=context.arguments[context.options.id_fieldname])
-
-        context.instance = node
+        context.instance = context.node
 
     @classmethod
     def mutate(cls, context: core.ModelUpdateMutaionContext):
