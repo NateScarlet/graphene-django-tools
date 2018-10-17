@@ -42,10 +42,11 @@ class NodeMutation(Mutation):
     @classmethod
     def _make_context(cls, root, info: core.ResolveInfo, **kwargs):
         arguments = kwargs['input']
-        return core.MutationContext(root=root,
-                                    info=info,
-                                    options=cls._meta,
-                                    arguments=arguments)
+        return core.NodeMutationContext(root=root,
+                                        info=info,
+                                        node=None,
+                                        options=cls._meta,
+                                        arguments=arguments)
 
     @classmethod
     def postmutate(cls,

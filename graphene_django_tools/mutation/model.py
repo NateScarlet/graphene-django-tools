@@ -96,6 +96,7 @@ class ModelMutaion(NodeMutation):
         return core.ModelMutaionContext(
             root=root,
             info=info,
+            node=None,
             options=cls._meta,
             arguments=arguments,
             mapping=arguments['mapping'])
