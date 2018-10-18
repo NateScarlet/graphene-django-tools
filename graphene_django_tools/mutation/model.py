@@ -99,7 +99,7 @@ class ModelMutaion(NodeMutation):
             node=None,
             options=cls._meta,
             arguments=arguments,
-            mapping=arguments['mapping'])
+            mapping=None)
 
     @classmethod
     def collect_model_fields(cls, **options)-> Dict[str, UnmountedType]:
@@ -111,6 +111,11 @@ class ModelMutaion(NodeMutation):
                for i in fields}
         ret = graphene.types.utils.yank_fields_from_attrs(ret)
         return ret
+
+    @classmethod
+    def premutate(cls, context: core.ModelMutaionContext):
+        super().premutate(context)
+        context.mapping = context.arguments['mapping']
 
     @classmethod
     def mutate(cls, context: core.ModelMutaionContext)\

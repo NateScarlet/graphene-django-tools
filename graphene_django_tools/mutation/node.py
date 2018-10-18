@@ -1,6 +1,7 @@
 """Anothor implement for `graphene.relay.mutation.ClientIDMutation`  """
 
 import re
+from typing import Type
 
 import graphene
 
@@ -49,41 +50,85 @@ class NodeMutation(Mutation):
                                         arguments=arguments)
 
     @classmethod
+    def premutate(cls, context: core.ModelMutaionContext):
+        super().premutate(context)
+        for k, v in context.arguments.items():
+            field = getattr(
+                context.options.arguments['input'], '_meta').fields[k]
+            context.arguments[k] = \
+                cls._convert_id_field_to_node(context, field, v)
+
+    @classmethod
+    def _convert_id_field_to_node(cls,
+                                  context: core.NodeMutationContext,
+                                  field: graphene.types.mountedtype.MountedType,
+                                  value):
+        assert isinstance(
+            field, graphene.types.mountedtype.MountedType), type(field)
+
+        unmounted = field.type
+        if isinstance(unmounted, graphene.NonNull):
+            unmounted = unmounted.of_type
+
+        # XXX: maybe replace this with single dispacth.
+        if isinstance(unmounted, graphene.types.unmountedtype.UnmountedType):
+            method = cls._id2node_unmmounted_instance
+        elif issubclass(unmounted, graphene.InputObjectType):
+            method = cls._id2node_inputobjecttype
+        elif issubclass(unmounted, graphene.Scalar):
+            method = cls._id2node_scalar
+        else:
+            raise NotImplementedError(unmounted)
+
+        return method(context, unmounted, value)
+
+    @classmethod
+    def _id2node_unmmounted_instance(cls,
+                                     context,
+                                     unmounted: graphene.types.unmountedtype.UnmountedType,
+                                     value):
+        ret = value
+        if isinstance(unmounted, graphene.List):
+            assert isinstance(value, list), type(value)
+            if issubclass(unmounted.of_type, graphene.ID):
+                ret = [graphene.Node.get_node_from_global_id(
+                    context.info, global_id=i) for i in value]
+        else:
+            raise NotImplementedError(unmounted)
+        return ret
+
+    @classmethod
+    def _id2node_inputobjecttype(cls,
+                                 context,
+                                 unmounted: Type[graphene.Scalar],
+                                 value):
+        assert isinstance(value, dict), type(value)
+        _input_fields = getattr(unmounted, '_meta').fields
+        ret = {}
+        for k, v in _input_fields.items():
+            if k not in value:
+                continue
+            ret[k] = cls._convert_id_field_to_node(context, v, value[k])
+        return ret
+
+    @classmethod
+    def _id2node_scalar(cls,
+                        context,
+                        unmounted: Type[graphene.InputObjectType],
+                        value):
+        ret = value
+        if issubclass(unmounted, graphene.ID):
+            ret = graphene.Node.get_node_from_global_id(
+                context.info, global_id=value)
+        return ret
+
+    @classmethod
     def postmutate(cls,
                    context: core.MutationContext,
                    payload: graphene.ObjectType) -> graphene.ObjectType:
         ret = super().postmutate(context, payload)
         ret.client_mutation_id = context.arguments.get("client_mutation_id")
         return ret
-
-    @classmethod
-    def _convert_id_field_to_node(cls, context: core.NodeMutationContext, field, value):
-        ret = value
-        fieldtype = field.type
-        if isinstance(fieldtype, graphene.NonNull):
-            fieldtype = fieldtype.of_type
-
-        if isinstance(fieldtype, graphene.ID):
-            ret = graphene.Node.get_node_from_global_id(
-                context.info, global_id=value)
-        elif (isinstance(fieldtype, graphene.List)
-              and issubclass(fieldtype.of_type, graphene.ID)):
-            ret = [graphene.Node.get_node_from_global_id(
-                context.info, global_id=i) for i in value]
-        elif isinstance(fieldtype, graphene.InputField):
-            _input_fields = getattr(field, '_meta').fields
-            for k, v in _input_fields.items():
-                ret[k] = cls._convert_id_field_to_node(context, v, value[k])
-        return ret
-
-    @classmethod
-    def premutate(cls, context: core.ModelMutaionContext):
-        super().premutate(context)
-        for k, v in context.arguments.items():
-            field = getattr(
-                context.options.arguments['input'], '_meta').fields[k]
-            context.arguments[k] = cls._convert_id_field_to_node(
-                context, field, v)
 
 
 class NodeUpdateMutation(NodeMutation):
