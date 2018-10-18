@@ -88,8 +88,11 @@ class Logout(gdtools.NodeMutation):
 class NodeEcho(gdtools.NodeUpdateMutation):
     """Example non-model mutation.  """
 
+    class Arguments:
+        extra_nodes = graphene.List(graphene.ID)
     message = graphene.String(required=True)
+    extra_nodes = graphene.List(graphene.Node)
 
     @classmethod
     def mutate(cls, context: gdtools.NodeUpdateMutation):
-        return cls(message=repr(context.node))
+        return cls(message=repr(context.node), extra_nodes=context.arguments['extra_nodes'])

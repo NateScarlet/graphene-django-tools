@@ -56,6 +56,35 @@ class NodeMutation(Mutation):
         ret.client_mutation_id = context.arguments.get("client_mutation_id")
         return ret
 
+    @classmethod
+    def _convert_id_field_to_node(cls, context: core.NodeMutationContext, field, value):
+        ret = value
+        fieldtype = field.type
+        if isinstance(fieldtype, graphene.NonNull):
+            fieldtype = fieldtype.of_type
+
+        if isinstance(fieldtype, graphene.ID):
+            ret = graphene.Node.get_node_from_global_id(
+                context.info, global_id=value)
+        elif (isinstance(fieldtype, graphene.List)
+              and issubclass(fieldtype.of_type, graphene.ID)):
+            ret = [graphene.Node.get_node_from_global_id(
+                context.info, global_id=i) for i in value]
+        elif isinstance(fieldtype, graphene.InputField):
+            _input_fields = getattr(field, '_meta').fields
+            for k, v in _input_fields.items():
+                ret[k] = cls._convert_id_field_to_node(context, v, value[k])
+        return ret
+
+    @classmethod
+    def premutate(cls, context: core.ModelMutaionContext):
+        super().premutate(context)
+        for k, v in context.arguments.items():
+            field = getattr(
+                context.options.arguments['input'], '_meta').fields[k]
+            context.arguments[k] = cls._convert_id_field_to_node(
+                context, field, v)
+
 
 class NodeUpdateMutation(NodeMutation):
     """Mutate a node.  """
@@ -86,13 +115,9 @@ class NodeUpdateMutation(NodeMutation):
         return super()._make_arguments_fields(**options)
 
     @classmethod
-    def premutate(cls, context: core.ModelMutaionContext):
-
-        id_ = context.arguments[cls._meta.id_fieldname]
-
+    def premutate(cls, context: core.NodeUpdateMutationOptions):
         super().premutate(context)
-        node = graphene.Node.get_node_from_global_id(
-            context.info, global_id=id_)
+        node = context.arguments[context.options.id_fieldname]
         if not node:
-            raise ValueError('No such node.', id_)
+            raise ValueError('No such node.')
         context.node = node
