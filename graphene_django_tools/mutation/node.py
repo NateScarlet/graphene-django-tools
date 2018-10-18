@@ -1,13 +1,32 @@
 """Anothor implement for `graphene.relay.mutation.ClientIDMutation`  """
 
 import re
-from typing import Type
+from typing import Type, Union
 
 import graphene
 
 from . import core
 from ..interfaces import ClientMutationID
 from .base import Mutation
+
+
+def try_get_node(info: core.ResolveInfo, global_id: str, only_type: Type = False) \
+        ->Union[graphene.Node, str]:
+    """Fallback to global_id when `graphene.Node.get_node_from_global_id` 
+        failed.
+
+    Returns:
+        Union[graphene.Node, str]: Node or input `global_id`
+    """
+
+    try:
+        ret = graphene.Node.get_node_from_global_id(
+            info=info, global_id=global_id, only_type=only_type)
+    except AssertionError:
+        ret = None
+    if ret is None:
+        ret = global_id
+    return ret
 
 
 class NodeMutation(Mutation):
@@ -91,8 +110,7 @@ class NodeMutation(Mutation):
         if isinstance(unmounted, graphene.List):
             assert isinstance(value, list), type(value)
             if issubclass(unmounted.of_type, graphene.ID):
-                ret = [graphene.Node.get_node_from_global_id(
-                    context.info, global_id=i) for i in value]
+                ret = [try_get_node(context.info, global_id=i) for i in value]
         else:
             raise NotImplementedError(unmounted)
         return ret
@@ -118,8 +136,7 @@ class NodeMutation(Mutation):
                         value):
         ret = value
         if issubclass(unmounted, graphene.ID):
-            ret = graphene.Node.get_node_from_global_id(
-                context.info, global_id=value)
+            ret = try_get_node(context.info, global_id=value)
         return ret
 
     @classmethod
