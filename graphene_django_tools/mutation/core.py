@@ -1,6 +1,5 @@
 """Mutation tools. """
 
-import sys
 from collections import OrderedDict
 from typing import Any, List
 
@@ -72,13 +71,3 @@ class ModelBulkMutaionContext(MutationContext):
 
 def _sorted_dict(obj: dict, key=None, reverse=False)->OrderedDict:
     return OrderedDict(sorted(obj.items(), key=key, reverse=reverse))
-
-
-def handle_resolve_error():
-    """Detail message for `graphql.error.located_error.GraphQLLocatedError`.  """
-
-    import traceback
-    traceback.print_exc()
-    type_, value, _ = sys.exc_info()
-
-    raise Exception(f'{type_.__name__}:{value}')

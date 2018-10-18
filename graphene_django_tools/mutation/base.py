@@ -14,6 +14,7 @@ from graphene.utils.props import props
 from graphql.execution.base import ResolveInfo
 
 from . import core
+from ..core import handle_resolve_error
 
 
 class Mutation(graphene.ObjectType):
@@ -101,7 +102,7 @@ class Mutation(graphene.ObjectType):
             payload = cls.postmutate(context, payload)
             return payload
         except:
-            core.handle_resolve_error()
+            handle_resolve_error()
             raise
 
     @classmethod

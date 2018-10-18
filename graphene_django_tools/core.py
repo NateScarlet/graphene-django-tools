@@ -1,10 +1,12 @@
 """Addtional tools for `graphene_django`.  """
+import sys
 from typing import Type
 
 import django
 import graphene
 import graphene_django
 from graphene_django.registry import get_global_registry
+from graphql import GraphQLError
 
 
 def get_modelnode(model: Type[django.db.models.Model], is_autocreate=True)\
@@ -54,3 +56,15 @@ def create_modelnode(model: Type[django.db.models.Model], bases=(), **meta_optio
     bases += (graphene_django.DjangoObjectType,)
     clsname = texttools.camel_case(f'auto_{model.__name__}_node')
     return type(clsname, bases, dict(Meta=meta_options))
+
+
+def handle_resolve_error():
+    """Detail message for `graphql.error.located_error.GraphQLLocatedError`.  """
+
+    type_, value, _ = sys.exc_info()
+    if not isinstance(value, GraphQLError):
+        import traceback
+        traceback.print_exc()
+        raise GraphQLError(f'{type_.__name__}:{value}')
+    else:
+        raise value

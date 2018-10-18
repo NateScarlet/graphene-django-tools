@@ -4,13 +4,14 @@
 
 import re
 from collections import OrderedDict
-from typing import Dict, Union
+from typing import Dict, Tuple, Union
 
 import django
 import graphene
 from django.db.models.fields.reverse_related import ForeignObjectRel
 from graphene.types.unmountedtype import UnmountedType
 from graphene_django.forms.converter import convert_form_field
+from graphql import GraphQLError
 
 from . import core
 from ..texttools import snake_case
@@ -131,6 +132,35 @@ class ModelMutaion(NodeMutation):
         context.instance.save()
         return ret
 
+    @classmethod
+    def sorted_mapping(cls,
+                       context: core.ModelMutaionContext) -> Tuple[dict, dict]:
+        """Get sorted mapping by type.
+
+        Args:
+            context (core.ModelMutaionContext): Mutation context
+
+        Raises:
+            ValueError: Try use auto field in mapping.
+
+        Returns:
+            Tuple[dict, dict]: normal mapping, many to many mapping
+        """
+
+        model_meta = getattr(context.options.model, '_meta')
+        fields = model_meta.get_fields()
+        normal_mapping = dict(context.mapping)
+        m2m_mapping = {}
+        for i in fields:
+            if i.name not in context.mapping:
+                continue
+            if isinstance(i, django.db.models.AutoField):
+                raise ValueError('Assign to auto field is not allowed')
+            elif isinstance(i, django.db.models.ManyToManyField):
+                m2m_mapping[i.name] = normal_mapping.pop(i.name)
+
+        return normal_mapping, m2m_mapping
+
 
 class ModelCreationMutaion(ModelMutaion):
     """Carete model.  """
@@ -139,10 +169,15 @@ class ModelCreationMutaion(ModelMutaion):
         abstract = True
 
     @classmethod
-    def premutate(cls, context: core.ModelMutaionContext):
-        super().premutate(context)
-        instance = context.options.model(**context.mapping)
+    def mutate(cls, context: core.ModelMutaionContext)\
+            -> graphene.ObjectType:
+        normal_mapping, m2m_mapping = cls.sorted_mapping(context)
+        instance = context.options.model(**normal_mapping)
+        instance.save()
+        for k, v in m2m_mapping.items():
+            getattr(instance, k).set(v)
         context.instance = instance
+        return super().mutate(context)
 
 
 class ModelUpdateMutaion(NodeUpdateMutation, ModelMutaion):
@@ -165,10 +200,16 @@ class ModelUpdateMutaion(NodeUpdateMutation, ModelMutaion):
     def premutate(cls, context: core.ModelMutaionContext):
 
         super().premutate(context)
+        if not isinstance(context.node, context.options.model):
+            raise GraphQLError(
+                f'Got a {type(context.node)} node, expected for {context.options.model}')
         context.instance = context.node
 
     @classmethod
     def mutate(cls, context: core.ModelMutaionContext):
-        for k, v in context.mapping.items():
+        normal_mapping, m2m_mapping = cls.sorted_mapping(context)
+        for k, v in normal_mapping.items():
             setattr(context.instance, k, v)
+        for k, v in m2m_mapping.items():
+            getattr(context.instance, k).set(v)
         return super().mutate(context)

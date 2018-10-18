@@ -8,6 +8,8 @@ from graphene_django import DjangoObjectType
 import graphene_django_tools as gdtools
 from graphene_django_tools import auth
 
+from .models import Group
+
 
 class UserNode(DjangoObjectType):
     class Meta:
@@ -18,6 +20,24 @@ class UserNode(DjangoObjectType):
         interfaces = (relay.Node,)
 
 
+class GroupNode(DjangoObjectType):
+    class Meta:
+        model = Group
+        filter_fields = []
+        interfaces = (relay.Node,)
+
+
+class CreateGroup(gdtools.ModelCreationMutaion):
+    class Meta:
+        model = Group
+        required = ['users']
+
+
+class UpdateGroup(gdtools.ModelUpdateMutaion):
+    class Meta:
+        model = Group
+
+
 class Mutation(graphene.ObjectType):
     """Mutation """
 
@@ -26,6 +46,8 @@ class Mutation(graphene.ObjectType):
     login = auth.Login.Field()
     logout = auth.Logout.Field()
     node_echo = auth.NodeEcho.Field()
+    create_group = CreateGroup.Field()
+    update_group = UpdateGroup.Field()
 
 
 class Query(graphene.ObjectType):
@@ -40,6 +62,10 @@ class Query(graphene.ObjectType):
         return user
 
     users = gdtools.ModelFilterConnectionField(auth.User)
+    groups = gdtools.ModelFilterConnectionField(Group)
+
+    def resolve_groups(self, info: gdtools.ResolveInfo):
+        print(info)
 
 
 SCHEMA = graphene.Schema(
