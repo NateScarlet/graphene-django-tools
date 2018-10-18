@@ -64,9 +64,6 @@ class Query(graphene.ObjectType):
     users = gdtools.ModelFilterConnectionField(auth.User)
     groups = gdtools.ModelFilterConnectionField(Group)
 
-    def resolve_groups(self, info: gdtools.ResolveInfo):
-        print(info)
-
 
 SCHEMA = graphene.Schema(
     query=Query,
