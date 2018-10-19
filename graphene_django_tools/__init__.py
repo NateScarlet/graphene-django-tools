@@ -9,4 +9,5 @@ from .mutation import (ModelBulkMutaionContext, ModelCreationMutaion,
                        ModelMutaion, ModelMutaionContext, ModelUpdateMutaion,
                        Mutation, MutationContext, NodeMutation,
                        NodeMutationContext, NodeUpdateMutation)
-from .types import ModelConnectionField, ModelField, ModelFilterConnectionField
+from .types import (ModelConnectionField, ModelField,
+                    ModelFilterConnectionField, ModelListField)

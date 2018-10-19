@@ -20,6 +20,19 @@ class ModelField(graphene.Field):
         super().__init__(core.get_modelnode(model), **kwargs)
 
 
+class ModelListField(graphene.List):
+    """`List` field for model.
+
+    Use `create_nodemodel` first if you want customize the node.
+    """
+
+    def __init__(self, model, **kwargs):
+        kwargs.setdefault('description',
+                          (model.__doc__
+                           or f'Node list for database model: {model.__name__}'))
+        super().__init__(core.get_modelnode(model), **kwargs)
+
+
 class CustomConnectionResolveMixin:
     """Print traceback when encountered a error"""
 

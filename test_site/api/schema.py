@@ -26,6 +26,9 @@ class GroupNode(DjangoObjectType):
         filter_fields = []
         interfaces = (relay.Node,)
 
+    this = gdtools.ModelField(Group)
+    this_list = gdtools.ModelListField(Group)
+
 
 class CreateGroup(gdtools.ModelCreationMutaion):
     class Meta:
@@ -63,6 +66,14 @@ class Query(graphene.ObjectType):
 
     users = gdtools.ModelFilterConnectionField(auth.User)
     groups = gdtools.ModelFilterConnectionField(Group)
+
+    recursive_group = gdtools.ModelField(Group)
+
+    def resolve_recursive_group(self, info: gdtools.ResolveInfo):
+        ret = Group.objects.first()
+        ret.this = ret
+        ret.this_list = [ret]
+        return ret
 
 
 SCHEMA = graphene.Schema(
