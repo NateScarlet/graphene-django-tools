@@ -2,7 +2,6 @@
 import graphene
 import graphene_django
 import graphene_django.filter
-from graphql import GraphQLError
 
 from . import core
 
@@ -17,7 +16,7 @@ class ModelField(graphene.Field):
         kwargs.setdefault('description',
                           (model.__doc__
                            or f'Node for database model: {model.__name__}'))
-        super().__init__(core.get_modelnode(model), **kwargs)
+        super().__init__(lambda: core.get_modelnode(model), **kwargs)
 
 
 class ModelListField(graphene.List):
@@ -30,7 +29,7 @@ class ModelListField(graphene.List):
         kwargs.setdefault('description',
                           (model.__doc__
                            or f'Node list for database model: {model.__name__}'))
-        super().__init__(core.get_modelnode(model), **kwargs)
+        super().__init__(lambda: core.get_modelnode(model), **kwargs)
 
 
 class CustomConnectionResolveMixin:
@@ -55,7 +54,7 @@ class ModelConnectionField(CustomConnectionResolveMixin, graphene_django.DjangoC
         kwargs.setdefault('description',
                           (model.__doc__
                            or f'Connection for database model: {model.__name__}'))
-        super().__init__(core.get_modelnode(model), **kwargs)
+        super().__init__(lambda: core.get_modelnode(model), **kwargs)
 
 
 class ModelFilterConnectionField(CustomConnectionResolveMixin, graphene_django.filter.DjangoFilterConnectionField):
@@ -68,4 +67,4 @@ class ModelFilterConnectionField(CustomConnectionResolveMixin, graphene_django.f
         kwargs.setdefault('description',
                           (model.__doc__
                            or f'Fitlerable connection for database model: {model.__name__}'))
-        super().__init__(core.get_modelnode(model), **kwargs)
+        super().__init__(lambda: core.get_modelnode(model), **kwargs)

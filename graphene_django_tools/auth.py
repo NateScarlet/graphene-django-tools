@@ -7,8 +7,6 @@ from django.contrib.auth.password_validation import validate_password
 
 import graphene_django_tools as gdtools
 
-gdtools.get_modelnode(User)  # Check if UserNode defined.
-
 
 class UserMutation(gdtools.ModelMutaion):
     """Addtional actions for user.  """
