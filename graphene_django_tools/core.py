@@ -54,7 +54,7 @@ def create_modelnode(model: Type[django.db.models.Model], bases=(), **meta_optio
     if graphene_django.utils.DJANGO_FILTER_INSTALLED:
         meta_options.setdefault('filter_fields', '__all__')
     bases += (graphene_django.DjangoObjectType,)
-    clsname = texttools.camel_case(f'auto_{model.__name__}_node')
+    clsname = texttools.camel_case(f'{model.__name__}_node')
     return type(clsname, bases, dict(Meta=meta_options))
 
 
