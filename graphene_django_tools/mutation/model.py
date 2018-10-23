@@ -45,6 +45,8 @@ class ModelMutaion(NodeMutation):
     def _make_arguments_fields(cls, **options) -> OrderedDict:
         model = options['model']
         options.setdefault('arguments', {})
+        options.setdefault('require_mapping', True)
+
         field_dict = OrderedDict(
             __doc__=f'Mapping data for mutation: {cls.__name__}',
             Meta=dict())
@@ -53,7 +55,7 @@ class ModelMutaion(NodeMutation):
             re.sub("Mapping$|$", "Mapping", cls.__name__),
             (graphene.InputObjectType,),
             field_dict)
-        field = field_objecttype(required=True,
+        field = field_objecttype(required=options['require_mapping'],
                                  description=f'Mapping data for model: {model.__name__}')
 
         options['arguments'].update(mapping=field)

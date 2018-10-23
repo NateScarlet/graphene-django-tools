@@ -41,6 +41,32 @@ class UpdateGroup(gdtools.ModelUpdateMutaion):
         model = Group
 
 
+class IDInInput(graphene.InputObjectType):
+    node_id = graphene.ID()
+    node_id_list = graphene.List(graphene.ID)
+
+
+class NodeEcho(gdtools.NodeUpdateMutation):
+    """Example non-model mutation.  """
+
+    class Arguments:
+        extra_nodes = graphene.List(graphene.ID)
+        input = IDInInput().Field()
+
+    message = graphene.String(required=True)
+    extra_nodes = graphene.List(graphene.Node)
+    input_node = graphene.Field(graphene.Node)
+    input_nodes = graphene.List(graphene.Node)
+
+    @classmethod
+    def mutate(cls, context: gdtools.NodeUpdateMutation):
+        input_ = context.arguments.get('input', {})
+        return cls(message=repr(context.node),
+                   extra_nodes=context.arguments.get('extra_nodes'),
+                   input_node=input_.get('node_id'),
+                   input_nodes=input_.get('node_id_list'))
+
+
 class Mutation(graphene.ObjectType):
     """Mutation """
 
@@ -48,7 +74,7 @@ class Mutation(graphene.ObjectType):
     update_user = auth.UpdateUser.Field()
     login = auth.Login.Field()
     logout = auth.Logout.Field()
-    node_echo = auth.NodeEcho.Field()
+    node_echo = NodeEcho.Field()
     create_group = CreateGroup.Field()
     update_group = UpdateGroup.Field()
 

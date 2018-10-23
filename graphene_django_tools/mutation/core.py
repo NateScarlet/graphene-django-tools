@@ -30,6 +30,7 @@ class ModelMutationOptions(NodeMutationOptions):
     node_fieldname = None  # type: str
     require = ()  # type: tuple[str]
     exclude = ()  # type: tuple[str]
+    require_mapping = True
 
 
 class ModelUpdateMutationOptions(NodeUpdateMutationOptions, ModelMutationOptions):
