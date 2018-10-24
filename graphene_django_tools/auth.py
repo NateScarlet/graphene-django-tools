@@ -1,11 +1,12 @@
 """Example schema for django auth.  """
 
 import graphene
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.contrib.auth.password_validation import validate_password
 
 import graphene_django_tools as gdtools
+
+User = get_user_model()  # pylint: disable=invalid-name
 
 
 class UserMutation(gdtools.ModelMutaion):
@@ -59,9 +60,6 @@ class Login(gdtools.NodeMutation):
         username = graphene.String(required=True)
         password = graphene.String(required=True)
 
-    class Meta:
-        interfaces = (gdtools.interfaces.Message,)
-
     user = gdtools.ModelField(User)
 
     @classmethod
@@ -71,7 +69,7 @@ class Login(gdtools.NodeMutation):
         if not user:
             raise ValueError('Login failed.')
         login(request, user)
-        return cls(user=user, message=f'Welcome back, {user}.')
+        return cls(user=user)
 
 
 class Logout(gdtools.NodeMutation):
