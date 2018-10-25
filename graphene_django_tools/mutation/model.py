@@ -190,10 +190,7 @@ class ModelUpdateMutaion(NodeUpdateMutation, ModelMutaion):
 
     @classmethod
     def _construct_meta(cls, **options) -> core.ModelUpdateMutationOptions:
-        model = options['model']  # type: django.db.models.Model
-
         options.setdefault('_meta', core.ModelUpdateMutationOptions(cls))
-        options.setdefault('id_fieldname', snake_case(f'{model.__name__}_id'))
         ret = super()._construct_meta(**options) \
             # type: core.ModelUpdateMutationOptions
         return ret
