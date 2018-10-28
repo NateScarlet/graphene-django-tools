@@ -1,7 +1,10 @@
 """Mutation tools. """
 
 from .base import Mutation
-from .core import (ModelBulkMutaionContext, ModelMutaionContext,
+from .core import (ModelBulkCreationMutaionContext,
+                   ModelBulkUpdateMutaionContext, ModelMutaionContext,
                    MutationContext, NodeMutationContext)
-from .model import ModelCreationMutaion, ModelMutaion, ModelUpdateMutaion
+from .model import (ModelBulkCreationMutaion, ModelBulkMutation,
+                    ModelBulkUpdateMutaion, ModelCreationMutaion, ModelMutaion,
+                    ModelUpdateMutaion)
 from .node import NodeMutation, NodeUpdateMutation

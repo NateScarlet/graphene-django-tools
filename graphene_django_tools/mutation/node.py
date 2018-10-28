@@ -169,12 +169,15 @@ class NodeUpdateMutation(NodeMutation):
     def _make_arguments_fields(cls, **options) -> dict:
         options.setdefault('arguments', {})
 
+        options['arguments'].update(cls._make_node_arguments_fields(**options))
+        return super()._make_arguments_fields(**options)
+
+    @classmethod
+    def _make_node_arguments_fields(cls, **options) -> dict:
         id_type = graphene.ID(
             required=True,
             description='Node ID for this mutation.')
-        options['arguments'][options['id_fieldname']] = id_type
-
-        return super()._make_arguments_fields(**options)
+        return {options['id_fieldname']: id_type}
 
     @classmethod
     def premutate(cls, context: core.NodeUpdateMutationOptions):

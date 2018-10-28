@@ -67,6 +67,17 @@ class NodeEcho(gdtools.NodeUpdateMutation):
                    input_nodes=input_.get('node_id_list'))
 
 
+class BulkCreateGroup(gdtools.ModelBulkCreationMutaion):
+    class Meta:
+        model = Group
+        required = ['users']
+
+
+class BulkUpdateGroup(gdtools.ModelBulkUpdateMutaion):
+    class Meta:
+        model = Group
+
+
 class Mutation(graphene.ObjectType):
     """Mutation """
 
@@ -77,6 +88,8 @@ class Mutation(graphene.ObjectType):
     node_echo = NodeEcho.Field()
     create_group = CreateGroup.Field()
     update_group = UpdateGroup.Field()
+    bulk_create_group = BulkCreateGroup.Field()
+    bulk_update_group = BulkUpdateGroup.Field()
 
 
 class Query(graphene.ObjectType):

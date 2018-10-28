@@ -62,11 +62,16 @@ class ModelMutaionContext(NodeMutationContext):
 
 
 @dataclass
-class ModelBulkMutaionContext(MutationContext):
-    """Tuple data for model bulk mutation context.  """
+class ModelBulkCreationMutaionContext(MutationContext):
+    """Tuple data for model bulk creation mutation context.  """
 
-    fitlers: dict
     data: List[dict]
+
+
+@dataclass
+class ModelBulkUpdateMutaionContext(MutationContext):
+    """Tuple data for model bulk update mutation context.  """
+    mapping: dict
     query_set: db.models.QuerySet = None
 
 
