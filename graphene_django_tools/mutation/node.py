@@ -80,12 +80,11 @@ class NodeMutation(Mutation):
     @classmethod
     def _convert_id_field_to_node(cls,
                                   context: core.NodeMutationContext,
-                                  field: graphene.types.mountedtype.MountedType,
+                                  field,
                                   value):
-        assert isinstance(
-            field, graphene.types.mountedtype.MountedType), type(field)
 
-        unmounted = field.type
+        unmounted = field.type if isinstance(
+            field, graphene.types.mountedtype.MountedType) else field
         if isinstance(unmounted, graphene.NonNull):
             unmounted = unmounted.of_type
 
@@ -108,9 +107,10 @@ class NodeMutation(Mutation):
                                      value):
         ret = value
         if isinstance(unmounted, graphene.List):
+            unmounted = unmounted.of_type
             assert isinstance(value, list), type(value)
-            if issubclass(unmounted.of_type, graphene.ID):
-                ret = [try_get_node(context.info, global_id=i) for i in value]
+            ret = [cls._convert_id_field_to_node(
+                context, unmounted, i) for i in value]
         else:
             raise NotImplementedError(unmounted)
         return ret
