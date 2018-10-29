@@ -14,7 +14,6 @@ from graphene_django.forms.converter import convert_form_field
 from graphql import GraphQLError
 
 from . import core
-from ..core import get_modelnode
 from ..texttools import snake_case
 from ..types import ModelField, ModelListField
 from .node import NodeMutation, NodeUpdateMutation
