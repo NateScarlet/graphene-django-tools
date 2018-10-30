@@ -19,7 +19,7 @@ class UserMutation(gdtools.ModelMutaion):
     def premutate(cls, context: gdtools.ModelMutaionContext):
 
         super().premutate(context)
-        password = context.arguments.get('password')
+        password = context.mapping.get('password')
         if password:
             validate_password(password)
 
@@ -28,7 +28,7 @@ class UserMutation(gdtools.ModelMutaion):
                    context: gdtools.ModelMutaionContext,
                    payload: graphene.ObjectType) -> graphene.ObjectType:
 
-        password = context.arguments.get('password')
+        password = context.mapping.get('password')
         if password:
             context.instance.set_password(password)
         return super().postmutate(context, payload)
