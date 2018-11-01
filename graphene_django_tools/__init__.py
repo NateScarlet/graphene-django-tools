@@ -4,7 +4,7 @@
 from graphql.execution.base import ResolveInfo
 
 from . import interfaces, utils
-from .core import create_modelnode, get_modelnode
+from .core import create_modelnode, get_modelnode, get_node_id
 from .mutation import (ModelBulkCreationMutaion,
                        ModelBulkCreationMutaionContext, ModelBulkMutation,
                        ModelBulkUpdateMutaion, ModelBulkUpdateMutaionContext,

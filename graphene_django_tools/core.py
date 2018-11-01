@@ -68,3 +68,18 @@ def handle_resolve_error():
         raise GraphQLError(f'{type_.__name__}:{value}')
     else:
         raise value
+
+
+def get_node_id(instance: django.db.models.Model) -> str:
+    """Get instance global node id.
+
+    Args:
+        instance (django.db.models.Model): Model instance
+
+    Returns:
+        str: Global id.
+    """
+
+    assert isinstance(instance, django.db.models.Model), type(instance)
+    modelnode = get_modelnode(instance.__class__, is_autocreate=False)
+    return graphene.Node.to_global_id(modelnode.__name__, instance.pk)
