@@ -1,14 +1,12 @@
 """GrapQl schema.  """
 
 import graphene
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group, User
 from graphene import relay
 from graphene_django import DjangoObjectType
 
 import graphene_django_tools as gdtools
 from graphene_django_tools import auth
-
-from .models import Group
 
 
 class UserNode(DjangoObjectType):
