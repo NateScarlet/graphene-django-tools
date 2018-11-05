@@ -8,6 +8,7 @@ from typing import Dict, Tuple, Union
 
 import django
 import graphene
+from django.db import transaction
 from django.db.models.fields.reverse_related import ForeignObjectRel
 from graphene.types.unmountedtype import UnmountedType
 from graphene_django.forms.converter import convert_form_field
@@ -306,7 +307,13 @@ class ModelBulkUpdateMutaion(ModelUpdateMutaion, ModelBulkMutation):
             pk__in=(i.pk for i in context.node))
 
     @classmethod
-    def mutate(cls, context: core.ModelBulkUpdateMutaionContext)\
-            -> graphene.ObjectType:
-        context.query_set.update(**context.mapping)
+    @transaction.atomic
+    def mutate(cls, context: core.ModelMutaionContext):
+        normal_mapping, m2m_mapping = cls.sorted_mapping(
+            context, context.mapping)
+        context.query_set.update(**normal_mapping)
+        for i in context.query_set:
+            for k, v in m2m_mapping.items():
+                getattr(i, k).set(v)
+            i.save()
         return cls(**{context.options.node_fieldname: context.query_set})
