@@ -183,6 +183,6 @@ class NodeUpdateMutation(NodeMutation):
     def premutate(cls, context: core.NodeUpdateMutationOptions):
         super().premutate(context)
         node = context.arguments[context.options.id_fieldname]
-        if not node:
-            raise ValueError('No such node.')
+        if isinstance(node, str) or not node:
+            raise ValueError(f'No such node: {node}')
         context.node = node
