@@ -76,6 +76,11 @@ class BulkUpdateGroup(gdtools.ModelBulkUpdateMutaion):
         model = Group
 
 
+class DeleteNode(gdtools.NodeDeleteMutation):
+    class Meta:
+        allowed_cls = (Group,)
+
+
 class Mutation(graphene.ObjectType):
     """Mutation """
 
@@ -84,6 +89,7 @@ class Mutation(graphene.ObjectType):
     login = auth.Login.Field()
     logout = auth.Logout.Field()
     node_echo = NodeEcho.Field()
+    delete_node = DeleteNode.Field()
     create_group = CreateGroup.Field()
     update_group = UpdateGroup.Field()
     bulk_create_group = BulkCreateGroup.Field()
