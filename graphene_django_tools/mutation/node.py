@@ -198,7 +198,9 @@ class NodeDeleteMutation(NodeUpdateMutation):
     @classmethod
     def _construct_meta(cls, **options) -> core.NodeDeleteMutationOptions:
         options.setdefault('_meta', core.NodeDeleteMutationOptions(cls))
-        options.setdefault('allowed_cls', ())
+        if 'allowed_cls' not in options:
+            raise KeyError(
+                f'{cls.__name__}: Meta options `allowed_cls` can not be ommitted.')
 
         ret: core.NodeDeleteMutationOptions = super()._construct_meta(**options)
         ret.allowed_cls = options['allowed_cls']
