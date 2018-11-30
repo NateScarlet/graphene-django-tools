@@ -7,4 +7,4 @@ from .core import (ModelBulkCreationMutaionContext,
 from .model import (ModelBulkCreationMutaion, ModelBulkMutation,
                     ModelBulkUpdateMutaion, ModelCreationMutaion, ModelMutaion,
                     ModelUpdateMutaion)
-from .node import NodeMutation, NodeUpdateMutation
+from .node import NodeDeleteMutation, NodeMutation, NodeUpdateMutation

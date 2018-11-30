@@ -4,6 +4,7 @@ import re
 from typing import Type, Union
 
 import graphene
+from graphql import GraphQLError
 
 from . import core
 from ..interfaces import ClientMutationID
@@ -184,5 +185,31 @@ class NodeUpdateMutation(NodeMutation):
         super().premutate(context)
         node = context.arguments[context.options.id_fieldname]
         if isinstance(node, str) or not node:
-            raise ValueError(f'No such node: {node}')
+            raise GraphQLError(f'No such node: {node}')
         context.node = node
+
+
+class NodeDeleteMutation(NodeUpdateMutation):
+    """Delete a node.  """
+
+    class Meta:
+        abstract = True
+        allowed_cls = ()
+
+    @classmethod
+    def _construct_meta(cls, **options) -> core.NodeUpdateMutationOptions:
+        options.setdefault('_meta', core.NodeDeleteMutationOptions(cls))
+        options.setdefault('allowed_cls', ())
+
+        ret = super()._construct_meta(**options) \
+            # type: core.NodeDeleteMutationOptions
+        ret.allowed_cls = options['allowed_cls']
+        return ret
+
+    @classmethod
+    def mutate(cls, context: core.NodeMutationContext):
+        if not isinstance(context.node, context.options.allowed_cls):
+            raise GraphQLError(
+                f'Delete not allowed: {type(context.node).__name__}')
+        context.node.delete()
+        return cls()

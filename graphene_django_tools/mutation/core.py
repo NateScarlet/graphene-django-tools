@@ -23,6 +23,12 @@ class NodeUpdateMutationOptions(NodeMutationOptions):
     id_fieldname = None  # type: str
 
 
+class NodeDeleteMutationOptions(NodeUpdateMutationOptions):
+    """`Meta` for `NodeDeleteMutation`.  """
+
+    allowed_cls: tuple = ()
+
+
 class ModelMutationOptions(NodeMutationOptions):
     """`Meta` for `ModelMutation`.  """
 
