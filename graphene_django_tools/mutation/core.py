@@ -49,7 +49,7 @@ class MutationContext:
 
     root: Any  # XXX: Not found documentation for this.
     info: ResolveInfo
-    options: ModelMutationOptions
+    options: MutationOptions
     arguments: dict
 
 
@@ -57,6 +57,17 @@ class MutationContext:
 class NodeMutationContext(MutationContext):
 
     node: graphene.relay.Node
+    options: NodeMutationOptions
+
+
+@dataclass
+class NodeUpdateMutationContext(MutationContext):
+    options: NodeUpdateMutationOptions
+
+
+@dataclass
+class NodeDeleteMutationContext(MutationContext):
+    options: NodeDeleteMutationOptions
 
 
 @dataclass
@@ -65,6 +76,7 @@ class ModelMutaionContext(NodeMutationContext):
 
     mapping: dict
     instance: graphene.ObjectType = None
+    options: ModelMutationOptions
 
 
 @dataclass

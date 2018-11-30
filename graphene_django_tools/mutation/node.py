@@ -197,17 +197,16 @@ class NodeDeleteMutation(NodeUpdateMutation):
         allowed_cls = ()
 
     @classmethod
-    def _construct_meta(cls, **options) -> core.NodeUpdateMutationOptions:
+    def _construct_meta(cls, **options) -> core.NodeDeleteMutationOptions:
         options.setdefault('_meta', core.NodeDeleteMutationOptions(cls))
         options.setdefault('allowed_cls', ())
 
-        ret = super()._construct_meta(**options) \
-            # type: core.NodeDeleteMutationOptions
+        ret: core.NodeDeleteMutationOptions = super()._construct_meta(**options)
         ret.allowed_cls = options['allowed_cls']
         return ret
 
     @classmethod
-    def mutate(cls, context: core.NodeMutationContext):
+    def mutate(cls, context: core.NodeDeleteMutationContext):
         if not isinstance(context.node, context.options.allowed_cls):
             raise GraphQLError(
                 f'Delete not allowed: {type(context.node).__name__}')

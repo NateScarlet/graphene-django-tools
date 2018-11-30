@@ -10,7 +10,8 @@ from .mutation import (ModelBulkCreationMutaion,
                        ModelBulkUpdateMutaion, ModelBulkUpdateMutaionContext,
                        ModelCreationMutaion, ModelMutaion, ModelMutaionContext,
                        ModelUpdateMutaion, Mutation, MutationContext,
-                       NodeDeleteMutation, NodeMutation, NodeMutationContext,
-                       NodeUpdateMutation)
+                       NodeDeleteMutation, NodeDeleteMutationContext,
+                       NodeMutation, NodeMutationContext, NodeUpdateMutation,
+                       NodeUpdateMutationContext)
 from .types import (ModelConnectionField, ModelField,
                     ModelFilterConnectionField, ModelListField)
