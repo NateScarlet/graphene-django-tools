@@ -194,7 +194,6 @@ class NodeDeleteMutation(NodeUpdateMutation):
 
     class Meta:
         abstract = True
-        allowed_cls = ()
 
     @classmethod
     def _construct_meta(cls, **options) -> core.NodeDeleteMutationOptions:
