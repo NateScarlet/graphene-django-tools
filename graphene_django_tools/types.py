@@ -1,7 +1,12 @@
 """Graphene types.  """
+from datetime import timedelta
+
 import graphene
 import graphene_django
 import graphene_django.filter
+from graphql.language import ast
+
+import isodate
 
 from . import core
 
@@ -68,3 +73,64 @@ class ModelFilterConnectionField(CustomConnectionResolveMixin, graphene_django.f
                           (model.__doc__
                            or f'Fitlerable connection for database model: {model.__name__}'))
         super().__init__(lambda: core.get_modelnode(model), **kwargs)
+
+
+class Duration(graphene.Scalar):
+    """Duration in ISO-8601 format.  """
+
+    @staticmethod
+    def serialize(duration: timedelta):
+        """Serialize python object.
+
+        Args:
+            duration (timedelta): Duration
+
+        Returns:
+            str
+        """
+
+        return isodate.duration_isoformat(duration)
+
+    @classmethod
+    def parse_literal(cls, node):
+        """Parse ast node.
+
+        Args:
+            node: AST node
+
+        Returns:
+            timedelta | None
+        """
+
+        if isinstance(node, ast.StringValue):
+            return cls.parse_value(node.value)
+        return None
+
+    @staticmethod
+    def parse_value(value):
+        """Parse str to python object.
+
+        Args:
+            value (str): Value
+
+        Returns:
+            timedelta | None
+        """
+
+        try:
+            return isodate.parse_duration(value)
+        except ValueError:
+            return None
+
+
+class CountableConnection(graphene.relay.Connection):
+    """Extended connection with total count.  """
+
+    class Meta:
+        abstract = True
+
+    total = graphene.Int()
+
+    @staticmethod
+    def resolve_total(root, _info):
+        return root.length

@@ -13,5 +13,5 @@ from .mutation import (ModelBulkCreationMutaion,
                        NodeDeleteMutation, NodeDeleteMutationContext,
                        NodeMutation, NodeMutationContext, NodeUpdateMutation,
                        NodeUpdateMutationContext)
-from .types import (ModelConnectionField, ModelField,
-                    ModelFilterConnectionField, ModelListField)
+from .types import (CountableConnection, Duration, ModelConnectionField,
+                    ModelField, ModelFilterConnectionField, ModelListField)
