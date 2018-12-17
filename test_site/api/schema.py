@@ -1,5 +1,6 @@
 """GrapQl schema.  """
 
+import django_filters
 import graphene
 from django.contrib.auth.models import Group, User
 from graphene import relay
@@ -9,13 +10,22 @@ import graphene_django_tools as gdtools
 from graphene_django_tools import auth
 
 
-class UserNode(DjangoObjectType):
+class UserFilterSet(django_filters.FilterSet):
+    order_by = django_filters.OrderingFilter(
+        fields=['username', 'email', 'id'])
+
     class Meta:
         model = User
-        filter_fields = {
+        fields = {
             'username': ['icontains', 'istartswith', 'iendswith'],
             'email': ['icontains', 'istartswith', 'iendswith'], }
+
+
+class UserNode(gdtools.ModelNode):
+    class Meta:
+        model = User
         interfaces = (relay.Node,)
+        filterset_class = UserFilterSet
 
 
 class GroupNode(DjangoObjectType):

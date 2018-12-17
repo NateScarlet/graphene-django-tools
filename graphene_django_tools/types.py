@@ -4,9 +4,8 @@ from datetime import timedelta
 import graphene
 import graphene_django
 import graphene_django.filter
-from graphql.language import ast
-
 import isodate
+from graphql.language import ast
 
 from . import core
 
@@ -62,17 +61,27 @@ class ModelConnectionField(CustomConnectionResolveMixin, graphene_django.DjangoC
         super().__init__(lambda: core.get_modelnode(model), **kwargs)
 
 
-class ModelFilterConnectionField(CustomConnectionResolveMixin, graphene_django.filter.DjangoFilterConnectionField):
-    """`DjangoFilterConnectionField` for model.
-
-    Use `create_nodemodel` first if you want customize the node.
-    """
+class ModelFilterConnectionField(CustomConnectionResolveMixin,
+                                 graphene_django.filter.DjangoFilterConnectionField):
+    """`DjangoFilterConnectionField` for model.  """
 
     def __init__(self, model, **kwargs):
         kwargs.setdefault('description',
                           (model.__doc__
                            or f'Fitlerable connection for database model: {model.__name__}'))
+        self._node_filterset_class = None
         super().__init__(lambda: core.get_modelnode(model), **kwargs)
+
+    @property
+    def _provided_filterset_class(self):
+        if self._node_filterset_class is None:
+            meta = getattr(self.node_type, '_meta')
+            self._node_filterset_class = getattr(meta, 'filterset_class', None)
+        return self._node_filterset_class
+
+    @_provided_filterset_class.setter
+    def _provided_filterset_class(self, value):
+        self._node_filterset_class = value
 
 
 class Duration(graphene.Scalar):
@@ -134,3 +143,25 @@ class CountableConnection(graphene.relay.Connection):
     @staticmethod
     def resolve_total(root, _info):
         return root.length
+
+
+class ModelNodeOptions(graphene_django.types.DjangoObjectTypeOptions):
+    """Extended DjangoObjectTypeOptions for `ModelNode`.  """
+
+    filterset_class = None
+
+
+class ModelNode(graphene_django.DjangoObjectType):
+    class Meta:
+        abstract = True
+
+    @classmethod
+    def __init_subclass_with_meta__(
+            cls,
+            filterset_class=None,
+            **options):
+        # pylint: disable=W0221
+        _meta = options.get('_meta', ModelNodeOptions(cls))
+        _meta.filterset_class = filterset_class
+        options['_meta'] = _meta
+        super().__init_subclass_with_meta__(**options)
