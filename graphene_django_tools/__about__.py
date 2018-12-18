@@ -1,4 +1,6 @@
-__version__ = '0.14.0'
+"""Tools for use [graphene-django](https://github.com/graphql-python/graphene-django).  """
+
+__version__ = '0.15.0'
 __author__ = 'NateScarlet@Gmail.com'
 
 # TODO: Add tests
