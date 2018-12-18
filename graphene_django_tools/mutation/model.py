@@ -35,8 +35,10 @@ class ModelMutaion(NodeMutation):
     @classmethod
     def _construct_meta(cls, **options) -> core.ModelMutationOptions:
         ret = super()._construct_meta(**options)  # type: core.ModelMutationOptions
+        ret.model = options['model']
         ret.require = options['require']
         ret.exclude = options['exclude']
+        ret.require_mapping = options['require_mapping']
         return ret
 
     @classmethod
