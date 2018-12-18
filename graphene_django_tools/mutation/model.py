@@ -30,6 +30,7 @@ class ModelMutaion(NodeMutation):
         options.setdefault('_meta', core.ModelMutationOptions(cls))
         options.setdefault('require', ())
         options.setdefault('exclude', ())
+        options.setdefault('require_mapping', True)
         super().__init_subclass_with_meta__(**options)
 
     @classmethod
@@ -53,7 +54,6 @@ class ModelMutaion(NodeMutation):
     @classmethod
     def _make_model_arguments_fields(cls, **options) -> dict:
         model = options['model']
-        options.setdefault('require_mapping', True)
 
         field_dict = OrderedDict(
             __doc__=f'Mapping data for mutation: {cls.__name__}',
