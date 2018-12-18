@@ -88,21 +88,16 @@ class ModelConnectionField(CustomConnectionResolveMixin, graphene_django.DjangoC
                 f"You must provide a `first` or `last` value "
                 f"to properly paginate the `{info.field_name}` connection.")
 
-        limit_msg = (
-            "Requesting {} records "
-            f"on the `{info.field_name}` connection "
-            f"exceeds the limit of {max_limit} records.")
         if not max_limit:
             pass
         elif first is None and last is None:
             kwargs['first'] = max_limit
-        elif first and last and (abs(first - last) > max_limit):
-            raise ValueError(limit_msg.format(abs(first - last)))
         else:
-            if first > max_limit:
-                raise ValueError(limit_msg.format(first))
-            if last > max_limit:
-                raise ValueError(limit_msg.format(last))
+            count = min(i for i in (first, last) if i)
+            if count > max_limit:
+                raise ValueError(f"Requesting {count} records "
+                                 f"on the `{info.field_name}` connection "
+                                 f"exceeds the limit of {max_limit} records.")
 
         iterable = resolver(root, info, **kwargs)
         on_resolve = partial(cls.resolve_connection,
