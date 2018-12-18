@@ -15,7 +15,6 @@ from graphene_django.forms.converter import convert_form_field
 from graphql import GraphQLError
 
 from . import core
-from ..texttools import snake_case
 from ..types import ModelField, ModelListField
 from .node import NodeMutation, NodeUpdateMutation
 
@@ -27,17 +26,15 @@ class ModelMutaion(NodeMutation):
         abstract = True
 
     @classmethod
-    def _construct_meta(cls, **options) -> core.ModelMutationOptions:
-        model = options['model']  # type: django.db.models.Model
-
+    def __init_subclass_with_meta__(cls, **options):
         options.setdefault('_meta', core.ModelMutationOptions(cls))
-        options.setdefault('node_fieldname', snake_case(model.__name__))
         options.setdefault('require', ())
         options.setdefault('exclude', ())
+        super().__init_subclass_with_meta__(**options)
 
+    @classmethod
+    def _construct_meta(cls, **options) -> core.ModelMutationOptions:
         ret = super()._construct_meta(**options)  # type: core.ModelMutationOptions
-        ret.model = model
-        ret.node_fieldname = options['node_fieldname']
         ret.require = options['require']
         ret.exclude = options['exclude']
         return ret
@@ -239,6 +236,11 @@ class ModelUpdateMutaion(NodeUpdateMutation, ModelMutaion):
 class ModelBulkMutation(ModelMutaion):
     class Meta:
         abstract = True
+
+    @classmethod
+    def __init_subclass_with_meta__(cls, **options):
+        options.setdefault('node_fieldname', 'node_set')
+        super().__init_subclass_with_meta__(**options)
 
     @classmethod
     def _make_payload_fields(cls, **options) -> OrderedDict:

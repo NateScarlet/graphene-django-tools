@@ -39,10 +39,17 @@ class NodeMutation(Mutation):
 
     @classmethod
     def __init_subclass_with_meta__(cls, **options):
+        options.setdefault('_meta', core.NodeMutationOptions(cls))
         options.setdefault('node_fieldname', 'node')
         options.setdefault('interfaces', ())
         options['interfaces'] += (ClientMutationID,)
         super().__init_subclass_with_meta__(**options)
+
+    @classmethod
+    def _construct_meta(cls, **options) -> core.ModelMutationOptions:
+        ret = super()._construct_meta(**options)  # type: core.ModelMutationOptions
+        ret.node_fieldname = options['node_fieldname']
+        return ret
 
     @classmethod
     def _make_arguments_fields(cls, **options) -> dict:

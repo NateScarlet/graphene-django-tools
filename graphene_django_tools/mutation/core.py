@@ -16,6 +16,8 @@ from dataclasses import dataclass
 class NodeMutationOptions(MutationOptions):
     """`Meta` for `NodeMutation`.  """
 
+    node_fieldname = None  # type: str
+
 
 class NodeUpdateMutationOptions(NodeMutationOptions):
     """`Meta` for `NodeUpdateMutation`.  """
@@ -33,7 +35,6 @@ class ModelMutationOptions(NodeMutationOptions):
     """`Meta` for `ModelMutation`.  """
 
     model = None  # type: django.db.models.Model
-    node_fieldname = None  # type: str
     require = ()  # type: tuple[str]
     exclude = ()  # type: tuple[str]
     require_mapping = True
