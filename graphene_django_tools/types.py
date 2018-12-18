@@ -1,11 +1,13 @@
 """Graphene types.  """
 from datetime import timedelta
+from functools import partial
 
 import graphene
 import graphene_django
 import graphene_django.filter
 import isodate
 from graphql.language import ast
+from promise import Promise
 
 from . import core
 
@@ -59,6 +61,57 @@ class ModelConnectionField(CustomConnectionResolveMixin, graphene_django.DjangoC
                           (model.__doc__
                            or f'Connection for database model: {model.__name__}'))
         super().__init__(lambda: core.get_modelnode(model), **kwargs)
+
+    @classmethod
+    def connection_resolver(
+            cls,
+            resolver,
+            connection,
+            default_manager,
+            max_limit,
+            enforce_first_or_last,
+            root,
+            info,
+            **kwargs):
+        # pylint: disable=R0913,W0221
+
+        first = kwargs.get("first")
+        last = kwargs.get("last")
+        if not (first is None or first > 0):
+            raise ValueError(
+                f'`first` argument must be positive, got `{first}`')
+        if not (last is None or last > 0):
+            raise ValueError(
+                f'`last` argument must be positive, got `{last}`')
+        if enforce_first_or_last and not (first or last):
+            raise ValueError(
+                f"You must provide a `first` or `last` value "
+                f"to properly paginate the `{info.field_name}` connection.")
+
+        limit_msg = (
+            "Requesting {} records "
+            f"on the `{info.field_name}` connection "
+            f"exceeds the limit of {max_limit} records.")
+        if not max_limit:
+            pass
+        elif first is None and last is None:
+            kwargs['first'] = max_limit
+        elif first and last and (abs(first - last) > max_limit):
+            raise ValueError(limit_msg.format(abs(first - last)))
+        else:
+            if first > max_limit:
+                raise ValueError(limit_msg.format(first))
+            if last > max_limit:
+                raise ValueError(limit_msg.format(last))
+
+        iterable = resolver(root, info, **kwargs)
+        on_resolve = partial(cls.resolve_connection,
+                             connection, default_manager, kwargs)
+
+        if Promise.is_thenable(iterable):
+            return Promise.resolve(iterable).then(on_resolve)
+
+        return on_resolve(iterable)
 
 
 class ModelFilterConnectionField(CustomConnectionResolveMixin,
