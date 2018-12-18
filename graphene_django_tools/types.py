@@ -123,15 +123,20 @@ class ModelFilterConnectionField(ModelConnectionField):
     merge_querysets = DjangoFilterConnectionField.merge_querysets
     get_resolver = DjangoFilterConnectionField.get_resolver
 
-    def __init__(self, model, **kwargs):
+    def __init__(self, model,
+                 fields=None,
+                 extra_filter_meta=None,
+                 filterset_class=None,
+                 **kwargs):
         kwargs.setdefault('description',
                           (model.__doc__
                            or f'Fitlerable connection for database model: {model.__name__}'))
         self._node_filterset_class = None
-        self._fields = None
-        self._provided_filterset_class = None
+
+        self._fields = fields
+        self._provided_filterset_class = filterset_class
         self._filterset_class = None
-        self._extra_filter_meta = None
+        self._extra_filter_meta = extra_filter_meta
         self._base_args = None
         super().__init__(model, **kwargs)
 
