@@ -104,7 +104,7 @@ class NodeMutation(Mutation):
         elif issubclass(unmounted, graphene.Scalar):
             method = cls._id2node_scalar
         else:
-            raise NotImplementedError(unmounted)
+            return value
 
         return method(context, unmounted, value)
 
@@ -119,8 +119,6 @@ class NodeMutation(Mutation):
             assert isinstance(value, list), type(value)
             ret = [cls._convert_id_field_to_node(
                 context, unmounted, i) for i in value]
-        else:
-            raise NotImplementedError(unmounted)
         return ret
 
     @classmethod
