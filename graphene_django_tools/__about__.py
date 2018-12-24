@@ -1,6 +1,6 @@
 """Tools for use [graphene-django](https://github.com/graphql-python/graphene-django).  """
 
-__version__ = '0.16.1'
+__version__ = '0.16.2'
 __author__ = 'NateScarlet@Gmail.com'
 
 # TODO: Add tests
