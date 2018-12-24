@@ -7,7 +7,10 @@ import django
 import graphene
 from django import forms
 from django.db import models
+from graphene.types.json import JSONString
 from graphene.types.unmountedtype import UnmountedType
+from graphene_django.compat import (ArrayField, HStoreField, JSONField,
+                                    RangeField)
 from graphene_django.forms.converter import convert_form_field
 from graphene_django.registry import Registry
 
@@ -61,7 +64,22 @@ def _(field):
     return graphene.List(graphene.NonNull(graphene.ID), description=getattr(field, 'help_text', ''))
 
 
-@convert_form_field.register(forms.BooleanField)
+@_convert_db_field_to_argument.register(ArrayField)
+@_convert_db_field_to_argument.register(RangeField)
+def _(field):
+    base_type = _convert_db_field_to_argument(field.base_field)
+    if not isinstance(base_type, graphene.NonNull):
+        base_type = graphene.NonNull(base_type)
+    return graphene.List(base_type, description=field.help_text, required=not field.blank)
+
+
+@_convert_db_field_to_argument.register(HStoreField)
+@_convert_db_field_to_argument.register(JSONField)
+def _(field):
+    return JSONString(description=field.help_text, required=not field.blank)
+
+
+@_convert_db_field_to_argument.register(forms.BooleanField)
 def _(field):
     # Default `convert_form_field` always return required field.
     # https://github.com/graphql-python/graphene-django/issues/532
