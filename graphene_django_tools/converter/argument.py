@@ -58,7 +58,7 @@ def _(field):
 @_convert_db_field_to_argument.register(models.ManyToManyRel)
 @_convert_db_field_to_argument.register(models.ManyToOneRel)
 def _(field):
-    return graphene.List(graphene.ID, description=getattr(field, 'help_text', ''))
+    return graphene.List(graphene.NonNull(graphene.ID), description=getattr(field, 'help_text', ''))
 
 
 @convert_form_field.register(forms.BooleanField)
