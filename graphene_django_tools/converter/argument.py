@@ -1,0 +1,71 @@
+"""Convert django field to graphene field for arguments.  """
+
+from functools import singledispatch
+from typing import Optional
+
+import django
+import graphene
+from django import forms
+from django.db import models
+from graphene.types.unmountedtype import UnmountedType
+from graphene_django.forms.converter import convert_form_field
+from graphene_django.registry import Registry
+
+from .enum import construct_enum_from_db_field
+
+
+def convert_db_field_to_argument(
+        field: django.db.models.Field, registry: Optional[Registry] = None) -> UnmountedType:
+    """Convert a django db field to graphene field for argument.
+
+    Args:
+        field (django.db.models.Field): Field
+        registry (Optional[Registry], optional): Defaults to None. Field registry.
+
+    Returns:
+        graphene.types.unmounted.UnmmountedType: Graphene field.
+    """
+
+    if getattr(field, "choices", None):
+        ret = construct_enum_from_db_field(field, registry)
+    else:
+        ret = _convert_db_field_to_argument(field)
+    return ret
+
+
+@singledispatch
+def _convert_db_field_to_argument(field):
+    form_field = field.formfield()
+    if not form_field:
+        return None
+    return convert_form_field(form_field)
+
+
+@_convert_db_field_to_argument.register(models.BooleanField)
+def _(field: models.BooleanField):
+    # pylint: disable=missing-docstring
+    return graphene.Boolean(description=field.help_text, required=True)
+
+
+@_convert_db_field_to_argument.register(models.ForeignKey)
+@_convert_db_field_to_argument.register(models.OneToOneField)
+@_convert_db_field_to_argument.register(models.OneToOneRel)
+def _(field):
+    return graphene.ID(required=not field.null)
+
+
+@_convert_db_field_to_argument.register(models.ManyToManyField)
+@_convert_db_field_to_argument.register(models.ManyToManyRel)
+@_convert_db_field_to_argument.register(models.ManyToOneRel)
+def _(field):
+    return graphene.List(graphene.ID, required=not field.null)
+
+
+@convert_form_field.register(forms.BooleanField)
+def convert_form_field_to_boolean(field):
+    # pylint: disable=missing-docstring
+    # Default `convert_form_field` always return required field.
+    # https://github.com/graphql-python/graphene-django/issues/532
+    return graphene.Boolean(
+        description=field.help_text,
+        required=field.required)

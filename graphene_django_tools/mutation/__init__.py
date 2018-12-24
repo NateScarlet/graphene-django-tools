@@ -7,5 +7,5 @@ from .core import (ModelBulkCreationMutaionContext,
                    NodeMutationContext, NodeUpdateMutationContext)
 from .model import (ModelBulkCreationMutaion, ModelBulkMutation,
                     ModelBulkUpdateMutaion, ModelCreationMutaion, ModelMutaion,
-                    ModelUpdateMutaion)
+                    ModelUpdateMutaion, get_all_fields)
 from .node import NodeDeleteMutation, NodeMutation, NodeUpdateMutation

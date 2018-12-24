@@ -4,19 +4,57 @@
 
 import re
 from collections import OrderedDict
-from typing import Dict, Tuple, Union
+from collections.abc import Callable
+from typing import Dict, Iterable, Tuple
 
 import django
 import graphene
-from django.db import transaction
-from django.db.models.fields.reverse_related import ForeignObjectRel
+from django.db import models, transaction
 from graphene.types.unmountedtype import UnmountedType
-from graphene_django.forms.converter import convert_form_field
+from graphene_django.registry import Registry, get_global_registry
 from graphql import GraphQLError
 
 from . import core
+from ..converter import convert_db_field_to_argument
 from ..types import ModelField, ModelListField
 from .node import NodeMutation, NodeUpdateMutation
+
+
+def get_all_fields(model):
+    """Get all fields from model."""
+
+    # pylint: disable=protected-access
+    meta: django.db.models.options.Options = model._meta
+    return meta.get_fields()
+
+
+def construct_argument_fields(
+        model: models.Model,
+        registry: Registry,
+        include: Iterable[str],
+        require: Iterable[str])-> OrderedDict:
+    """Construct fields for argument.
+
+    Args:
+        model (models.Model): Django db model.
+        registry (Registry): Graphene django registry.
+        include (Iterable[str]): Include field names.
+        require (Iterable[str]): Required(Non-null) fields names.
+
+    Returns:
+        OrderedDict: Fields
+    """
+
+    fields = [i for i in get_all_fields(model) if i.name in include]
+
+    ret = OrderedDict()
+    for i in fields:
+        converted = convert_db_field_to_argument(i, registry)
+        if not converted:
+            continue
+        converted.kwargs['required'] = i.name in require
+        ret[i.name] = converted
+    return ret
 
 
 class ModelMutaion(NodeMutation):
@@ -31,15 +69,18 @@ class ModelMutaion(NodeMutation):
         options.setdefault('require', ())
         options.setdefault('exclude', ())
         options.setdefault('require_mapping', True)
+        options.setdefault('registry', get_global_registry())
+        assert isinstance(options['registry'], Registry)
+        if(not isinstance(options.get('fields'), (Callable, Iterable))):
+            raise ValueError(f'Meta options for `{cls.__name__}` require'
+                             ' `fields` to be either callable or iterable.')
         super().__init_subclass_with_meta__(**options)
 
     @classmethod
     def _construct_meta(cls, **options) -> core.ModelMutationOptions:
         ret = super()._construct_meta(**options)  # type: core.ModelMutationOptions
         ret.model = options['model']
-        ret.require = options['require']
-        ret.exclude = options['exclude']
-        ret.require_mapping = options['require_mapping']
+        ret.registry = options['registry']
         return ret
 
     @classmethod
@@ -58,7 +99,7 @@ class ModelMutaion(NodeMutation):
         field_dict = OrderedDict(
             __doc__=f'Mapping data for mutation: {cls.__name__}',
             Meta=dict())
-        field_dict.update(cls.collect_model_fields(**options))
+        field_dict.update(cls._get_model_input_fields(**options))
         field_objecttype = type(
             re.sub("Mapping$|$", "Mapping", cls.__name__),
             (graphene.InputObjectType,),
@@ -67,30 +108,6 @@ class ModelMutaion(NodeMutation):
                                  description=f'Mapping data for model: {model.__name__}')
 
         return {'mapping': field}
-
-    @classmethod
-    def _convert_db_field(cls, field: django.db.models.Field, **options)\
-            -> Union[UnmountedType, None]:
-        if isinstance(field, ForeignObjectRel):
-            return None
-        if field.name in options['exclude']:
-            return None
-
-        required = field.name in options['require']
-
-        _field = field.formfield(required=required)
-        if not _field:
-            return None
-        ret = convert_form_field(_field)  # pylint:disable=E1111
-
-        # `convert_form_field` always return required field.
-        # https://github.com/graphql-python/graphene-django/issues/532
-        if isinstance(ret, graphene.Boolean):
-            ret = graphene.Boolean(
-                description=field.help_text,
-                required=required)
-
-        return ret
 
     @classmethod
     def _make_payload_fields(cls, **options) -> OrderedDict:
@@ -111,15 +128,29 @@ class ModelMutaion(NodeMutation):
             mapping=None)
 
     @classmethod
-    def collect_model_fields(cls, **options)-> Dict[str, UnmountedType]:
-        """Collect fields from model.  """
+    def _get_model_input_fields(cls, **options)-> Dict[str, UnmountedType]:
 
-        model = options['model']  # type: django.db.models.Model
-        fields = model._meta.get_fields()  # pylint: disable=protected-access
-        ret = {i.name: cls._convert_db_field(i, **options)
-               for i in fields}
+        model = options['model']
+        fields = options['fields']
+        require = options['require']
+        exclude = options['exclude']
+        if callable(fields):
+            fields = fields(model)
+            fields = list(i.name if hasattr(i, 'name') else i
+                          for i in fields)
+        fields = [i for i in fields if i not in exclude]
+        ret = construct_argument_fields(model,
+                                        options['registry'],
+                                        fields,
+                                        require,)
         ret = graphene.types.utils.yank_fields_from_attrs(ret)
         return ret
+
+    @classmethod
+    def _get_model_fields(cls, **options) -> list:
+        model = options['model']  # type: django.db.models.Model
+        fields = options['fields']
+        return (i for i in get_all_fields(model) if i.name in fields)
 
     @classmethod
     def premutate(cls, context: core.ModelMutaionContext):
@@ -160,8 +191,7 @@ class ModelMutaion(NodeMutation):
             Tuple[dict, dict]: normal mapping, many to many mapping
         """
 
-        model_meta = getattr(context.options.model, '_meta')
-        fields = model_meta.get_fields()
+        fields = get_all_fields(context.options.model)
         normal_mapping = dict(mapping)
         m2m_mapping = {}
         for i in fields:
@@ -219,7 +249,8 @@ class ModelUpdateMutaion(NodeUpdateMutation, ModelMutaion):
 
         super().premutate(context)
         if not (isinstance(context.node, context.options.model)
-                or (isinstance(context.node, list) and all(isinstance(i, context.options.model) for i in context.node))):
+                or (isinstance(context.node, list)
+                    and all(isinstance(i, context.options.model) for i in context.node))):
             raise GraphQLError(
                 f'Got a {type(context.node)} node, expected for {context.options.model}')
         context.instance = context.node

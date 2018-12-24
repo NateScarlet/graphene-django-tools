@@ -13,7 +13,7 @@ class UserMutation(gdtools.ModelMutaion):
     """Addtional actions for user.  """
 
     class Meta:
-        model = User
+        abstract = True
 
     @classmethod
     def premutate(cls, context: gdtools.ModelMutaionContext):
@@ -31,6 +31,7 @@ class UserMutation(gdtools.ModelMutaion):
         password = context.mapping.get('password')
         if password:
             context.instance.set_password(password)
+        context.instance.full_clean()
         return super().postmutate(context, payload)
 
 
@@ -39,10 +40,8 @@ class CreateUser(UserMutation, gdtools.ModelCreationMutaion):
 
     class Meta:
         model = User
+        fields = ('username', 'password', 'first_name', 'last_name', 'email')
         require = ('username', 'password')
-        exclude = ('is_staff', 'is_superuser', 'is_active',
-                   'user_permissions', 'groups', 'date_joined',
-                   'last_login')
 
 
 class UpdateUser(UserMutation, gdtools.ModelUpdateMutaion):
@@ -50,7 +49,7 @@ class UpdateUser(UserMutation, gdtools.ModelUpdateMutaion):
 
     class Meta:
         model = User
-        exclude = ('username', 'last_login')
+        fields = ('username', 'password', 'first_name', 'last_name', 'email')
 
 
 class Login(gdtools.NodeMutation):

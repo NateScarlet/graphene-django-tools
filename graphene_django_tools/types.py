@@ -1,4 +1,5 @@
 """Graphene types.  """
+
 from datetime import timedelta
 from functools import partial
 
@@ -43,6 +44,7 @@ class CustomConnectionResolveMixin:
 
     @classmethod
     def connection_resolver(cls, *args, **kwargs):
+        """Resolve connection.  """
         try:
             return super().connection_resolver(*args, **kwargs)
         except:

@@ -12,7 +12,7 @@ from .mutation import (ModelBulkCreationMutaion,
                        ModelUpdateMutaion, Mutation, MutationContext,
                        NodeDeleteMutation, NodeDeleteMutationContext,
                        NodeMutation, NodeMutationContext, NodeUpdateMutation,
-                       NodeUpdateMutationContext)
+                       NodeUpdateMutationContext, get_all_fields)
 from .types import (CountableConnection, Duration, ModelConnectionField,
                     ModelField, ModelFilterConnectionField, ModelListField,
                     ModelNode)

@@ -41,12 +41,14 @@ class GroupNode(DjangoObjectType):
 class CreateGroup(gdtools.ModelCreationMutaion):
     class Meta:
         model = Group
+        fields = gdtools.get_all_fields
         required = ['users']
 
 
 class UpdateGroup(gdtools.ModelUpdateMutaion):
     class Meta:
         model = Group
+        fields = gdtools.get_all_fields
 
 
 class IDInInput(graphene.InputObjectType):
@@ -78,12 +80,14 @@ class NodeEcho(gdtools.NodeUpdateMutation):
 class BulkCreateGroup(gdtools.ModelBulkCreationMutaion):
     class Meta:
         model = Group
+        fields = gdtools.get_all_fields
         required = ['users']
 
 
 class BulkUpdateGroup(gdtools.ModelBulkUpdateMutaion):
     class Meta:
         model = Group
+        fields = gdtools.get_all_fields
 
 
 class DeleteNode(gdtools.NodeDeleteMutation):

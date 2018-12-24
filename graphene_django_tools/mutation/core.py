@@ -35,6 +35,7 @@ class ModelMutationOptions(NodeMutationOptions):
     """`Meta` for `ModelMutation`.  """
 
     model = None  # type: django.db.models.Model
+    fields = ()  # type: Union[Callable, Iterable]
     require = ()  # type: tuple[str]
     exclude = ()  # type: tuple[str]
     require_mapping = True
