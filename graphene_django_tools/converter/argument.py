@@ -43,27 +43,26 @@ def _convert_db_field_to_argument(field):
 
 @_convert_db_field_to_argument.register(models.BooleanField)
 def _(field: models.BooleanField):
-    # pylint: disable=missing-docstring
-    return graphene.Boolean(description=field.help_text, required=True)
+    return graphene.Boolean(description=field.help_text, required=not field.blank)
 
 
 @_convert_db_field_to_argument.register(models.ForeignKey)
 @_convert_db_field_to_argument.register(models.OneToOneField)
 @_convert_db_field_to_argument.register(models.OneToOneRel)
 def _(field):
-    return graphene.ID(required=not field.null)
+    return graphene.ID(description=getattr(field, 'help_text', ''),
+                       required=not getattr(field, 'blank', True))
 
 
 @_convert_db_field_to_argument.register(models.ManyToManyField)
 @_convert_db_field_to_argument.register(models.ManyToManyRel)
 @_convert_db_field_to_argument.register(models.ManyToOneRel)
 def _(field):
-    return graphene.List(graphene.ID, required=not field.null)
+    return graphene.List(graphene.ID, description=getattr(field, 'help_text', ''))
 
 
 @convert_form_field.register(forms.BooleanField)
-def convert_form_field_to_boolean(field):
-    # pylint: disable=missing-docstring
+def _(field):
     # Default `convert_form_field` always return required field.
     # https://github.com/graphql-python/graphene-django/issues/532
     return graphene.Boolean(
