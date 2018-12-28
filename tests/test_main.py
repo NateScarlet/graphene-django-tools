@@ -9,7 +9,7 @@ from django.contrib.auth.password_validation import validate_password
 import graphene_django_tools
 
 
-class UserCreationMutation(graphene_django_tools.DjangoModelCreationMutaion):
+class UserCreationMutation(graphene_django_tools.DjangoModelCreationMutation):
     class Meta:
         model = User
 
@@ -31,7 +31,7 @@ class UserCreationMutation(graphene_django_tools.DjangoModelCreationMutaion):
         return ret
 
 
-class UserUpdateMutation(graphene_django_tools.DjangoModelCreationMutaion):
+class UserUpdateMutation(graphene_django_tools.DjangoModelCreationMutation):
     class Meta:
         model = User
 

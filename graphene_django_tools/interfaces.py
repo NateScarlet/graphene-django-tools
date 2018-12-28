@@ -1,4 +1,4 @@
-"""Mixin for predefined fieldss.  """
+"""Mixin for predefined fields.  """
 
 import graphene
 

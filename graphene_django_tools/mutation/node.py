@@ -1,4 +1,4 @@
-"""Anothor implement for `graphene.relay.mutation.ClientIDMutation`  """
+"""Another implement for `graphene.relay.mutation.ClientIDMutation`  """
 
 import re
 from typing import Type, Union
@@ -77,7 +77,7 @@ class NodeMutation(Mutation):
                                         arguments=arguments)
 
     @classmethod
-    def premutate(cls, context: core.ModelMutaionContext):
+    def premutate(cls, context: core.ModelMutationContext):
         super().premutate(context)
         for k, v in context.arguments.items():
             field = getattr(
@@ -96,7 +96,7 @@ class NodeMutation(Mutation):
         if isinstance(unmounted, graphene.NonNull):
             unmounted = unmounted.of_type
 
-        # XXX: maybe replace this with single dispacth.
+        # XXX: maybe replace this with single dispatch.
         if isinstance(unmounted, graphene.types.unmountedtype.UnmountedType):
             method = cls._id2node_unmmounted_instance
         elif issubclass(unmounted, graphene.InputObjectType):
@@ -205,7 +205,7 @@ class NodeDeleteMutation(NodeUpdateMutation):
         options.setdefault('_meta', core.NodeDeleteMutationOptions(cls))
         if 'allowed_cls' not in options:
             raise KeyError(
-                f'{cls.__name__}: Meta options `allowed_cls` can not be ommitted.')
+                f'{cls.__name__}: Meta options `allowed_cls` can not be omitted.')
 
         ret: core.NodeDeleteMutationOptions = super()._construct_meta(**options)
         ret.allowed_cls = options['allowed_cls']

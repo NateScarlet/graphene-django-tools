@@ -31,7 +31,7 @@ Map the user model with password validation in 40 lines.
 ![](./pic/20181011200840.png)
 ![](./pic/20181012184432.png)
 
-## Reimplemented `Mutation` class
+## Re-implemented `Mutation` class
 
 Supports arguments on interface.
 

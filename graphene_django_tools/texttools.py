@@ -1,4 +1,4 @@
-"""Django grapehe model mutation"""
+"""Django graphene model mutation"""
 
 import re
 

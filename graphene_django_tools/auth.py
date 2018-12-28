@@ -9,14 +9,14 @@ import graphene_django_tools as gdtools
 User = get_user_model()  # pylint: disable=invalid-name
 
 
-class UserMutation(gdtools.ModelMutaion):
-    """Addtional actions for user.  """
+class UserMutation(gdtools.ModelMutation):
+    """Additional actions for user.  """
 
     class Meta:
         abstract = True
 
     @classmethod
-    def premutate(cls, context: gdtools.ModelMutaionContext):
+    def premutate(cls, context: gdtools.ModelMutationContext):
 
         super().premutate(context)
         password = context.mapping.get('password')
@@ -25,7 +25,7 @@ class UserMutation(gdtools.ModelMutaion):
 
     @classmethod
     def postmutate(cls,
-                   context: gdtools.ModelMutaionContext,
+                   context: gdtools.ModelMutationContext,
                    payload: graphene.ObjectType) -> graphene.ObjectType:
 
         password = context.mapping.get('password')
@@ -35,7 +35,7 @@ class UserMutation(gdtools.ModelMutaion):
         return super().postmutate(context, payload)
 
 
-class CreateUser(UserMutation, gdtools.ModelCreationMutaion):
+class CreateUser(UserMutation, gdtools.ModelCreationMutation):
     """Create user.  """
 
     class Meta:
@@ -44,7 +44,7 @@ class CreateUser(UserMutation, gdtools.ModelCreationMutaion):
         require = ('username', 'password')
 
 
-class UpdateUser(UserMutation, gdtools.ModelUpdateMutaion):
+class UpdateUser(UserMutation, gdtools.ModelUpdateMutation):
     """Update user.  """
 
     class Meta:
@@ -62,7 +62,7 @@ class Login(gdtools.NodeMutation):
     user = gdtools.ModelField(User)
 
     @classmethod
-    def mutate(cls, context: gdtools.ModelMutaionContext):
+    def mutate(cls, context: gdtools.ModelMutationContext):
         request = context.info.context
         user = authenticate(**context.arguments)
         if not user:
@@ -75,6 +75,6 @@ class Logout(gdtools.NodeMutation):
     """Logout current user.  """
 
     @classmethod
-    def mutate(cls, context: gdtools.ModelMutaionContext):
+    def mutate(cls, context: gdtools.ModelMutationContext):
         logout(context.info.context)
         return cls()

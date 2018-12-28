@@ -1,5 +1,5 @@
 
-"""Mutatiom base for django model  """
+"""Mutation base for django model  """
 
 
 import re
@@ -57,7 +57,7 @@ def construct_argument_fields(
     return ret
 
 
-class ModelMutaion(NodeMutation):
+class ModelMutation(NodeMutation):
     """Mutate django model.  """
     # pylint: disable=abstract-method
     class Meta:
@@ -119,7 +119,7 @@ class ModelMutaion(NodeMutation):
     @classmethod
     def _make_context(cls, root, info: core.ResolveInfo, **kwargs):
         arguments = kwargs['input']
-        return core.ModelMutaionContext(
+        return core.ModelMutationContext(
             root=root,
             info=info,
             node=None,
@@ -153,20 +153,20 @@ class ModelMutaion(NodeMutation):
         return (i for i in get_all_fields(model) if i.name in fields)
 
     @classmethod
-    def premutate(cls, context: core.ModelMutaionContext):
+    def premutate(cls, context: core.ModelMutationContext):
         super().premutate(context)
         if hasattr(context, 'mapping'):
             context.mapping = context.arguments['mapping']
 
     @classmethod
-    def mutate(cls, context: core.ModelMutaionContext)\
+    def mutate(cls, context: core.ModelMutationContext)\
             -> graphene.ObjectType:
 
         return cls(**{context.options.node_fieldname: context.instance})
 
     @classmethod
     def postmutate(cls,
-                   context: core.ModelMutaionContext,
+                   context: core.ModelMutationContext,
                    payload: graphene.ObjectType) -> graphene.ObjectType:
         ret = super().postmutate(context, payload)
         try:
@@ -177,12 +177,12 @@ class ModelMutaion(NodeMutation):
 
     @classmethod
     def sorted_mapping(cls,
-                       context: core.ModelMutaionContext,
+                       context: core.ModelMutationContext,
                        mapping: dict) -> Tuple[dict, dict]:
         """Get sorted mapping by type.
 
         Args:
-            context (core.ModelMutaionContext): Mutation context
+            context (core.ModelMutationContext): Mutation context
 
         Raises:
             ValueError: Try use auto field in mapping.
@@ -205,21 +205,21 @@ class ModelMutaion(NodeMutation):
         return normal_mapping, m2m_mapping
 
 
-class ModelCreationMutaion(ModelMutaion):
-    """Carete model.  """
+class ModelCreationMutation(ModelMutation):
+    """Create model.  """
 
     class Meta:
         abstract = True
 
     @classmethod
-    def mutate(cls, context: core.ModelMutaionContext)\
+    def mutate(cls, context: core.ModelMutationContext)\
             -> graphene.ObjectType:
         context.instance = cls.create(context, context.mapping)
         return super().mutate(context)
 
     @classmethod
     def create(cls,
-               context: core.ModelMutaionContext,
+               context: core.ModelMutationContext,
                mapping: dict) -> django.db.models.Model:
         """Create instance from mapping.  """
 
@@ -231,7 +231,7 @@ class ModelCreationMutaion(ModelMutaion):
         return instance
 
 
-class ModelUpdateMutaion(NodeUpdateMutation, ModelMutaion):
+class ModelUpdateMutation(NodeUpdateMutation, ModelMutation):
     """Update model.  """
 
     class Meta:
@@ -245,7 +245,7 @@ class ModelUpdateMutaion(NodeUpdateMutation, ModelMutaion):
         return ret
 
     @classmethod
-    def premutate(cls, context: core.ModelMutaionContext):
+    def premutate(cls, context: core.ModelMutationContext):
 
         super().premutate(context)
         if not (isinstance(context.node, context.options.model)
@@ -256,7 +256,7 @@ class ModelUpdateMutaion(NodeUpdateMutation, ModelMutaion):
         context.instance = context.node
 
     @classmethod
-    def mutate(cls, context: core.ModelMutaionContext):
+    def mutate(cls, context: core.ModelMutationContext):
         normal_mapping, m2m_mapping = cls.sorted_mapping(
             context, context.mapping)
         for k, v in normal_mapping.items():
@@ -266,7 +266,7 @@ class ModelUpdateMutaion(NodeUpdateMutation, ModelMutaion):
         return super().mutate(context)
 
 
-class ModelBulkMutation(ModelMutaion):
+class ModelBulkMutation(ModelMutation):
     class Meta:
         abstract = True
 
@@ -284,8 +284,8 @@ class ModelBulkMutation(ModelMutaion):
         return ret
 
 
-class ModelBulkCreationMutaion(ModelCreationMutaion, ModelBulkMutation):
-    """Carete model in bulk.  """
+class ModelBulkCreationMutation(ModelCreationMutation, ModelBulkMutation):
+    """Create model in bulk.  """
 
     class Meta:
         abstract = True
@@ -293,7 +293,7 @@ class ModelBulkCreationMutaion(ModelCreationMutaion, ModelBulkMutation):
     @classmethod
     def _make_context(cls, root, info: core.ResolveInfo, **kwargs):
         arguments = kwargs['input']
-        return core.ModelBulkCreationMutaionContext(
+        return core.ModelBulkCreationMutationContext(
             root=root,
             info=info,
             options=cls._meta,
@@ -301,7 +301,7 @@ class ModelBulkCreationMutaion(ModelCreationMutaion, ModelBulkMutation):
             data=None)
 
     @classmethod
-    def premutate(cls, context: core.ModelBulkCreationMutaionContext):
+    def premutate(cls, context: core.ModelBulkCreationMutationContext):
         super().premutate(context)
         context.data = context.arguments['data']
 
@@ -312,7 +312,7 @@ class ModelBulkCreationMutaion(ModelCreationMutaion, ModelBulkMutation):
         return ret
 
     @classmethod
-    def mutate(cls, context: core.ModelBulkCreationMutaionContext)\
+    def mutate(cls, context: core.ModelBulkCreationMutationContext)\
             -> graphene.ObjectType:
         ret = []
         for i in context.data:
@@ -320,8 +320,8 @@ class ModelBulkCreationMutaion(ModelCreationMutaion, ModelBulkMutation):
         return cls(**{context.options.node_fieldname: ret})
 
 
-class ModelBulkUpdateMutaion(ModelUpdateMutaion, ModelBulkMutation):
-    """Carete model in bulk.  """
+class ModelBulkUpdateMutation(ModelUpdateMutation, ModelBulkMutation):
+    """Create model in bulk.  """
 
     class Meta:
         abstract = True
@@ -334,7 +334,7 @@ class ModelBulkUpdateMutaion(ModelUpdateMutaion, ModelBulkMutation):
         return ret
 
     @classmethod
-    def premutate(cls, context: core.ModelBulkUpdateMutaionContext):
+    def premutate(cls, context: core.ModelBulkUpdateMutationContext):
         super().premutate(context)
         assert isinstance(context.node, list) and all(isinstance(
             i, context.options.model) for i in context.node)
@@ -343,7 +343,7 @@ class ModelBulkUpdateMutaion(ModelUpdateMutaion, ModelBulkMutation):
 
     @classmethod
     @transaction.atomic
-    def mutate(cls, context: core.ModelMutaionContext):
+    def mutate(cls, context: core.ModelMutationContext):
         normal_mapping, m2m_mapping = cls.sorted_mapping(
             context, context.mapping)
         context.query_set.update(**normal_mapping)

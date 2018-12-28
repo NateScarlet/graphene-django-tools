@@ -1,4 +1,4 @@
-"""GrapQl schema.  """
+"""GraphQl schema.  """
 
 import django_filters
 import graphene
@@ -38,14 +38,14 @@ class GroupNode(DjangoObjectType):
     this_list = gdtools.ModelListField(Group)
 
 
-class CreateGroup(gdtools.ModelCreationMutaion):
+class CreateGroup(gdtools.ModelCreationMutation):
     class Meta:
         model = Group
         fields = gdtools.get_all_fields
         required = ['users']
 
 
-class UpdateGroup(gdtools.ModelUpdateMutaion):
+class UpdateGroup(gdtools.ModelUpdateMutation):
     class Meta:
         model = Group
         fields = gdtools.get_all_fields
@@ -77,14 +77,14 @@ class NodeEcho(gdtools.NodeUpdateMutation):
                    input_nodes=input_.get('node_id_list'))
 
 
-class BulkCreateGroup(gdtools.ModelBulkCreationMutaion):
+class BulkCreateGroup(gdtools.ModelBulkCreationMutation):
     class Meta:
         model = Group
         fields = gdtools.get_all_fields
         required = ['users']
 
 
-class BulkUpdateGroup(gdtools.ModelBulkUpdateMutaion):
+class BulkUpdateGroup(gdtools.ModelBulkUpdateMutation):
     class Meta:
         model = Group
         fields = gdtools.get_all_fields

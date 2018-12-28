@@ -1,0 +1,14 @@
+{
+    "version": "0.1",
+    "language": "en",
+    "words": [
+        "functools",
+        "gdtools",
+        "graphene",
+        "graphql",
+        "pylint",
+        "pytest",
+        "Unmmounted"
+    ],
+    "flagWords": []
+}

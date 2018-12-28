@@ -73,7 +73,7 @@ class NodeDeleteMutationContext(MutationContext):
 
 
 @dataclass
-class ModelMutaionContext(NodeMutationContext):
+class ModelMutationContext(NodeMutationContext):
     """Tuple data for model mutation context.  """
 
     mapping: dict
@@ -82,14 +82,14 @@ class ModelMutaionContext(NodeMutationContext):
 
 
 @dataclass
-class ModelBulkCreationMutaionContext(MutationContext):
+class ModelBulkCreationMutationContext(MutationContext):
     """Tuple data for model bulk creation mutation context.  """
 
     data: List[dict]
 
 
 @dataclass
-class ModelBulkUpdateMutaionContext(MutationContext):
+class ModelBulkUpdateMutationContext(MutationContext):
     """Tuple data for model bulk update mutation context.  """
     mapping: dict
     query_set: db.models.QuerySet = None
