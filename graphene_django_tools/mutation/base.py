@@ -1,5 +1,5 @@
 
-"""Anothor implement for `graphene.Mutation`  """
+"""Another implementation for `graphene.Mutation`  """
 
 import re
 from collections import OrderedDict
@@ -68,14 +68,14 @@ class Mutation(graphene.ObjectType):
         options.setdefault('interfaces', ())
         options.setdefault('arguments', {})
 
-        def _get_aguments(interface):
+        def _get_arguments(interface):
             if hasattr(interface, 'Arguments'):
                 return props(getattr(interface, 'Arguments'))
             return {}
 
         ret = options['arguments']
         for i in options['interfaces'] + (cls,):
-            ret.update(_get_aguments(i))
+            ret.update(_get_arguments(i))
         return ret
 
     @classmethod
@@ -136,7 +136,7 @@ class Mutation(graphene.ObjectType):
 
     @classmethod
     def Field(cls, **kwargs) -> graphene.Field:
-        """Create graphene Feild for the mutation.  """
+        """Create graphene Field for the mutation.  """
         # pylint: disable=invalid-name
         assert issubclass(cls._meta.output, graphene.ObjectType), type(
             cls._meta.output)
