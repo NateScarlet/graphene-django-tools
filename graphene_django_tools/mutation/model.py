@@ -321,7 +321,7 @@ class ModelBulkCreationMutation(ModelCreationMutation, ModelBulkMutation):
 
 
 class ModelBulkUpdateMutation(ModelUpdateMutation, ModelBulkMutation):
-    """Create model in bulk.  """
+    """Update model in bulk.  """
 
     class Meta:
         abstract = True
