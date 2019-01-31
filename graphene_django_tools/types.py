@@ -127,7 +127,7 @@ class ModelFilterConnectionField(ModelConnectionField):
                  **kwargs):
         kwargs.setdefault('description',
                           (model.__doc__
-                           or f'Fitlerable connection for database model: {model.__name__}'))
+                           or f'Filterable connection for database model: {model.__name__}'))
         self._node_filterset_class = None
 
         self._fields = fields
