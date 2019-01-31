@@ -2,6 +2,10 @@ Tools for use [`graphene-django`](https://github.com/graphql-python/graphene-dja
 
 Only support python3.7
 
+# Install
+
+`pip install graphene-django-tools`
+
 # MainFeature
 
 ## Query
