@@ -5,6 +5,7 @@ from graphql.execution.base import ResolveInfo
 
 from . import interfaces, utils
 from .core import create_modelnode, get_modelnode, get_node_id
+from .dataloader import DataLoaderModelFilterConnectionField
 from .mutation import (ModelBulkCreationMutation,
                        ModelBulkCreationMutationContext, ModelBulkMutation,
                        ModelBulkUpdateMutation, ModelBulkUpdateMutationContext,
