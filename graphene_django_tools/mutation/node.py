@@ -7,6 +7,7 @@ import graphene
 from graphql import GraphQLError
 
 from . import core
+from ..core import get_unmounted_type
 from ..interfaces import ClientMutationID
 from .base import Mutation
 
@@ -91,10 +92,7 @@ class NodeMutation(Mutation):
                                   field,
                                   value):
 
-        unmounted = field.type if isinstance(
-            field, graphene.types.mountedtype.MountedType) else field
-        if isinstance(unmounted, graphene.NonNull):
-            unmounted = unmounted.of_type
+        unmounted = get_unmounted_type(field)
 
         # XXX: maybe replace this with single dispatch.
         if isinstance(unmounted, graphene.types.unmountedtype.UnmountedType):

@@ -1,10 +1,12 @@
 """Addtional tools for `graphene_django`.  """
 import sys
-from typing import Type
+from typing import Type, Union
 
 import django
 import graphene
 import graphene_django
+from graphene.types.mountedtype import MountedType
+from graphene.types.unmountedtype import UnmountedType
 from graphene_django.registry import get_global_registry
 from graphql import GraphQLError
 
@@ -83,3 +85,19 @@ def get_node_id(instance: django.db.models.Model) -> str:
     assert isinstance(instance, django.db.models.Model), type(instance)
     modelnode = get_modelnode(instance.__class__, is_autocreate=False)
     return graphene.Node.to_global_id(modelnode.__name__, instance.pk)
+
+
+def get_unmounted_type(obj: Union[MountedType, UnmountedType]) -> UnmountedType:
+    """Get unmounted type of given object object.  
+
+    Args:
+        obj (Union[MountedType, UnmountedType]): Graphene object
+
+    Returns:
+        UnmountedType
+    """
+
+    unmounted = obj.type if isinstance(MountedType) else obj
+    if isinstance(unmounted, graphene.NonNull):
+        unmounted = unmounted.of_type
+    return unmounted
