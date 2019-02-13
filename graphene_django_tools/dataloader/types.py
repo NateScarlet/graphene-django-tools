@@ -9,12 +9,11 @@ from graphql.execution.base import ResolveInfo
 from graphql_relay.connection.arrayconnection import connection_from_list_slice
 from promise import Promise
 
-from ..types import ModelFilterConnectionField
+from ..types import (ModelConnectionField, ModelField,
+                     ModelFilterConnectionField, ModelListField)
 
 
-class DataLoaderModelFilterConnectionField(ModelFilterConnectionField):
-    """Model filter connection field with data loader support.  """
-
+class DataLoaderModelConnectionMixin:
     @classmethod
     def resolve_connection(cls, connection, default_manager, args, iterable):
         def construct_connection(iterable):
@@ -42,7 +41,7 @@ class DataLoaderModelFilterConnectionField(ModelFilterConnectionField):
         if isinstance(iterable, models.QuerySet) and iterable is not default_manager:
             default_queryset = maybe_queryset(default_manager)
             iterable = cls.merge_querysets(default_queryset, iterable)
-        if info:
+        if info and hasattr(info.context, 'get_data_loader'):
             iterable = (info
                         .context
                         .get_data_loader(default_manager
@@ -53,19 +52,28 @@ class DataLoaderModelFilterConnectionField(ModelFilterConnectionField):
             return Promise.resolve(iterable).then(construct_connection)
         return construct_connection(iterable)
 
+
+def get_resolver_with_info(parent_resolver):
+
+    def resolver(parent, info: ResolveInfo, **kwargs):
+        ret = parent_resolver(parent, info, **kwargs)
+        try:
+            ret.info = info
+        except AttributeError:
+            # `ret` may be None
+            pass
+        return ret
+    return resolver
+
+
+class DataLoaderModelFilterConnectionField(DataLoaderModelConnectionMixin, ModelFilterConnectionField):
+    """Model filter connection field with data loader support.  """
+
     def get_resolver(self, parent_resolver):
-        def resolver(parent, info: ResolveInfo, **kwargs):
-            ret = parent_resolver(parent, info, **kwargs)
-            try:
-                ret.info = info
-            except AttributeError:
-                # `ret` may be None
-                pass
-            return ret
 
         return partial(
             self.connection_resolver,
-            resolver,
+            get_resolver_with_info(parent_resolver),
             self.type,
             self.get_manager(),
             self.max_limit,
@@ -73,3 +81,48 @@ class DataLoaderModelFilterConnectionField(ModelFilterConnectionField):
             self.filterset_class,
             self.filtering_args
         )
+
+
+class DataLoaderModelConnectionField(DataLoaderModelConnectionMixin, ModelConnectionField):
+    """Model connection field with data loader support.  """
+
+    def get_resolver(self, parent_resolver):
+        return partial(
+            self.connection_resolver,
+            get_resolver_with_info(parent_resolver),
+            self.type,
+            self.get_manager(),
+            self.max_limit,
+            self.enforce_first_or_last,
+        )
+
+
+class DataLoaderModelListField(ModelListField):
+    """Model list field with data loader support.  """
+
+    def get_resolver(self, parent_resolver):
+        return partial(self.resolve, parent_resolver)
+
+    def resolve(self, resolver, root, info: ResolveInfo, **kwargs):
+        iterable = maybe_queryset(resolver(root, info, **kwargs))
+        if isinstance(iterable, models.QuerySet) and hasattr(info.context, 'get_data_loader'):
+            iterable = (info
+                        .context
+                        .get_data_loader(self.model)
+                        .load_many(iterable
+                                   .values_list('pk', flat=True)))
+        return iterable
+
+
+class DataLoaderModelField(ModelField):
+    def get_resolver(self, parent_resolver):
+        return partial(self.resolve, parent_resolver)
+
+    def resolve(self, resolver, root, info: ResolveInfo, **kwargs):
+        ret = resolver(root, info, **kwargs)
+        if hasattr(info.context, 'get_data_loader'):
+            ret = (info
+                   .context
+                   .get_data_loader(self.model)
+                   .load(ret.pk))
+        return ret

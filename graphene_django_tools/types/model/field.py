@@ -21,9 +21,10 @@ class ModelField(graphene.Field):
                           (model.__doc__
                            or f'Node for database model: {model.__name__}'))
         super().__init__(lambda: core.get_modelnode(model), **kwargs)
+        self.model = model
 
 
-class ModelListField(graphene.List):
+class ModelListField(graphene_django.fields.DjangoListField):
     """`List` field for model.
 
     Use `create_nodemodel` first if you want customize the node.

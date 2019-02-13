@@ -1,4 +1,4 @@
-"""Graphene types for model.  """
+"""Graphene types.  """
 
 import graphene_django
 

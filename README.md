@@ -1,14 +1,16 @@
+# Graphene django tools
+
 Tools for use [`graphene-django`](https://github.com/graphql-python/graphene-django)
 
 Only support python3.7
 
-# Install
+## Install
 
 `pip install graphene-django-tools`
 
-# MainFeature
+## MainFeature
 
-## Query
+### Query
 
 - `ModelField`
 - `ModelConnectionField`
@@ -21,7 +23,7 @@ Map the user model with filter in 10 lines.
 ![](./pic/20181012161945.png)
 ![](./pic/20181012162201.png)
 
-## Mutation
+### Mutation
 
 - `ModelMutation`
 - `ModelCreateMutation`
@@ -35,7 +37,7 @@ Map the user model with password validation in 40 lines.
 ![](./pic/20181011200840.png)
 ![](./pic/20181012184432.png)
 
-## Re-implemented `Mutation` class
+### Re-implemented `Mutation` class
 
 Supports arguments on interface.
 
@@ -48,3 +50,7 @@ class ClientMutationID(graphene.Interface):
 
     client_mutation_id = graphene.String()
 ```
+
+### Data loader integrate
+
+Enable by add `'graphene_django_tools.dataloader.middleware.DataLoaderMiddleware'` to your django settings `GRAPHENE['MIDDLEWARE']`

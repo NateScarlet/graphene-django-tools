@@ -280,7 +280,7 @@ class ModelBulkMutation(ModelMutation):
         model = options['model']  # type: django.db.models.Model
         ret = super()._make_payload_fields(**options)
         node_fieldname = options['node_fieldname']
-        ret[node_fieldname] = ModelListField(model).Field()
+        ret[node_fieldname] = ModelListField(model)
         return ret
 
 
