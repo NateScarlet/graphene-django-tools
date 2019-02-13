@@ -115,12 +115,14 @@ class DataLoaderModelListField(ModelListField):
 
 
 class DataLoaderModelField(ModelField):
+    """Model field with data loader support.  """
+
     def get_resolver(self, parent_resolver):
         return partial(self.resolve, parent_resolver)
 
     def resolve(self, resolver, root, info: ResolveInfo, **kwargs):
         ret = resolver(root, info, **kwargs)
-        if hasattr(info.context, 'get_data_loader'):
+        if isinstance(ret, self.model) and hasattr(info.context, 'get_data_loader'):
             ret = (info
                    .context
                    .get_data_loader(self.model)
