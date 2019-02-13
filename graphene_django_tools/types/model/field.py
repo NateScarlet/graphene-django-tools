@@ -1,16 +1,13 @@
 """Graphene types.  """
-
-from datetime import timedelta
 from functools import partial
 
 import graphene
 import graphene_django
-import isodate
 from graphene_django.filter import DjangoFilterConnectionField
-from graphql.language import ast
 from promise import Promise
 
-from . import core
+from ... import core
+from ..mixin import CustomConnectionResolveMixin
 
 
 class ModelField(graphene.Field):
@@ -37,19 +34,6 @@ class ModelListField(graphene.List):
                           (model.__doc__
                            or f'Node list for database model: {model.__name__}'))
         super().__init__(lambda: core.get_modelnode(model), **kwargs)
-
-
-class CustomConnectionResolveMixin:
-    """Print traceback when encountered a error"""
-
-    @classmethod
-    def connection_resolver(cls, *args, **kwargs):
-        """Resolve connection.  """
-        try:
-            return super().connection_resolver(*args, **kwargs)
-        except:
-            core.handle_resolve_error()
-            raise
 
 
 class ModelConnectionField(CustomConnectionResolveMixin, graphene_django.DjangoConnectionField):
@@ -179,86 +163,3 @@ class ModelFilterConnectionField(ModelConnectionField):
             root,
             info,
             **kwargs)
-
-
-class Duration(graphene.Scalar):
-    """Duration in ISO-8601 format.  """
-
-    @staticmethod
-    def serialize(duration: timedelta):
-        """Serialize python object.
-
-        Args:
-            duration (timedelta): Duration
-
-        Returns:
-            str
-        """
-
-        return isodate.duration_isoformat(duration)
-
-    @classmethod
-    def parse_literal(cls, node):
-        """Parse ast node.
-
-        Args:
-            node: AST node
-
-        Returns:
-            timedelta | None
-        """
-
-        if isinstance(node, ast.StringValue):
-            return cls.parse_value(node.value)
-        return None
-
-    @staticmethod
-    def parse_value(value):
-        """Parse str to python object.
-
-        Args:
-            value (str): Value
-
-        Returns:
-            timedelta | None
-        """
-
-        try:
-            return isodate.parse_duration(value)
-        except ValueError:
-            return None
-
-
-class CountableConnection(graphene.relay.Connection):
-    """Extended connection with total count.  """
-
-    class Meta:
-        abstract = True
-
-    total = graphene.Int()
-
-    @staticmethod
-    def resolve_total(root, _info):
-        return root.length
-
-
-class ModelNodeOptions(graphene_django.types.DjangoObjectTypeOptions):
-    """Extended DjangoObjectTypeOptions for `ModelNode`.  """
-
-    filterset_class = None
-
-
-class ModelNode(graphene_django.DjangoObjectType):
-    class Meta:
-        abstract = True
-
-    @classmethod
-    def __init_subclass_with_meta__(
-            cls,
-            filterset_class=None,
-            **options):
-        # pylint: disable=W0221
-        _meta = options.get('_meta', ModelNodeOptions(cls))
-        _meta.filterset_class = filterset_class
-        options['_meta'] = _meta
-        super().__init_subclass_with_meta__(**options)
