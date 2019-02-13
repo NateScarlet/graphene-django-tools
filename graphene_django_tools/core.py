@@ -97,7 +97,7 @@ def get_unmounted_type(obj: Union[MountedType, UnmountedType]) -> UnmountedType:
         UnmountedType
     """
 
-    unmounted = obj.type if isinstance(MountedType) else obj
+    unmounted = obj.type if isinstance(obj, MountedType) else obj
     if isinstance(unmounted, graphene.NonNull):
         unmounted = unmounted.of_type
     return unmounted
