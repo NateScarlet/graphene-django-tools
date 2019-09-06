@@ -64,7 +64,7 @@ class Login(gdtools.NodeMutation):
     @classmethod
     def mutate(cls, context: gdtools.ModelMutationContext):
         request = context.info.context
-        user = authenticate(**context.arguments)
+        user = authenticate(request, **context.arguments)
         if not user:
             raise ValueError('Login failed.')
         login(request, user)
