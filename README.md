@@ -16,7 +16,7 @@ Only support python3.7
 - `ModelConnectionField`
 - `ModelFilterConnectionField`
 
-[example schema](./test_site/api/schema.py)
+[example schema](./example/api/schema.py)
 
 Map the user model with filter in 10 lines.
 
