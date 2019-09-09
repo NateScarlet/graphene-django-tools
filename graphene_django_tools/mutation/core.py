@@ -1,28 +1,31 @@
 """Mutation tools. """
 
 from collections import OrderedDict
-from typing import Any, List
+from dataclasses import dataclass
+from typing import (TYPE_CHECKING, Any, Callable, Iterable, List, Optional,
+                    Union)
 
 import graphene
 from django import db
 from graphene.types.mutation import MutationOptions
 from graphql.execution.base import ResolveInfo
 
-from dataclasses import dataclass
-
 # pylint: disable=too-few-public-methods
+
+if TYPE_CHECKING:
+    import django
 
 
 class NodeMutationOptions(MutationOptions):
     """`Meta` for `NodeMutation`.  """
 
-    node_fieldname = None  # type: str
+    node_fieldname = None  # type: Optional[str]
 
 
 class NodeUpdateMutationOptions(NodeMutationOptions):
     """`Meta` for `NodeUpdateMutation`.  """
 
-    id_fieldname = None  # type: str
+    id_fieldname = None  # type: Optional[str]
 
 
 class NodeDeleteMutationOptions(NodeUpdateMutationOptions):
@@ -49,7 +52,7 @@ class ModelUpdateMutationOptions(NodeUpdateMutationOptions, ModelMutationOptions
 class MutationContext:
     """Tuple data for mutation context.  """
 
-    root: Any  # XXX: Not found documentation for this.
+    root: Any  # parent node for this context.
     info: ResolveInfo
     options: MutationOptions
     arguments: dict
@@ -77,8 +80,8 @@ class ModelMutationContext(NodeMutationContext):
     """Tuple data for model mutation context.  """
 
     mapping: dict
-    instance: graphene.ObjectType = None
     options: ModelMutationOptions
+    instance: graphene.ObjectType = None
 
 
 @dataclass
@@ -95,5 +98,5 @@ class ModelBulkUpdateMutationContext(MutationContext):
     query_set: db.models.QuerySet = None
 
 
-def _sorted_dict(obj: dict, key=None, reverse=False)->OrderedDict:
+def _sorted_dict(obj: dict, key=None, reverse=False) -> OrderedDict:
     return OrderedDict(sorted(obj.items(), key=key, reverse=reverse))

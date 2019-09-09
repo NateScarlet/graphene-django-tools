@@ -13,7 +13,7 @@ from .base import Mutation
 
 
 def try_get_node(info: core.ResolveInfo, global_id: str, only_type: Type = False) \
-        ->Union[graphene.Node, str]:
+        -> Union[graphene.Node, str]:
     """Fallback to global_id when `graphene.Node.get_node_from_global_id`
         failed.
 
@@ -37,6 +37,8 @@ class NodeMutation(Mutation):
 
     class Meta:
         abstract = True
+
+    _meta: core.NodeMutationOptions
 
     @classmethod
     def __init_subclass_with_meta__(cls, **options):
