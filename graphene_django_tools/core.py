@@ -1,4 +1,4 @@
-"""Addtional tools for `graphene_django`.  """
+"""Additional tools for `graphene_django`.  """
 import sys
 from typing import Type, Union
 
