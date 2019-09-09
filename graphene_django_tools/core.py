@@ -64,6 +64,8 @@ def handle_resolve_error():
     """Detail message for `graphql.error.located_error.GraphQLLocatedError`.  """
 
     type_, value, _ = sys.exc_info()
+    if value is None:
+        return
     if not isinstance(value, GraphQLError):
         import traceback
         traceback.print_exc()
