@@ -13,9 +13,10 @@ def camel_case(text: str, is_lower=False) -> str:
         str
     """
 
-    components = text.split('_')
-    first = components[0].lower() if is_lower else components[0].title()
-    return first + ''.join(x.title() for x in components[1:])
+    ret = ''.join(x[0].title() + x[1:] for x in text.split('_'))
+    if is_lower:
+        ret = ret[0].lower() + ret[1:]
+    return ret
 
 
 def snake_case(text: str) -> str:

@@ -20,3 +20,4 @@ from .mutation import (ModelBulkCreationMutation,
 from .types import (CountableConnection, Duration, ModelConnectionField,
                     ModelField, ModelFilterConnectionField, ModelListField,
                     ModelNode)
+from .resolver import Resolver

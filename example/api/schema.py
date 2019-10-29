@@ -95,6 +95,78 @@ class DeleteNode(gdtools.NodeDeleteMutation):
         allowed_cls = (Group,)
 
 
+class Resolver(gdtools.Resolver):
+    schema = {
+        "args": {
+            "key": str,
+            "value": str,
+        },
+        "type": int,
+        "description": "created from `Resolver`."
+    }
+
+    def resolve(self, **kwargs):
+        print({"kwargs": kwargs})
+        return 42
+
+
+class FooResolver(gdtools.Resolver):
+    schema = int
+
+    def resolve(self, **kwargs):
+        print({"parent": self.parent})
+        return self.parent['bar']
+
+
+class BarResolver(gdtools.Resolver):
+    schema = {
+        "args": {
+            "bar": int
+        },
+        "type": {
+            "foo": FooResolver
+        },
+    }
+
+    def resolve(self, **kwargs):
+        return kwargs
+
+
+class ComplicatedResolver(gdtools.Resolver):
+    _input_schema = {
+        "type": {"type": str},
+        "data": [
+            {
+                "type":
+                {
+                    "key": {
+                        "type": str,
+                        "required": True,
+                        "description": "<description>",
+                    },
+                    "value": int,
+                    "extra": {
+                        "type": [str],
+                        "deprecation_reason": "<deprecated>"
+                    },
+                },
+                "required": True
+            },
+        ],
+    }
+    schema = {
+        "args": {
+            "input": _input_schema
+        },
+        "type": _input_schema,
+        "description": "description",
+        "deprecation_reason": None
+    }
+
+    def resolve(self, **kwargs):
+        return kwargs['input']
+
+
 class Mutation(graphene.ObjectType):
     """Mutation """
 
@@ -108,6 +180,7 @@ class Mutation(graphene.ObjectType):
     update_group = UpdateGroup.Field()
     bulk_create_group = BulkCreateGroup.Field()
     bulk_update_group = BulkUpdateGroup.Field()
+    mutation_resolver = Resolver.as_field()
 
 
 class Query(graphene.ObjectType):
@@ -131,6 +204,10 @@ class Query(graphene.ObjectType):
         ret.this = ret
         ret.this_list = [ret]
         return ret
+
+    query_resolver = Resolver.as_field()
+    nested_resolver = BarResolver.as_field()
+    complicated_resolver = ComplicatedResolver.as_field()
 
 
 SCHEMA = graphene.Schema(
