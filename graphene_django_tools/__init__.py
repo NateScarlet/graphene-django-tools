@@ -21,3 +21,4 @@ from .types import (CountableConnection, Duration, ModelConnectionField,
                     ModelField, ModelFilterConnectionField, ModelListField,
                     ModelNode)
 from .resolver import Resolver
+from .utils import ID, convert_id
