@@ -27,6 +27,13 @@ TYPE_ALIAS = {
     graphene.List: list,
     graphene.ObjectType: dict,
     graphene.InputObjectType: dict,
+    'ID': graphene.ID,
+    'Bool': graphene.Boolean,
+    'String': graphene.String,
+    'Int': graphene.Int,
+    'Float': graphene.Float,
+    'Duration': types.Duration,
+    'Date': graphene.DateTime,
 }
 
 
@@ -62,29 +69,32 @@ class FieldDefinition:
             and 'type' in v
             and not (
                 isinstance(v['type'], typing.Mapping)
-                and isinstance(v['type'].get('type'), type)))
+                and isinstance(v['type'].get('type'), (type, str))))
 
+        type_def = v
         if is_full_config:
             config.update(**v)
-            if isinstance(v.get('type'), typing.Mapping):
-                config['type'] = dict
-                child_definition = v['type']
-            elif isinstance(v.get('type'), typing.Iterable):
-                config['type'] = list
-                child_definition = v['type'][0]
-        elif isinstance(v, typing.Mapping):
+            type_def = v['type']
+
+        if isinstance(type_def, str):
+            if type_def[-1] == '!':
+                config.setdefault('required', True)
+                type_def = type_def[:-1]
+            config['type'] = TYPE_ALIAS[type_def]
+        elif isinstance(type_def, typing.Mapping):
             config['type'] = dict
-            child_definition = v
-        elif isinstance(v, typing.Iterable):
+            child_definition = type_def
+        elif isinstance(type_def, typing.Iterable):
             config['type'] = list
-            child_definition = v[0]
+            child_definition = type_def[0]
         else:
-            config['type'] = v
+            config['type'] = type_def
+
+        config['type'] = TYPE_ALIAS.get(config['type'], config['type'])
         if not isinstance(config['type'], type):
             raise SyntaxError(
                 f'Invalid schema: can not find type field from: {v}')
         config['type'] = core.get_unmounted_type(config['type'])
-        config['type'] = TYPE_ALIAS.get(config['type'], config['type'])
 
         config.setdefault('args', None)
         config.setdefault('required', False)
@@ -124,7 +134,7 @@ class FieldDefinition:
         kwargs.setdefault('required', self.required)
         kwargs.setdefault('description', self.description)
         kwargs.setdefault('deprecation_reason', self.deprecation_reason)
-        if (issubclass(self.type, resolver.Resolver)):
+        if issubclass(self.type, resolver.Resolver):
             field = self.type.as_field()
             kwargs['type'] = core.get_unmounted_type(field)
             kwargs.setdefault('args', field.args)

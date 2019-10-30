@@ -101,7 +101,7 @@ class Resolver(gdtools.Resolver):
             "key": str,
             "value": str,
         },
-        "type": int,
+        "type": 'Int!',
         "description": "created from `Resolver`."
     }
 
@@ -146,7 +146,7 @@ class ComplicatedResolver(gdtools.Resolver):
                     },
                     "value": int,
                     "extra": {
-                        "type": [str],
+                        "type": ['String!'],
                         "deprecation_reason": "<deprecated>"
                     },
                 },

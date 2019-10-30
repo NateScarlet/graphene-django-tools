@@ -91,8 +91,19 @@ Nested resolver:
   class Query(graphene.ObjectType):
       nested_resolver = BarResolver.as_field()
 
+Use gdl type name for built in type:
 
-Full example:
+.. code:: python
+
+  import graphene_django_tools as gdtools
+
+  class FooResolver(gdtools.Resolver):
+      schema = 'Int!'
+
+      def resolve(self, **kwargs):
+          return 42
+
+More complicated example:
 
 .. code:: python
 
@@ -113,7 +124,7 @@ Full example:
                       },
                       "value": int,
                       "extra": {
-                          "type": [str],
+                          "type": ['String!'],
                           "deprecation_reason": "<deprecated>"
                       },
                   },
