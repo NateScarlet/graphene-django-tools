@@ -7,7 +7,10 @@ import datetime
 import decimal
 import typing
 
+import django.db.models
 import graphene
+import graphene_django.converter
+import graphene_django.registry
 
 from .. import core, types
 
@@ -70,13 +73,17 @@ class FieldDefinition:
             and 'type' in v
             and not (
                 isinstance(v['type'], typing.Mapping)
-                and isinstance(v['type'].get('type'), (type, str))))
+                and isinstance(v['type'].get('type'), (type, str, django.db.models.Field))))
 
         type_def = v
         if is_full_config:
             config.update(**v)
             type_def = v['type']
-        if isinstance(type_def, str):
+        if isinstance(type_def, django.db.models.Field):
+            config['type'] = graphene_django.converter.convert_django_field_with_choices(
+                type_def,
+                registry=graphene_django.registry.get_global_registry()).__class__
+        elif isinstance(type_def, str):
             if type_def[-1] == '!':
                 config.setdefault('required', True)
                 type_def = type_def[:-1]

@@ -128,6 +128,33 @@ Use enum:
       def resolve(self, **kwargs):
           return kwargs['value']
 
+Use field from django model(mainly for enum):
+
+.. code:: python
+
+  import graphene
+  import graphene_django_tools as gdtools
+  from django.db import models
+
+  class Task(models.Model):
+      state = models.CharField('state',
+                              max_length=2,
+                              choices=(
+                                  ('A', 'A state'),
+                                  ('B', 'B state'),
+                              ))
+
+  class ModelFieldResolver(gdtools.Resolver):
+      schema = {
+          'args': {
+              'value': models.Task._meta.get_field('state')
+          },
+          'type': models.Task._meta.get_field('state')
+      }
+
+      def resolve(self, **kwargs):
+          return kwargs['value']
+
 More complicated example:
 
 .. code:: python

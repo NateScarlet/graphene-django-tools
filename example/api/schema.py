@@ -9,6 +9,8 @@ from graphene_django import DjangoObjectType
 import graphene_django_tools as gdtools
 from graphene_django_tools import auth
 
+from . import models
+
 
 class UserFilterSet(django_filters.FilterSet):
     order_by = django_filters.OrderingFilter(
@@ -151,6 +153,18 @@ class EnumResolver(gdtools.Resolver):
         return kwargs['value']
 
 
+class ModelFieldResolver(gdtools.Resolver):
+    schema = {
+        'args': {
+            'value': models.Task._meta.get_field('state')
+        },
+        'type': models.Task._meta.get_field('state')
+    }
+
+    def resolve(self, **kwargs):
+        return kwargs['value']
+
+
 class ComplicatedResolver(gdtools.Resolver):
     _input_schema = {
         "type": {"type": str},
@@ -228,6 +242,7 @@ class Query(graphene.ObjectType):
     nested_resolver = BarResolver.as_field()
     complicated_resolver = ComplicatedResolver.as_field()
     enum_resolver = EnumResolver.as_field()
+    model_field_resolver = ModelFieldResolver.as_field()
 
 
 SCHEMA = graphene.Schema(
