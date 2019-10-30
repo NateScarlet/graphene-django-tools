@@ -63,6 +63,10 @@ class FieldDefinition:
         """
 
         config = {}
+        config.setdefault('args', None)
+        config.setdefault('required', False)
+        config.setdefault('description', None)
+        config.setdefault('deprecation_reason', None)
         child_definition = None
         is_full_config = (
             isinstance(v, typing.Mapping)
@@ -75,7 +79,6 @@ class FieldDefinition:
         if is_full_config:
             config.update(**v)
             type_def = v['type']
-
         if isinstance(type_def, str):
             if type_def[-1] == '!':
                 config.setdefault('required', True)
@@ -89,17 +92,13 @@ class FieldDefinition:
             child_definition = type_def[0]
         else:
             config['type'] = type_def
-
         config['type'] = TYPE_ALIAS.get(config['type'], config['type'])
         if not isinstance(config['type'], type):
             raise SyntaxError(
                 f'Invalid schema: can not find type field from: {v}')
-        config['type'] = core.get_unmounted_type(config['type'])
-
-        config.setdefault('args', None)
-        config.setdefault('required', False)
-        config.setdefault('description', None)
-        config.setdefault('deprecation_reason', None)
+        if isinstance(config['type'], graphene.types.mountedtype.MountedType):
+            mounted = config['type']
+            config['type'] = core.get_unmounted_type(mounted)
 
         return cls(
             type=config['type'],
@@ -141,5 +140,4 @@ class FieldDefinition:
             kwargs.setdefault('resolver', field.resolver)
             kwargs.setdefault('description', field.description)
             kwargs.setdefault('deprecation_reason', field.deprecation_reason)
-
         return graphene.Field(**kwargs)
