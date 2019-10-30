@@ -103,6 +103,31 @@ Use gdl type name for built in type:
       def resolve(self, **kwargs):
           return 42
 
+Use enum:
+
+.. code:: python
+
+  import graphene
+  import graphene_django_tools as gdtools
+
+  class State(graphene.Enum):
+      A = 1
+
+
+  class EnumResolver(gdtools.Resolver):
+      schema = {
+          'args': {
+              'value': {
+                  'type': State,
+                  'required': True
+              },
+          },
+          'type': State
+      }
+
+      def resolve(self, **kwargs):
+          return kwargs['value']
+
 More complicated example:
 
 .. code:: python

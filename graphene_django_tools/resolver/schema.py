@@ -1,12 +1,10 @@
 # -*- coding=UTF-8 -*-
 """Mongoose-like schema.  """
-# TODO: support enum
 
 from __future__ import annotations
 import dataclasses
 import datetime
 import decimal
-import enum
 import typing
 
 import graphene
@@ -18,7 +16,6 @@ TYPE_ALIAS = {
     int: graphene.Int,
     float: graphene.Float,
     bool: graphene.Boolean,
-    enum.Enum: graphene.Enum,
     decimal.Decimal: graphene.Decimal,
     datetime.time: graphene.Time,
     datetime.date: graphene.Date,

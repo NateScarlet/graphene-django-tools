@@ -132,6 +132,25 @@ class BarResolver(gdtools.Resolver):
         return kwargs
 
 
+class State(graphene.Enum):
+    A = 1
+
+
+class EnumResolver(gdtools.Resolver):
+    schema = {
+        'args': {
+            'value': {
+                'type': State,
+                'required': True
+            },
+        },
+        'type': State
+    }
+
+    def resolve(self, **kwargs):
+        return kwargs['value']
+
+
 class ComplicatedResolver(gdtools.Resolver):
     _input_schema = {
         "type": {"type": str},
@@ -208,6 +227,7 @@ class Query(graphene.ObjectType):
     query_resolver = Resolver.as_field()
     nested_resolver = BarResolver.as_field()
     complicated_resolver = ComplicatedResolver.as_field()
+    enum_resolver = EnumResolver.as_field()
 
 
 SCHEMA = graphene.Schema(
