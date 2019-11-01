@@ -7,13 +7,12 @@
 
 .PHONY: test build dev
 
-dev:
+dev: .venv/.make_success
 	. ./scripts/activate-venv.sh && ./manage.py runserver
 
 test: .venv/.make_success
 	@echo "Not implemented"
 
-build:
+build: .venv/.make_success
 	rm -rf build
 	. ./scripts/activate-venv.sh && python setup.py sdist bdist_wheel
-
