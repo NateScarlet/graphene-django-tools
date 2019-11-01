@@ -21,7 +21,7 @@ Mutation that returns a scalar type:
           "args": {
               "key": {
                 "type": str,
-                "required: True,
+                "required": True,
               },
               "value": str,
           },
@@ -147,9 +147,9 @@ Use field from django model(mainly for enum):
   class ModelFieldResolver(gdtools.Resolver):
       schema = {
           'args': {
-              'value': models.Task._meta.get_field('state')
+              'value': Task._meta.get_field('state')
           },
-          'type': models.Task._meta.get_field('state')
+          'type': Task._meta.get_field('state')
       }
 
       def resolve(self, **kwargs):
