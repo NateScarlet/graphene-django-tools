@@ -200,6 +200,45 @@ class ComplicatedResolver(gdtools.Resolver):
         return kwargs['input']
 
 
+class Task(gdtools.Resolver):
+    schema = {
+        'state':  models.Task._meta.get_field('state')
+    }
+
+
+class CreateTask(gdtools.Resolver):
+    schema = {
+        'args': {'state': models.Task._meta.get_field('state')},
+        'type': Task
+    }
+
+    def resolve(self, **kwargs):
+        return models.Task.objects.create(**kwargs)
+
+
+class TaskConnection(gdtools.ConnectionResolver):
+    schema = {'node': Task}
+
+
+class Tasks(TaskConnection):
+
+    def resolve(self, **kwargs):
+        return self.resolve_connection(models.Task.objects.all(), **kwargs)
+
+
+class Item(gdtools.Resolver):
+    schema = {'name': 'String!'}
+
+
+class ItemConnection(gdtools.ConnectionResolver):
+    schema = {'node': Item}
+
+
+class Items(ItemConnection):
+    def resolve(self, **kwargs):
+        return self.resolve_connection([{'name': 'a'}, {'name': 'b'}], **kwargs)
+
+
 class Mutation(graphene.ObjectType):
     """Mutation """
 
@@ -214,6 +253,7 @@ class Mutation(graphene.ObjectType):
     bulk_create_group = BulkCreateGroup.Field()
     bulk_update_group = BulkUpdateGroup.Field()
     mutation_resolver = Resolver.as_field()
+    create_task = CreateTask.as_field()
 
 
 class Query(graphene.ObjectType):
@@ -243,6 +283,8 @@ class Query(graphene.ObjectType):
     complicated_resolver = ComplicatedResolver.as_field()
     enum_resolver = EnumResolver.as_field()
     model_field_resolver = ModelFieldResolver.as_field()
+    tasks = Tasks.as_field()
+    items = Items.as_field()
 
 
 SCHEMA = graphene.Schema(

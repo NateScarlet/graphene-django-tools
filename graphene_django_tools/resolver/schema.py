@@ -28,7 +28,7 @@ TYPE_ALIAS = {
     graphene.ObjectType: dict,
     graphene.InputObjectType: dict,
     'ID': graphene.ID,
-    'Bool': graphene.Boolean,
+    'Boolean': graphene.Boolean,
     'String': graphene.String,
     'Int': graphene.Int,
     'Float': graphene.Float,
@@ -42,9 +42,10 @@ class FieldDefinition:
     """A mongoose-like schema for resolver field.  """
 
     # Options:
-    args: typing.Optional[typing.Mapping]  # only for root schema
+    args: typing.Mapping
     type: typing.Type
     required: bool
+    name: typing.Optional[str]
     description: typing.Optional[str]
     deprecation_reason: typing.Optional[str]
 
@@ -61,10 +62,12 @@ class FieldDefinition:
         Returns:
             SchemaDefinition: Parsing result
         """
+        from . import resolver
 
         config = {}
-        config.setdefault('args', None)
+        config.setdefault('args', {})
         config.setdefault('required', False)
+        config.setdefault('name', None)
         config.setdefault('description', None)
         config.setdefault('deprecation_reason', None)
         child_definition = None
@@ -103,10 +106,16 @@ class FieldDefinition:
         if isinstance(config['type'], graphene.types.mountedtype.MountedType):
             mounted = config['type']
             config['type'] = core.get_unmounted_type(mounted)
+        # Merge root level resolver args.
+        if issubclass(config['type'], resolver.Resolver):
+            args = dict(cls.parse(config['type'].schema).args)
+            args.update(**config['args'])
+            config['args'] = args
 
         return cls(
             type=config['type'],
             required=config['required'],
+            name=config['name'],
             description=config['description'],
             deprecation_reason=config['deprecation_reason'],
             args=config['args'],

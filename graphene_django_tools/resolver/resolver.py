@@ -9,83 +9,14 @@ import graphene
 import graphql
 
 from . import schema as schema_
-from .. import texttools
-
-
-def _nullable(
-        v: graphene.types.unmountedtype.UnmountedType,
-        is_nullable: bool = True
-) -> graphene.types.unmountedtype.UnmountedType:
-    ret = v
-    if is_nullable and isinstance(ret, graphene.NonNull):
-        ret = ret.of_type
-    elif not is_nullable and not isinstance(ret, graphene.NonNull):
-        ret = graphene.NonNull(ret)
-    return ret
-
-
-def _build_type(
-        namespace: str,
-        schema: typing.Any,
-        mapping_bases: typing.Tuple[typing.Type, ...],
-        is_mount=False,
-) -> typing.Union[typing.Mapping, graphene.Scalar, graphene.ObjectType]:
-    schema = schema_.FieldDefinition.parse(schema)
-    is_input = graphene.InputObjectType in mapping_bases
-    mount = schema.mount_as_argument if is_input else schema.mount_as_field
-
-    field_type = schema.type
-
-    # Mapping
-    if schema.type is dict:
-        field_type: typing.Type = type(
-            texttools.camel_case(namespace),
-            mapping_bases,
-            {k: _build_type(
-                f'{namespace}_{k}', v,
-                mapping_bases=mapping_bases,
-                is_mount=True
-            ) for k, v in schema.child_definition.items()})
-
-    # Iterable
-    if schema.type is list:
-        field_type = graphene.List(
-            _nullable(_build_type(
-                namespace,
-                schema.child_definition,
-                mapping_bases=mapping_bases,
-            ), False),
-        )
-
-    if is_mount:
-        return mount(type=field_type)
-    return _nullable(field_type, not schema.required)
-
-
-def _build_args_type(
-        namespace: str,
-        args: typing.Mapping,
-) -> typing.Union[typing.Mapping, graphene.Scalar, graphene.ObjectType]:
-    assert isinstance(
-        args, typing.Mapping), f'Expected a mapping, got a {type(args)}'
-
-    return {
-        k: _build_type(
-            namespace=f'{namespace}_{k}',
-            schema=v,
-            mapping_bases=(graphene.InputObjectType,),
-            is_mount=True,
-        )
-        for k, v in args.items()
-    }
+from . import typedef
 
 
 class Resolver:
     """Apollo-like schema field resolver.  """
 
     # Resolver definitions.
-    schema: typing.Optional[typing.Mapping] = None
-    _field: typing.Optional[graphene.Field] = None
+    schema: typing.Optional[typing.MutableMapping] = None
 
     # Data that avaliable inside `resolve`.
     parent: typing.Any
@@ -102,6 +33,11 @@ class Resolver:
     def resolve(self, **kwargs):
         """Resolve the field.  """
 
+        field_name = self.info.field_name
+        if isinstance(self.parent, typing.Mapping) and field_name in self.parent:
+            return self.parent[field_name]
+        elif hasattr(self.parent, field_name):
+            return getattr(self.parent, field_name)
         raise NotImplementedError(
             f'`{self.__class__.__name__}.resolve` is not implemented.')
 
@@ -116,16 +52,17 @@ class Resolver:
         if not cls.schema:
             raise NotImplementedError(
                 f'Resolver schema is not defined: {cls.__name__}')
-        if cls._field:
-            return cls._field
+        schema = schema_.FieldDefinition.parse(cls.schema)
+        namespace = schema.name or cls.__name__
+        if namespace in RESOLVER_REGISTRY:
+            return RESOLVER_REGISTRY[namespace]
 
-        _type = _build_type(
-            namespace=cls.__name__,
+        _type = typedef.build_type(
+            namespace=namespace,
             schema=cls.schema,
             mapping_bases=(graphene.ObjectType,),
         )
-        schema = schema_.FieldDefinition.parse(cls.schema)
-        args_type = _build_args_type(
+        args_type = typedef.build_args_type(
             cls.__name__,
             schema.args,
         ) if schema.args else None
@@ -133,12 +70,13 @@ class Resolver:
         def resolver(parent, info, **kwargs):
             return cls(parent=parent, info=info).resolve(**kwargs)
 
-        cls._field = graphene.Field(
+        RESOLVER_REGISTRY[namespace] = schema.mount_as_field(
             type=_type,
             args=args_type,
-            description=schema.description,
             resolver=resolver,
-            deprecation_reason=schema.deprecation_reason,
             required=False,
         )
-        return cls._field
+        return RESOLVER_REGISTRY[namespace]
+
+
+RESOLVER_REGISTRY: typing.Dict[str, Resolver] = {}

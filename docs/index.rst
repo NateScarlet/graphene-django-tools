@@ -11,6 +11,7 @@ Welcome to graphene_django_tools's documentation!
   :caption: Contents:
 
   resolver
+  connection
 
 
 Indices and tables
