@@ -1,4 +1,5 @@
 # pylint:disable=missing-docstring,invalid-name
+import pytest
 import graphene
 
 import graphene_django_tools as gdtools
@@ -206,3 +207,59 @@ def test_complicated():
     assert result.data == {
         "foo": {"type": "type",
                 "data": [{"key": "key", "value": 42, "extra": ["extra"]}]}}
+
+
+@pytest.mark.django_db
+def test_interface():
+    models.Pet.objects.create(name='pet1', age=1)
+
+    class Foo(gdtools.Resolver):
+        schema = {
+            'type': {
+                'name': models.Pet._meta.get_field('name'),
+                'age': models.Pet._meta.get_field('age'),
+            },
+            'interfaces': (graphene.Node,)
+        }
+
+        def resolve(self, **kwargs):
+            return models.Pet.objects.first()
+
+    class Query(graphene.ObjectType):
+        foo = Foo.as_field()
+
+    schema = graphene.Schema(query=Query)
+    assert str(schema) == '''\
+schema {
+  query: Query
+}
+
+type Foo implements Node {
+  id: ID!
+  name: String
+  age: Int
+}
+
+interface Node {
+  id: ID!
+}
+
+type Query {
+  foo: Foo
+}
+'''
+    result = schema.execute('''\
+{
+    foo{
+        id
+        name
+        age
+    }
+}
+''')
+    assert not result.errors
+    assert result.data == {
+        "foo": {"id": "Rm9vOjE=",
+                "name": 'pet1',
+                'age': 1}
+    }

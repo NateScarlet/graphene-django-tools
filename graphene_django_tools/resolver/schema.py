@@ -46,6 +46,7 @@ class FieldDefinition:
     type: typing.Type
     required: bool
     name: typing.Optional[str]
+    interfaces: typing.Iterable[graphene.Interface]
     description: typing.Optional[str]
     deprecation_reason: typing.Optional[str]
 
@@ -70,6 +71,7 @@ class FieldDefinition:
         config.setdefault('name', None)
         config.setdefault('description', None)
         config.setdefault('deprecation_reason', None)
+        config.setdefault('interfaces', ())
         child_definition = None
         is_full_config = (
             isinstance(v, typing.Mapping)
@@ -119,6 +121,7 @@ class FieldDefinition:
             description=config['description'],
             deprecation_reason=config['deprecation_reason'],
             args=config['args'],
+            interfaces=config['interfaces'],
             child_definition=child_definition,
         )
 

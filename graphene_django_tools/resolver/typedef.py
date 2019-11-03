@@ -60,11 +60,20 @@ def build_type(
         field_type: typing.Type = type(
             schema.name or texttools.camel_case(namespace),
             mapping_bases,
-            {k: build_type(
-                f'{namespace}_{k}', v,
-                mapping_bases=mapping_bases,
-                is_mount=True
-            ) for k, v in schema.child_definition.items()})
+            {
+                **{
+                    k: build_type(
+                        f'{namespace}_{k}', v,
+                        mapping_bases=mapping_bases,
+                        is_mount=True
+                    ) for k, v in schema.child_definition.items()
+                },
+                **dict(
+                    Meta=dict(
+                        interfaces=schema.interfaces
+                    )
+                )
+            })
 
     # Iterable
     if schema.type is list:
