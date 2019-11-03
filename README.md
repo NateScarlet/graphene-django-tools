@@ -34,6 +34,9 @@ class Foo(gdtools.Resolver):
     }
 
     def resolve(self, **kwargs):
+        self.parent # parent field
+        self.info # resolve info
+        self.context # django request object
         return kwargs['value']
 
 class Query(graphene.ObjectType):
