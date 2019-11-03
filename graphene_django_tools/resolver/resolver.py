@@ -65,7 +65,7 @@ class Resolver:
             value (typing.Any): Value to validate.
 
         Returns:
-            bool: whether value is corresponding node.
+            bool: whether value match schema type.
         """
         return True
 
