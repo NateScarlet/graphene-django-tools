@@ -57,12 +57,11 @@ relay connection:
 class Item(gdtools.Resolver):
     schema = {'name': 'String!'}
 
-class ItemConnection(gdtools.ConnectionResolver):
-    schema = {'node': Item}
+class Items(gdtools.Resolver):
+    schema = gdtools.get_connection(Item)
 
-class Items(ItemConnection):
     def resolve(self, **kwargs):
-        return self.resolve_connection([{'name': 'a'}, {'name': 'b'}], **kwargs)
+        return gdtools.resolve_connection([{'name': 'a'}, {'name': 'b'}], **kwargs)
 ```
 
 ```graphql
