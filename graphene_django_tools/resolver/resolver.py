@@ -23,6 +23,8 @@ class Resolver:
     info: graphql.execution.base.ResolveInfo
     context: django.core.handlers.wsgi.WSGIRequest
 
+    _field: typing.Optional[graphene.Field] = None
+
     def __init__(self,
                  parent: typing.Any,
                  info: graphql.execution.base.ResolveInfo):
@@ -54,8 +56,8 @@ class Resolver:
                 f'Resolver schema is not defined: {cls.__name__}')
         schema = schema_.FieldDefinition.parse(cls.schema)
         namespace = schema.name or cls.__name__
-        if namespace in RESOLVER_REGISTRY:
-            return RESOLVER_REGISTRY[namespace]
+        if cls._field:
+            return cls._field
 
         _type = typedef.build_type(
             namespace=namespace,
@@ -70,13 +72,10 @@ class Resolver:
         def resolver(parent, info, **kwargs):
             return cls(parent=parent, info=info).resolve(**kwargs)
 
-        RESOLVER_REGISTRY[namespace] = schema.mount_as_field(
+        cls._field = schema.mount_as_field(
             type=_type,
             args=args_type,
             resolver=resolver,
             required=False,
         )
-        return RESOLVER_REGISTRY[namespace]
-
-
-RESOLVER_REGISTRY: typing.Dict[str, Resolver] = {}
+        return cls._field

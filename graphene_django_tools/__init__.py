@@ -20,5 +20,5 @@ from .mutation import (ModelBulkCreationMutation,
 from .types import (CountableConnection, Duration, ModelConnectionField,
                     ModelField, ModelFilterConnectionField, ModelListField,
                     ModelNode)
-from .resolver import Resolver, get_connection, resolve_connection
+from .resolver import Resolver, get_connection, resolve_connection, CONNECTION_REGISTRY
 from .utils import ID, convert_id
