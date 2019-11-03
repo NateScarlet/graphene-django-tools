@@ -24,10 +24,14 @@ class Resolver:
     context: django.core.handlers.wsgi.WSGIRequest
 
     _field: typing.Optional[graphene.Field] = None
+    _type: typing.Optional[graphene.Scalar | graphene.ObjectType] = None
 
-    def __init__(self,
-                 parent: typing.Any,
-                 info: graphql.execution.base.ResolveInfo):
+    def __init__(
+            self,
+            *,
+            info: graphql.execution.base.ResolveInfo,
+            parent: typing.Any = None,
+    ):
         self.parent = parent
         self.info = info
         self.context = info.context
@@ -43,6 +47,64 @@ class Resolver:
         raise NotImplementedError(
             f'`{self.__class__.__name__}.resolve` is not implemented.')
 
+    def get_node(self, id_: str):
+        """Get node value from id.
+
+        Args:
+            id_ (str): Node id.
+
+        Returns:
+            typing.Any: Corresponding node value.
+        """
+        return None
+
+    def validate(self, value) -> bool:
+        """Test whether value is match resolver schema type.
+
+        Args:
+            value (typing.Any): Value to validate.
+
+        Returns:
+            bool: whether value is corresponding node.
+        """
+        return True
+
+    @classmethod
+    def as_type(
+            cls,
+            *,
+            namespace: str = None
+    ) -> typing.Union[graphene.Scalar, graphene.ObjectType]:
+        """Convert resolver as graphene type.
+
+        Args:
+            namespace (str, optional): [description]. Defaults to None.
+                namespace for auto naming, use class name when value is None.
+
+        Returns:
+            typing.Union[graphene.Scalar,graphene.ObjectType]:
+        """
+
+        if cls._type:
+            return cls._type
+        namespace = namespace or cls.__name__
+        ret = typedef.build_type(
+            namespace=namespace,
+            schema=cls.schema,
+            mapping_bases=(graphene.ObjectType,),
+        )
+
+        def get_node(info, id_):
+            return cls(info=info).get_node(id_)
+        ret.get_node = get_node
+
+        def is_type_of(value, info):
+            return cls(info=info).validate(value)
+        ret.is_type_of = is_type_of
+
+        cls._type = ret
+        return ret
+
     @classmethod
     def as_field(cls) -> graphene.Field:
         """Convert resolver as a graphene field.
@@ -55,15 +117,10 @@ class Resolver:
             raise NotImplementedError(
                 f'Resolver schema is not defined: {cls.__name__}')
         schema = schema_.FieldDefinition.parse(cls.schema)
-        namespace = schema.name or cls.__name__
         if cls._field:
             return cls._field
 
-        _type = typedef.build_type(
-            namespace=namespace,
-            schema=cls.schema,
-            mapping_bases=(graphene.ObjectType,),
-        )
+        _type = cls.as_type(namespace=schema.name or cls.__name__)
         args_type = typedef.build_args_type(
             cls.__name__,
             schema.args,

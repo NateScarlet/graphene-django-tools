@@ -263,3 +263,66 @@ type Query {
                 "name": 'pet1',
                 'age': 1}
     }
+
+
+@pytest.mark.django_db
+def test_node():
+    models.Pet.objects.create(name='pet1', age=1)
+
+    class Pet(gdtools.Resolver):
+        schema = {
+            'type': {
+                'name': models.Pet._meta.get_field('name'),
+                'age': models.Pet._meta.get_field('age'),
+            },
+            'interfaces': (graphene.Node,)
+        }
+
+        def get_node(self, id_):
+            return models.Pet.objects.get(pk=id_)
+
+        def validate(self, value):
+            return isinstance(value, models.Pet)
+
+    class Query(graphene.ObjectType):
+        node = graphene.Node.Field()
+
+    schema = graphene.Schema(query=Query, types=[Pet.as_type()])
+    assert str(schema) == '''\
+schema {
+  query: Query
+}
+
+interface Node {
+  id: ID!
+}
+
+type Pet implements Node {
+  id: ID!
+  name: String
+  age: Int
+}
+
+type Query {
+  node(id: ID!): Node
+}
+'''
+    result = schema.execute('''\
+{
+    node(id: "UGV0OjE="){
+        id
+        __typename
+        ... on Pet {
+            name
+            age
+        }
+    }
+}
+''')
+    assert not result.errors
+    assert result.data == {
+        "node": {"id": "UGV0OjE=",
+                 "__typename": "Pet",
+                 "name": 'pet1',
+                 'age': 1}
+    }

@@ -16,8 +16,7 @@ Tools for use [`graphene-django`](https://github.com/graphql-python/graphene-dja
 
 ### Resolver
 
-- `Resolver`
-- `ConnectionResolver`
+Using mongoose-like schema to write apollo-like resolver.
 
 simple example:
 
@@ -49,6 +48,47 @@ class Query(graphene.ObjectType):
 
 ```json
 { "foo": "v" }
+```
+
+relay node:
+
+```python
+class Pet(gdtools.Resolver):
+    schema = {
+        'type': {
+            'name': models.Pet._meta.get_field('name'),
+            'age': models.Pet._meta.get_field('age'),
+        },
+        'interfaces': (graphene.Node,)
+    }
+
+    def get_node(self, id_):
+        return models.Pet.objects.get(pk=id_)
+
+    def validate(self, value):
+        return isinstance(value, models.Pet)
+
+class Query(graphene.ObjectType):
+    node = graphene.Node.Field()
+
+schema = graphene.Schema(query=Query, types=[Pet.as_type()])
+```
+
+```graphql
+{
+  node(id: "UGV0OjE=") {
+    id
+    __typename
+    ... on Pet {
+      name
+      age
+    }
+  }
+}
+```
+
+```json
+{ "node": { "id": "UGV0OjE=", "__typename": "Pet", "name": "pet1", "age": 1 } }
 ```
 
 relay connection:

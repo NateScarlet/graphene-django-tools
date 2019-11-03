@@ -90,7 +90,7 @@ def get_node_id(instance: django.db.models.Model) -> str:
 
 
 def get_unmounted_type(obj: Union[MountedType, UnmountedType]) -> UnmountedType:
-    """Get unmounted type of given object object.  
+    """Get unmounted type of given object object.
 
     Args:
         obj (Union[MountedType, UnmountedType]): Graphene object
