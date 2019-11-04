@@ -43,7 +43,7 @@ class PageInfo(resolver.Resolver):
 
 
 def get_connection(
-        node: typing.Union[resolver.Resolver, typing.Any],
+        node: typing.Union[resolver.Resolver, str, typing.Any],
         *,
         page_info=PageInfo,
         name: str = None,
@@ -51,7 +51,7 @@ def get_connection(
     """Get connection resolver.
 
     Args:
-        node (typing.Union[resolver.Resolver, typing.Any]): Node resolver or schema.
+        node (typing.Union[resolver.Resolver, str, typing.Any]): Node resolver or schema.
         page_info (typing.Union[resolver.Resolver, typing.Any], optional):
             Page resolver or schema, defaults to PageInfo.
         name (str, optional): Override default connection name, required no node name not defined.
@@ -61,6 +61,8 @@ def get_connection(
     """
 
     def _get_node_name() -> str:
+        if isinstance(node, str):
+            return node
         if (isinstance(node, type)
                 and issubclass(node, resolver.Resolver)):
             node_name = schema_.FieldDefinition.parse(
