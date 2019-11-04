@@ -11,7 +11,7 @@ dev: .venv/.make_success
 	. ./scripts/activate-venv.sh && ./manage.py runserver
 
 test: .venv/.make_success
-	pytest --cov=graphene_django_tools -vv
+	. ./scripts/activate-venv.sh && pytest --cov=graphene_django_tools -vv
 
 build: .venv/.make_success
 	rm -rf build
