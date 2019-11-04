@@ -20,12 +20,12 @@ Mutation that returns a scalar type:
       schema = {
           "args": {
               "key": {
-                "type": str,
+                "type": 'String',
                 "required": True,
               },
-              "value": str,
+              "value": 'String',
           },
-          "type": int,
+          "type": 'Int',
           "description": "created from `Resolver`."
       }
 
@@ -49,7 +49,7 @@ Mutation that returns a object type:
   class SomeMutation(gdtools.Resolver):
       schema = {
         "ok": {
-            "type": int,
+            "type": 'Int',
             "required": True,
         },
       }
@@ -68,7 +68,7 @@ Nested resolver:
   import graphene_django_tools as gdtools
 
   class FooResolver(gdtools.Resolver):
-      schema = int
+      schema = 'Int'
 
       def resolve(self, **kwargs):
           print({"parent": self.parent})
@@ -78,7 +78,7 @@ Nested resolver:
   class BarResolver(gdtools.Resolver):
       schema = {
           "args": {
-              "bar": int
+              "bar": 'Int'
           },
           "type": {
               "foo": FooResolver
@@ -164,17 +164,17 @@ More complicated example:
 
   class ComplicatedResolver(gdtools.Resolver):
       _input_schema = {
-          "type": {"type": str},
+          "type": {"type": 'String'},
           "data": [
               {
                   "type":
                   {
                       "key": {
-                          "type": str,
+                          "type": 'String',
                           "required": True,
                           "description": "<description>",
                       },
-                      "value": int,
+                      "value": 'Int',
                       "extra": {
                           "type": ['String!'],
                           "deprecation_reason": "<deprecated>"

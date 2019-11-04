@@ -39,7 +39,7 @@ def test_object():
     class Foo(gdtools.Resolver):
         schema = {
             "ok": {
-                "type": int,
+                "type": 'Int',
                 "required": True,
             },
         }
@@ -121,17 +121,17 @@ def test_model():
 def test_complicated():
     class Foo(gdtools.Resolver):
         _input_schema = {
-            "type": {"type": str},
+            "type": {"type": 'String'},
             "data": [
                 {
                     "type":
                     {
                         "key": {
-                            "type": str,
+                            "type": 'String',
                             "required": True,
                             "description": "<description>",
                         },
-                        "value": int,
+                        "value": 'Int',
                         "extra": {
                             "type": ['String!'],
                             "deprecation_reason": "<deprecated>"

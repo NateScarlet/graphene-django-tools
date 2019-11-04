@@ -6,7 +6,7 @@ import graphene_django_tools as gdtools
 
 def test_simple():
     class Foo(gdtools.Resolver):
-        schema = int
+        schema = 'Int'
 
         def resolve(self, **kwargs):
             print({"parent": self.parent})
@@ -15,7 +15,7 @@ def test_simple():
     class Bar(gdtools.Resolver):
         schema = {
             "args": {
-                "bar": int
+                "bar": 'Int'
             },
             "type": {
                 "foo": Foo
@@ -53,7 +53,7 @@ def test_list():
     class Bar(gdtools.Resolver):
         schema = {
             "args": {
-                "bar": int
+                "bar": 'Int'
             },
             "type": [Foo]
         }

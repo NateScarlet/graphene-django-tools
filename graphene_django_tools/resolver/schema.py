@@ -17,18 +17,6 @@ import graphene_django.registry
 from .. import texttools
 from . import typedef
 
-TYPE_ALIAS: typing.Dict[typing.Any, str] = {
-    str: 'String',
-    int: 'Int',
-    float: 'Float',
-    bool: 'Boolean',
-    decimal.Decimal: 'Decimal',
-    datetime.time: 'Time',
-    datetime.date: 'Date',
-    datetime.datetime: 'DateTime',
-    datetime.timedelta: 'Duration',
-}
-
 
 @dataclasses.dataclass
 class FieldDefinition:
@@ -132,10 +120,6 @@ class FieldDefinition:
         config.setdefault('deprecation_reason', None)
         config.setdefault('resolver', None)
 
-        try:
-            config['type'] = TYPE_ALIAS.get(config['type'], config['type'])
-        except TypeError:
-            pass
         return cls(
             type=config['type'],
             required=config['required'],
