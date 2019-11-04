@@ -4,9 +4,10 @@ Dynamic type
 Use string as type to refer class that not defined yet.
 
 when resolver called `as_field` or `as_type`, related type will be registered in 
-``resolver.GRAPHENE_TYPE_REGISTRY``.
+``resolver.GRAPHENE_TYPE_REGISTRY``,
+type can be registered at anytime before schema init.
 
-when same name registered multiple time, registry will keep latest type.
+when same name registered multiple time, registry will only keep latest type.
 
 .. code:: python
 

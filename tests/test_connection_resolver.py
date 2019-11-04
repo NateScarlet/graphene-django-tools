@@ -55,7 +55,6 @@ def test_simple():
 def test_dynamic():
     class Item(gdtools.Resolver):
         schema = {'name': 'String!'}
-    Item.as_type('Item')
 
     class Items(gdtools.Resolver):
         schema = gdtools.get_connection('Item')
@@ -66,6 +65,7 @@ def test_dynamic():
     class Query(graphene.ObjectType):
         items = Items.as_field()
 
+    Item.as_type('Item')
     schema = graphene.Schema(query=Query)
     result = schema.execute('''\
 {

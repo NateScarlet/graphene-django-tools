@@ -89,11 +89,11 @@ class Resolver:
         if cls._type:
             return cls._type
         namespace = namespace or cls.__name__
-        ret = typedef.build_type(
+        ret = typedef.nullable(typedef.build_type(
             namespace=namespace,
             schema=cls.schema,
             mapping_bases=(graphene.ObjectType,),
-        )
+        ), True)
 
         if (isinstance(ret, type)
                 and issubclass(ret, graphene.ObjectType)):

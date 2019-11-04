@@ -21,11 +21,11 @@ def test_simple():
             'name': models.Pet._meta.get_field('name'),
             'age': models.Pet._meta.get_field('age'),
         }
-    Pet.as_type('Pet')
 
     class Query(graphene.ObjectType):
         first_pet = FirstPet.as_field()
 
+    Pet.as_type('Pet')
     schema = graphene.Schema(query=Query)
     assert str(schema) == '''\
 schema {

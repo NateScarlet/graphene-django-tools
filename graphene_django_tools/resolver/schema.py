@@ -12,7 +12,7 @@ import graphene
 import graphene_django.converter
 import graphene_django.registry
 
-from .. import core, types
+from .. import core
 
 TYPE_ALIAS: typing.Dict[typing.Any, str] = {
     str: 'String',
@@ -24,23 +24,6 @@ TYPE_ALIAS: typing.Dict[typing.Any, str] = {
     datetime.date: 'Date',
     datetime.datetime: 'DateTime',
     datetime.timedelta: 'Duration',
-}
-
-
-GRAPHENE_TYPE_REGISTRY: typing.Dict[
-    str,
-    graphene.types.unmountedtype.UnmountedType
-] = {
-    'ID': graphene.ID,
-    'Boolean': graphene.Boolean,
-    'String': graphene.String,
-    'Int': graphene.Int,
-    'Float': graphene.Float,
-    'Decimal': graphene.Decimal,
-    'Time': graphene.Time,
-    'Date': graphene.Date,
-    'DateTime': graphene.DateTime,
-    'Duration': types.Duration,
 }
 
 
@@ -70,7 +53,7 @@ class FieldDefinition:
         Returns:
             SchemaDefinition: Parsing result
         """
-        from . import resolver
+        from . import resolver, typedef
 
         config = {}
         child_definition = None
@@ -115,7 +98,11 @@ class FieldDefinition:
         if not isinstance(config['type'], (type, str)):
             raise SyntaxError(
                 f'Invalid schema: can not find type field from: {v}')
-        if (isinstance(config['type'], graphene.types.mountedtype.MountedType)
+        if isinstance(config['type'], str):
+            config['type'] = typedef.dynamic_type(config['type'])
+        elif (
+                isinstance(config['type'],
+                           graphene.types.mountedtype.MountedType)
                 and not isinstance(config['type'], graphene.Dynamic)):
             mounted = config['type']
             config['type'] = core.get_unmounted_type(mounted)
@@ -152,14 +139,7 @@ class FieldDefinition:
         kwargs.setdefault('required', self.required)
         kwargs.setdefault('description', self.description)
 
-        if isinstance(kwargs['type'], str):
-            ret = self.mount_as_dynamic(as_=graphene.Argument, **kwargs)
-        else:
-            ret = graphene.Argument(**kwargs)
-        if kwargs['name']:
-            GRAPHENE_TYPE_REGISTRY[kwargs['name']
-                                   ] = core.get_unmounted_type(ret)
-        return ret
+        return graphene.Argument(**kwargs)
 
     def mount_as_field(
             self,
@@ -185,27 +165,5 @@ class FieldDefinition:
             kwargs.setdefault('resolver', field.resolver)
             kwargs.setdefault('description', field.description)
             kwargs.setdefault('deprecation_reason', field.deprecation_reason)
-        print(dict(type=kwargs['type']))
-        kwargs['type'] = core.get_unmounted_type(kwargs['type'])
-        if isinstance(kwargs['type'], str):
-            ret = self.mount_as_dynamic(as_=graphene.Field, **kwargs)
-        else:
-            ret = graphene.Field(**kwargs)
-        if kwargs['name']:
-            GRAPHENE_TYPE_REGISTRY[
-                kwargs['name']
-            ] = core.get_unmounted_type(ret)
-        return ret
 
-    def mount_as_dynamic(self, *, as_: typing.Type, **kwargs):
-        kwargs.setdefault('type', self.type)
-        kwargs.setdefault('required', self.required)
-        kwargs.setdefault('description', self.description)
-        kwargs.setdefault('deprecation_reason', self.deprecation_reason)
-
-        def get_type(*_args, **_kwargs):
-            if isinstance(kwargs['type'], str):
-                kwargs['type'] = GRAPHENE_TYPE_REGISTRY[kwargs['type']]
-            assert isinstance(kwargs['type'], type), kwargs['type']
-            return as_(**kwargs)
-        return graphene.Dynamic(get_type)
+        return graphene.Field(**kwargs)
