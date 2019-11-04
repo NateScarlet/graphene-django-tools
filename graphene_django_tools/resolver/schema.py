@@ -1,7 +1,9 @@
 # -*- coding=UTF-8 -*-
 """Mongoose-like schema.  """
+# pylint:disable=unused-import
 
 from __future__ import annotations
+
 import dataclasses
 import datetime
 import decimal
@@ -12,7 +14,8 @@ import graphene
 import graphene_django.converter
 import graphene_django.registry
 
-from .. import core
+from .. import texttools
+from . import typedef
 
 TYPE_ALIAS: typing.Dict[typing.Any, str] = {
     str: 'String',
@@ -35,16 +38,17 @@ class FieldDefinition:
     args: typing.Mapping
     type: typing.Type
     required: bool
-    name: typing.Optional[str]
+    name: str
     interfaces: typing.Iterable[graphene.Interface]
     description: typing.Optional[str]
     deprecation_reason: typing.Optional[str]
+    resolver: typing.Optional[typing.Callable]
 
     # Parse results:
     child_definition: typing.Any
 
     @classmethod
-    def parse(cls, v: typing.Any) -> FieldDefinition:
+    def parse(cls, v: typing.Any, *, default: typing.Dict = None) -> FieldDefinition:
         """Parse a mongoose like schema
 
         Args:
@@ -53,9 +57,10 @@ class FieldDefinition:
         Returns:
             SchemaDefinition: Parsing result
         """
-        from . import resolver, typedef
+        from . import resolver
 
-        config = {}
+        assert v is not None, 'schema is None'
+        config = default or {}
         child_definition = None
         is_full_config = (
             isinstance(v, typing.Mapping)
@@ -68,10 +73,45 @@ class FieldDefinition:
         if is_full_config:
             config.update(**v)
             type_def = v['type']
+        if 'name' not in config:
+            raise ValueError(f'Not specified field name in: {v}')
+        config.setdefault('args', {})
+        config.setdefault('interfaces', ())
+        if config['args']:
+            config['args'] = {
+                k: (cls
+                    .parse(
+                        v,
+                        default={
+                            'name': texttools.camel_case(f'{config["name"]}_{k}')
+                        })
+                    .mount(as_=graphene.Argument))
+                for k, v in config['args'].items()
+            }
+
         if isinstance(type_def, django.db.models.Field):
             config['type'] = graphene_django.converter.convert_django_field_with_choices(
                 type_def,
                 registry=graphene_django.registry.get_global_registry()).__class__
+        elif isinstance(type_def, type) and issubclass(type_def, resolver.Resolver):
+            _resolver: typing.Type[resolver.Resolver] = type_def
+            # merge schema
+            config['type'] = _resolver._schema.type
+            config['args'].update(**_resolver._schema.args)
+            config['interfaces'] += _resolver._schema.interfaces
+            config.setdefault('required', _resolver._schema.required)
+
+            _parent_resolver = config.get('resolver')
+
+            def resolve_fn(parent, info, **kwargs):
+                if _parent_resolver:
+                    parent = _parent_resolver(parent, info, **kwargs)
+                return _resolver._schema.resolver(parent, info, **kwargs)
+            config.setdefault('resolver', resolve_fn)
+            config.setdefault('description', _resolver._schema.description)
+            config.setdefault('deprecation_reason',
+                              _resolver._schema.deprecation_reason)
+            child_definition = _resolver._schema.child_definition
         elif isinstance(type_def, str):
             if type_def[-1] == '!':
                 config.setdefault('required', True)
@@ -82,38 +122,20 @@ class FieldDefinition:
             child_definition = type_def
         elif isinstance(type_def, typing.Iterable):
             config['type'] = list
+            assert len(type_def) == 1, type_def
             child_definition = type_def[0]
         else:
             config['type'] = type_def
 
-        config.setdefault('args', {})
         config.setdefault('required', False)
-        config.setdefault('name', None)
         config.setdefault('description', None)
         config.setdefault('deprecation_reason', None)
-        config.setdefault('interfaces', ())
+        config.setdefault('resolver', None)
 
-        # Convert type
-        config['type'] = TYPE_ALIAS.get(config['type'], config['type'])
-        if not isinstance(config['type'], (type, str)):
-            raise SyntaxError(
-                f'Invalid schema: can not find type field from: {v}')
-        if isinstance(config['type'], str):
-            config['type'] = typedef.dynamic_type(config['type'])
-        elif (
-                isinstance(config['type'],
-                           graphene.types.mountedtype.MountedType)
-                and not isinstance(config['type'], graphene.Dynamic)):
-            mounted = config['type']
-            config['type'] = core.get_unmounted_type(mounted)
-
-        # Merge root level resolver args.
-        if (isinstance(config['type'], type)
-                and issubclass(config['type'], resolver.Resolver)):
-            args = dict(cls.parse(config['type'].schema).args)
-            args.update(**config['args'])
-            config['args'] = args
-
+        try:
+            config['type'] = TYPE_ALIAS.get(config['type'], config['type'])
+        except TypeError:
+            pass
         return cls(
             type=config['type'],
             required=config['required'],
@@ -122,48 +144,138 @@ class FieldDefinition:
             deprecation_reason=config['deprecation_reason'],
             args=config['args'],
             interfaces=config['interfaces'],
+            resolver=config['resolver'],
             child_definition=child_definition,
         )
 
-    def mount_as_argument(
+    def _get_options(self, target: typing.Type):
+        allowed_options = ()
+        if not isinstance(target, type):
+            pass
+
+        allowed_options_by_type = [
+            (graphene.Argument,
+             ('required', 'default_value', 'description', )),
+            (graphene.Field,
+             ('args', 'resolver', 'required', 'default_value',
+              'description', 'deprecation_reason', )),
+            (graphene.InputField,
+             ('required', 'default_value', 'description', 'deprecation_reason',)),
+        ]
+        for classinfo, options in allowed_options_by_type:
+            if issubclass(target, classinfo):
+                allowed_options += options
+
+        options = dict(
+            name=self.name,
+            required=self.required,
+            description=self.description,
+            deprecation_reason=self.deprecation_reason,
+            args=self.args,
+            resolver=self.resolver,
+        )
+
+        return {k: v for k, v in options.items() if k in allowed_options}
+
+    def as_type(
             self,
-            **kwargs
-    ) -> typing.Union[graphene.Argument, graphene.Dynamic]:
-        """Get mounted graphene argument.
+            *,
+            is_input: bool = False,
+            registry=None
+    ) -> graphene.types.unmountedtype.UnmountedType:
+        """Convert schema to graphene unmmounted type instance with options set.
+
+        Args:
+            is_input (bool, optional): Whether is input field. Defaults to False.
+            registry (typing.Dict, optional): Graphene type registry. Defaults to None.
 
         Returns:
-            graphene.Argument:
-        """
-        kwargs.setdefault('name', self.name)
-        kwargs.setdefault('type', self.type)
-        kwargs.setdefault('required', self.required)
-        kwargs.setdefault('description', self.description)
-
-        return graphene.Argument(**kwargs)
-
-    def mount_as_field(
-            self,
-            **kwargs
-    ) -> typing.Union[graphene.Field, graphene.Dynamic]:
-        """Get mounted graphene field.
-
-         Returns:
-             graphene.Field:
+            graphene.types.unmountedtype.UnmountedType: result
         """
         from . import resolver
+        registry = registry or typedef.GRAPHENE_TYPE_REGISTRY
 
-        kwargs.setdefault('name', self.name)
-        kwargs.setdefault('type', self.type)
-        kwargs.setdefault('required', self.required)
-        kwargs.setdefault('description', self.description)
-        kwargs.setdefault('deprecation_reason', self.deprecation_reason)
-        if (isinstance(self.type, type)
-                and issubclass(self.type, resolver.Resolver)):
-            field = self.type.as_field()
-            kwargs['type'] = core.get_unmounted_type(field)
-            kwargs.setdefault('args', field.args)
-            kwargs.setdefault('resolver', field.resolver)
-            kwargs.setdefault('description', field.description)
-            kwargs.setdefault('deprecation_reason', field.deprecation_reason)
+        namespace = self.name
+        mapping_bases = (graphene.InputObjectType,
+                         ) if is_input else (graphene.ObjectType,)
 
-        return graphene.Field(**kwargs)
+        options = self._get_options(
+            graphene.Argument if is_input else graphene.Field)
+        ret = None
+        # Mapping
+        if self.type is dict:
+            assert self.child_definition
+            _type: typing.Type = type(
+                namespace,
+                mapping_bases,
+                {
+                    **{
+                        k: (self.parse(
+                            v,
+                            default={
+                                'name': texttools.camel_case(f'{namespace}_{k}')}
+                        ).mount(as_=graphene.InputField if is_input else graphene.Field))
+                        for k, v in self.child_definition.items()
+                    },
+                    **dict(
+                        Meta=dict(
+                            interfaces=self.interfaces,
+                        )
+                    )
+                })
+            registry[namespace] = _type
+            ret = _type
+        # Iterable
+        elif self.type is list:
+            assert self.child_definition
+            ret = graphene.List(
+                self.parse(
+                    self.child_definition,
+                    default={'name': namespace}
+                ).as_type(is_input=is_input),
+                **options
+            )
+        # Unmounted type.
+        elif (isinstance(self.type, type)
+              and issubclass(self.type, graphene.types.unmountedtype.UnmountedType)):
+            ret = self.type(**options)
+        # Unmounted type (instance).
+        elif isinstance(self.type, graphene.types.unmountedtype.UnmountedType):
+            ret = self.type
+        # Dynamic
+        elif isinstance(self.type, str):
+            ret = typedef.dynamic_type(self.type)
+        else:
+            ret = self.type
+
+        return ret
+
+    def mount(
+            self,
+            *,
+            as_: typing.Type,
+            type_: graphene.types.unmountedtype.UnmountedType = None,
+            registry=None
+    ):
+        """Mount schema as a graphene mounted type instance.
+
+        Args:
+            as_ (typing.Type): Target type
+            type_ (graphene.types.unmountedtype.UnmountedType, optional):
+                Override unmmounted type. Defaults to None.
+            registry (typing.Mapping, optional): Graphene type registry. Defaults to None.
+
+        Returns:
+            Mounted type instance.
+        """
+
+        is_input = (
+            isinstance(as_, type)
+            and issubclass(
+                as_,
+                (graphene.Argument, graphene.InputField, graphene.InputObjectType)))
+        type_ = type_ or self.as_type(is_input=is_input, registry=registry)
+
+        if isinstance(type_, graphene.types.unmountedtype.UnmountedType):
+            return type_.mount_as(as_)
+        return as_(type=type_, **self._get_options(as_))

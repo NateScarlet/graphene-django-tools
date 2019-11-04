@@ -1,3 +1,4 @@
+# pylint:disable=missing-docstring,invalid-name,unused-variable
 
 import pytest
 import graphene
@@ -26,7 +27,6 @@ def test_simple():
     class Query(graphene.ObjectType):
         first_pet = FirstPet.as_field()
 
-    Pet.as_type('Pet')
     schema = graphene.Schema(query=Query)
     assert str(schema) == '''\
 schema {
@@ -85,7 +85,6 @@ def test_node():
     class Query(graphene.ObjectType):
         first_pet = FirstPet.as_field()
 
-    Pet.as_type('Pet')
     schema = graphene.Schema(query=Query)
     assert str(schema) == '''\
 schema {

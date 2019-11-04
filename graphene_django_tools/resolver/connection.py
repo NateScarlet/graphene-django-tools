@@ -66,11 +66,9 @@ def get_connection(
         if (isinstance(node, type)
                 and issubclass(node, resolver.Resolver)):
             node_name = schema_.FieldDefinition.parse(
-                node.schema).name or node.__name__
+                node.schema, default={'name': node.__name__}).name
         else:
             node_name = schema_.FieldDefinition.parse(node).name
-        if not node_name:
-            raise ValueError('Node name must defined in schema.')
         return node_name
     name = name or f'{_get_node_name()}Connection'
 

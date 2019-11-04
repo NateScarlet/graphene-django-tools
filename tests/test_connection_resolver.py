@@ -1,4 +1,4 @@
-# pylint:disable=missing-docstring,invalid-name
+# pylint:disable=missing-docstring,invalid-name,unused-variable
 import graphene
 
 import graphene_django_tools as gdtools
@@ -16,6 +16,10 @@ def test_simple():
 
     class Query(graphene.ObjectType):
         items = Items.as_field()
+
+    assert isinstance(Query.items, graphene.Field)
+    assert isinstance(Query.items.type, type)
+    assert issubclass(Query.items.type, graphene.ObjectType)
 
     schema = graphene.Schema(query=Query)
     result = schema.execute('''\
@@ -65,7 +69,6 @@ def test_dynamic():
     class Query(graphene.ObjectType):
         items = Items.as_field()
 
-    Item.as_type('Item')
     schema = graphene.Schema(query=Query)
     result = schema.execute('''\
 {

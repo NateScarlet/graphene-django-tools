@@ -23,6 +23,8 @@ def test_simple():
     class Query(graphene.ObjectType):
         foo = Foo.as_field()
 
+    assert len(Query.foo.args) == 2
+    print(dict(args=Query.foo.args['key'].type))
     schema = graphene.Schema(query=Query)
     result = schema.execute('''\
 {
@@ -58,42 +60,6 @@ def test_object():
 ''')
     assert not result.errors
     assert result.data == {"foo": {"ok": 1}}
-
-
-def test_nested():
-    class Foo(gdtools.Resolver):
-        schema = int
-
-        def resolve(self, **kwargs):
-            print({"parent": self.parent})
-            return self.parent['bar']
-
-    class Bar(gdtools.Resolver):
-        schema = {
-            "args": {
-                "bar": int
-            },
-            "type": {
-                "foo": Foo
-            },
-        }
-
-        def resolve(self, **kwargs):
-            return kwargs
-
-    class Query(graphene.ObjectType):
-        bar = Bar.as_field()
-
-    schema = graphene.Schema(query=Query)
-    result = schema.execute('''\
-{
-    bar(bar: 42){
-        foo
-    }
-}
-''')
-    assert not result.errors
-    assert result.data == {"bar": {"foo": 42}}
 
 
 def test_enum():

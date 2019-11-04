@@ -9,7 +9,6 @@ import graphene
 import graphql
 
 from . import schema as schema_
-from . import typedef
 
 
 class Resolver:
@@ -24,7 +23,12 @@ class Resolver:
     context: django.core.handlers.wsgi.WSGIRequest
 
     _field: typing.Optional[graphene.Field] = None
+    _schema: schema_.FieldDefinition
     _type: typing.Optional[graphene.Scalar | graphene.ObjectType] = None
+
+    def __init_subclass__(cls):
+        cls._parse_schema(default={'name': cls.__name__})
+        cls.as_type()
 
     def __init__(
             self,
@@ -72,10 +76,23 @@ class Resolver:
         return True
 
     @classmethod
+    def _parse_schema(cls, *, default: typing.Dict):
+        if not cls.schema:
+            raise NotImplementedError(
+                f'Resolver schema is not defined: {cls.__name__}')
+
+        def resolve_fn(parent, info, **kwargs):
+            return cls(parent=parent, info=info).resolve(**kwargs)
+        cls._schema = schema_.FieldDefinition.parse(
+            cls.schema,
+            default={**default, 'resolver': resolve_fn}
+        )
+        return cls._schema
+
+    @classmethod
     def as_type(
             cls,
-            namespace: str = None
-    ) -> typing.Union[graphene.Scalar, graphene.ObjectType]:
+    ) -> graphene.types.unmountedtype.UnmountedType:
         """Convert resolver as graphene type.
 
         Args:
@@ -83,27 +100,21 @@ class Resolver:
                 namespace for auto naming, use class name when value is None.
 
         Returns:
-            typing.Union[graphene.Scalar,graphene.ObjectType]:
+            graphene.types.unmountedtype.UnmountedType:
         """
 
         if cls._type:
             return cls._type
-        namespace = namespace or cls.__name__
-        ret = typedef.nullable(typedef.build_type(
-            namespace=namespace,
-            schema=cls.schema,
-            mapping_bases=(graphene.ObjectType,),
-        ), True)
 
-        if (isinstance(ret, type)
-                and issubclass(ret, graphene.ObjectType)):
-            def get_node(info, id_):
-                return cls(info=info).get_node(id_)
-            ret.get_node = get_node
+        ret = cls._schema.as_type()
 
-            def is_type_of(value, info):
-                return cls(info=info).validate(value)
-            ret.is_type_of = is_type_of
+        def get_node(info, id_):
+            return cls(info=info).get_node(id_)
+        ret.get_node = get_node
+
+        def is_type_of(value, info):
+            return cls(info=info).validate(value)
+        ret.is_type_of = is_type_of
 
         cls._type = ret
         return ret
@@ -116,25 +127,8 @@ class Resolver:
             graphene.Field: Converted field.
         """
 
-        if not cls.schema:
-            raise NotImplementedError(
-                f'Resolver schema is not defined: {cls.__name__}')
-        schema = schema_.FieldDefinition.parse(cls.schema)
         if cls._field:
             return cls._field
 
-        _type = cls.as_type(namespace=schema.name or cls.__name__)
-        args_type = typedef.build_args_type(
-            cls.__name__,
-            schema.args,
-        ) if schema.args else None
-
-        def resolver(parent, info, **kwargs):
-            return cls(parent=parent, info=info).resolve(**kwargs)
-
-        cls._field = schema.mount_as_field(
-            type=_type,
-            args=args_type,
-            resolver=resolver,
-        )
+        cls._field = cls._schema.mount(type_=cls.as_type(), as_=graphene.Field)
         return cls._field
