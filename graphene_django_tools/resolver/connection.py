@@ -7,7 +7,7 @@ from graphql_relay.connection import arrayconnection
 from . import resolver
 from . import schema as schema_
 
-CONNECTION_REGISTRY: typing.Dict[str, resolver.Resolver] = {}
+CONNECTION_REGISTRY: typing.Dict[str, typing.Type] = {}
 
 
 class PageInfo(resolver.Resolver):
@@ -61,7 +61,8 @@ def get_connection(
     """
 
     def _get_node_name() -> str:
-        if issubclass(node, resolver.Resolver):
+        if (isinstance(node, type)
+                and issubclass(node, resolver.Resolver)):
             node_name = schema_.FieldDefinition.parse(
                 node.schema).name or node.__name__
         else:

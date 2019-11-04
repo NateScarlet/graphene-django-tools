@@ -37,7 +37,8 @@ def build_type(
         schema: typing.Any,
         mapping_bases: typing.Tuple[typing.Type, ...],
         is_mount=False,
-) -> typing.Union[graphene.Scalar, graphene.ObjectType]:
+        registry=None,
+) -> graphene.utils.orderedtype.OrderedType:
     """Build field type from schema.
 
     Args:
@@ -45,10 +46,13 @@ def build_type(
         schema (typing.Any): Supported schema value.
         mapping_bases (typing.Tuple[typing.Type, ...]): Class bases for mapping field.
         is_mount (bool, optional): Whether returns mounted field. Defaults to False.
+        registry (typing.Dict, optional): Graphene type registry.
+            Defaults to `schema_.GRAPHENE_TYPE_REGISTRY`.
 
     Returns:
-        typing.Union[graphene.Scalar, graphene.ObjectType]: Graphene field type.
+        graphene.utils.orderedtype.OrderedType: Graphene field type.
     """
+    registry = registry or schema_.GRAPHENE_TYPE_REGISTRY
     schema = schema_.FieldDefinition.parse(schema)
     is_input = graphene.InputObjectType in mapping_bases
     mount = schema.mount_as_argument if is_input else schema.mount_as_field
@@ -57,8 +61,9 @@ def build_type(
 
     # Mapping
     if schema.type is dict:
+        name = schema.name or texttools.camel_case(namespace)
         field_type: typing.Type = type(
-            schema.name or texttools.camel_case(namespace),
+            name,
             mapping_bases,
             {
                 **{
@@ -74,6 +79,7 @@ def build_type(
                     )
                 )
             })
+        registry[name] = field_type
 
     # Iterable
     if schema.type is list:
@@ -84,6 +90,11 @@ def build_type(
                 mapping_bases=mapping_bases,
             ), False),
         )
+
+    # Dynamic
+    if isinstance(schema.type, str):
+        print(registry)
+        field_type = registry[schema.type]
 
     if is_mount:
         return mount(type=field_type)

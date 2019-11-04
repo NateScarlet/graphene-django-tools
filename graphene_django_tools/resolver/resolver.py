@@ -56,6 +56,7 @@ class Resolver:
         Returns:
             typing.Any: Corresponding node value.
         """
+        # pylint:disable=unused-argument
         return None
 
     def validate(self, value) -> bool:
@@ -67,12 +68,12 @@ class Resolver:
         Returns:
             bool: whether value match schema type.
         """
+        # pylint:disable=unused-argument
         return True
 
     @classmethod
     def as_type(
             cls,
-            *,
             namespace: str = None
     ) -> typing.Union[graphene.Scalar, graphene.ObjectType]:
         """Convert resolver as graphene type.
@@ -94,13 +95,15 @@ class Resolver:
             mapping_bases=(graphene.ObjectType,),
         )
 
-        def get_node(info, id_):
-            return cls(info=info).get_node(id_)
-        ret.get_node = get_node
+        if (isinstance(ret, type)
+                and issubclass(ret, graphene.ObjectType)):
+            def get_node(info, id_):
+                return cls(info=info).get_node(id_)
+            ret.get_node = get_node
 
-        def is_type_of(value, info):
-            return cls(info=info).validate(value)
-        ret.is_type_of = is_type_of
+            def is_type_of(value, info):
+                return cls(info=info).validate(value)
+            ret.is_type_of = is_type_of
 
         cls._type = ret
         return ret
@@ -133,6 +136,5 @@ class Resolver:
             type=_type,
             args=args_type,
             resolver=resolver,
-            required=False,
         )
         return cls._field
