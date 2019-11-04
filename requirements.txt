@@ -1,4 +1,5 @@
 django==2.2.3
+graphene==2.1.8
 graphene-django==2.3.2
 django-filter==2.1.0
 isodate==0.6.0

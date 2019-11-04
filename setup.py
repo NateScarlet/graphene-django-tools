@@ -6,6 +6,7 @@ from setuptools import find_packages, setup
 
 NAME = 'graphene_django_tools'
 REQUIRES = [
+    'graphene~=2.1.5',
     'graphene-django~=2.2.0',
     'isodate~=0.6.0'
 ]
