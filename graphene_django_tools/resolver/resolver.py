@@ -25,6 +25,7 @@ class Resolver:
     _field: typing.Optional[graphene.Field] = None
     _schema: schema_.FieldDefinition
     _type: typing.Optional[graphene.Scalar | graphene.ObjectType] = None
+    _as_interface: typing.Optional[typing.Type[graphene.Interface]] = None
 
     def __init_subclass__(cls):
         cls._parse_schema(default={'name': cls.__name__})
@@ -42,6 +43,7 @@ class Resolver:
 
     def resolve(self, **kwargs):
         """Resolve the field.  """
+        # pylint:disable=unused-argument
 
         field_name = self.info.field_name
         if isinstance(self.parent, typing.Mapping) and field_name in self.parent:
@@ -60,7 +62,7 @@ class Resolver:
         Returns:
             typing.Any: Corresponding node value.
         """
-        # pylint:disable=unused-argument
+        # pylint:disable=unused-argument,no-self-use
         return None
 
     def validate(self, value) -> bool:
@@ -72,7 +74,7 @@ class Resolver:
         Returns:
             bool: whether value match schema type.
         """
-        # pylint:disable=unused-argument
+        # pylint:disable=unused-argument,no-self-use
         return True
 
     @classmethod
@@ -132,3 +134,23 @@ class Resolver:
 
         cls._field = cls._schema.mount(type_=cls.as_type(), as_=graphene.Field)
         return cls._field
+
+    @classmethod
+    def as_interface(cls) -> typing.Type[graphene.Interface]:
+        """Convert resolver schema as interface
+
+        Raises:
+            ValueError: Can not convert to interface.
+
+        Returns:
+            typing.Type[graphene.Interface]: Convert result, will cache on class.
+        """
+        if cls._schema.type is not dict:
+            raise ValueError(
+                f'Schema can not use as interface, should be mapping: {cls.__name__}')
+
+        if cls._as_interface:
+            return cls._as_interface
+        cls._as_interface = cls._schema.as_type(
+            mapping_bases=(graphene.Interface,))
+        return cls._as_interface

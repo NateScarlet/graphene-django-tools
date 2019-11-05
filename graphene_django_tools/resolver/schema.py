@@ -5,8 +5,6 @@
 from __future__ import annotations
 
 import dataclasses
-import datetime
-import decimal
 import typing
 
 import django.db.models
@@ -27,7 +25,7 @@ class FieldDefinition:
     type: typing.Type
     required: bool
     name: str
-    interfaces: typing.Iterable[graphene.Interface]
+    interfaces: typing.Tuple[typing.Type[graphene.Interface], ...]
     description: typing.Optional[str]
     deprecation_reason: typing.Optional[str]
     resolver: typing.Optional[typing.Callable]
@@ -63,8 +61,8 @@ class FieldDefinition:
             type_def = v['type']
         if 'name' not in config:
             raise ValueError(f'Not specified field name in: {v}')
+        # Convert args
         config.setdefault('args', {})
-        config.setdefault('interfaces', ())
         if config['args']:
             config['args'] = {
                 k: (cls
@@ -76,6 +74,12 @@ class FieldDefinition:
                     .mount(as_=graphene.Argument))
                 for k, v in config['args'].items()
             }
+        # Convert interfaces
+        config.setdefault('interfaces', ())
+        config['interfaces'] = tuple(
+            i.as_interface() if (isinstance(i, type) and issubclass(i, resolver.Resolver)) else i
+            for i in config['interfaces']
+        )
 
         if isinstance(type_def, django.db.models.Field):
             config['type'] = graphene_django.converter.convert_django_field_with_choices(
@@ -165,7 +169,7 @@ class FieldDefinition:
     def as_type(
             self,
             *,
-            is_input: bool = False,
+            mapping_bases: typing.Tuple[typing.Type] = (graphene.ObjectType,),
             registry=None
     ) -> graphene.types.unmountedtype.UnmountedType:
         """Convert schema to graphene unmmounted type instance with options set.
@@ -177,12 +181,10 @@ class FieldDefinition:
         Returns:
             graphene.types.unmountedtype.UnmountedType: result
         """
-        from . import resolver
         registry = registry or typedef.GRAPHENE_TYPE_REGISTRY
 
         namespace = self.name
-        mapping_bases = (graphene.InputObjectType,
-                         ) if is_input else (graphene.ObjectType,)
+        is_input = graphene.InputObjectType in mapping_bases
 
         options = self._get_options(
             graphene.Argument if is_input else graphene.Field)
@@ -217,7 +219,7 @@ class FieldDefinition:
                 self.parse(
                     self.child_definition,
                     default={'name': namespace}
-                ).as_type(is_input=is_input),
+                ).as_type(mapping_bases=mapping_bases),
                 **options
             )
         # Unmounted type.
@@ -259,7 +261,10 @@ class FieldDefinition:
             and issubclass(
                 as_,
                 (graphene.Argument, graphene.InputField, graphene.InputObjectType)))
-        type_ = type_ or self.as_type(is_input=is_input, registry=registry)
+        mapping_bases = (graphene.InputObjectType,
+                         ) if is_input else (graphene.ObjectType,)
+        type_ = type_ or self.as_type(
+            mapping_bases=mapping_bases, registry=registry)
 
         if isinstance(type_, graphene.types.unmountedtype.UnmountedType):
             return type_.mount_as(as_)
