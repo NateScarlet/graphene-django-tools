@@ -84,6 +84,7 @@ class FieldDefinition:
         elif isinstance(type_def, type) and issubclass(type_def, resolver.Resolver):
             _resolver: typing.Type[resolver.Resolver] = type_def
             # merge schema
+            config['name'] = _resolver._schema.name
             config['type'] = _resolver._schema.type
             config['args'].update(**_resolver._schema.args)
             config['interfaces'] += _resolver._schema.interfaces

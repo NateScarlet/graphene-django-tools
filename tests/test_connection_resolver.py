@@ -22,6 +22,37 @@ def test_simple():
     assert issubclass(Query.items.type, graphene.ObjectType)
 
     schema = graphene.Schema(query=Query)
+    assert str(schema) == '''\
+schema {
+  query: Query
+}
+
+type Item {
+  name: String!
+}
+
+type ItemConnection {
+  pageInfo: PageInfoV2
+  edges: [ItemConnectionEdge]
+}
+
+type ItemConnectionEdge {
+  node: Item
+  cursor: String!
+}
+
+type PageInfoV2 {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+  total: Int!
+}
+
+type Query {
+  items(first: Int, last: Int, before: String, after: String): ItemConnection
+}
+'''
     result = schema.execute('''\
 {
     items{

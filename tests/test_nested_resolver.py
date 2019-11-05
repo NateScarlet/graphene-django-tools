@@ -70,12 +70,12 @@ schema {
   query: Query
 }
 
-type Bar {
+type Foo {
   value: Int
 }
 
 type Query {
-  bar(bar: Int): [Bar]
+  bar(bar: Int): [Foo]
 }
 '''
     result = schema.execute('''\
