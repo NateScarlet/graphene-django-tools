@@ -215,26 +215,29 @@ class FieldDefinition:
         # Iterable
         elif self.type is list:
             assert self.child_definition
+            _item_schema = self.parse(
+                self.child_definition,
+                default={'name': namespace}
+            )
+            _item_type = _item_schema.as_type(mapping_bases=mapping_bases)
+            if _item_schema.required:
+                # `required` option for list item not work,
+                # so non-null structure is required.
+                _item_type = graphene.NonNull(_item_type)
             ret = graphene.List(
-                self.parse(
-                    self.child_definition,
-                    default={'name': namespace}
-                ).as_type(mapping_bases=mapping_bases),
+                _item_type,
                 **options
             )
         # Unmounted type.
         elif (isinstance(self.type, type)
               and issubclass(self.type, graphene.types.unmountedtype.UnmountedType)):
             ret = self.type(**options)
-        # Unmounted type (instance).
-        elif isinstance(self.type, graphene.types.unmountedtype.UnmountedType):
-            ret = self.type
         # Dynamic
         elif isinstance(self.type, str):
             ret = typedef.dynamic_type(self.type)
+        # As-is
         else:
             ret = self.type
-
         return ret
 
     def mount(

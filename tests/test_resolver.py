@@ -292,3 +292,38 @@ type Query {
                  "name": 'pet1',
                  'age': 1}
     }
+
+
+def test_list():
+    class Foo(gdtools.Resolver):
+        schema = {
+            'args': {
+                'input': ['ID!']
+            },
+            'type': ['ID!'],
+            'required': True
+        }
+
+        def resolve(self, **kwargs):
+            return kwargs.get('input', [])
+
+    class Query(graphene.ObjectType):
+        foo = Foo.as_field()
+
+    schema = graphene.Schema(query=Query)
+    assert str(schema) == '''\
+schema {
+  query: Query
+}
+
+type Query {
+  foo(input: [ID!]): [ID!]!
+}
+'''
+    result = schema.execute('''\
+{
+    foo(input: "UGV0OjE=")
+}
+''')
+    assert not result.errors
+    assert result.data == {'foo': ["UGV0OjE="]}
