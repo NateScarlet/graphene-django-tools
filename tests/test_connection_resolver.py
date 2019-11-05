@@ -133,3 +133,85 @@ def test_dynamic():
                 "startCursor": "YXJyYXljb25uZWN0aW9uOjA=",
                 "endCursor": "YXJyYXljb25uZWN0aW9uOjE="}},
     }
+
+
+def test_name_conflict():
+    class Foo(gdtools.Resolver):
+        schema = {
+            'value': 'Int'
+        }
+
+        def resolve(self, **kwargs):
+            print({"parent": self.parent})
+            return self.parent['bar']
+
+    class Bar(gdtools.Resolver):
+        schema = {
+            'value': 'String'
+        }
+
+        def resolve(self, **kwargs):
+            return kwargs
+
+    class FooList(gdtools.Resolver):
+        schema = {
+            'args': {
+                'extraArg': 'String'
+            },
+            'type': gdtools.get_connection('Foo')
+        }
+
+    class BarList(gdtools.Resolver):
+        schema = gdtools.get_connection('Bar')
+
+    class Query(graphene.ObjectType):
+        foo_list = FooList.as_field()
+        bar_list = BarList.as_field()
+
+    schema = graphene.Schema(query=Query)
+    assert str(schema) == '''\
+schema {
+  query: Query
+}
+
+type Bar {
+  value: String
+}
+
+type BarConnection {
+  pageInfo: PageInfoV2
+  edges: [BarConnectionEdge]
+}
+
+type BarConnectionEdge {
+  node: Bar
+  cursor: String!
+}
+
+type Foo {
+  value: Int
+}
+
+type FooConnection {
+  pageInfo: PageInfoV2
+  edges: [FooConnectionEdge]
+}
+
+type FooConnectionEdge {
+  node: Foo
+  cursor: String!
+}
+
+type PageInfoV2 {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+  total: Int!
+}
+
+type Query {
+  fooList(extraArg: String, first: Int, last: Int, before: String, after: String): FooConnection
+  barList(first: Int, last: Int, before: String, after: String): BarConnection
+}
+'''

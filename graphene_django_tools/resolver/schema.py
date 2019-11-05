@@ -85,7 +85,7 @@ class FieldDefinition:
             _resolver: typing.Type[resolver.Resolver] = type_def
             # merge schema
             config['name'] = _resolver._schema.name
-            config['type'] = _resolver._schema.type
+            config['type'] = _resolver.as_type()
             config['args'].update(**_resolver._schema.args)
             config['interfaces'] += _resolver._schema.interfaces
             config.setdefault('required', _resolver._schema.required)
