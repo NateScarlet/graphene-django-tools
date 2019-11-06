@@ -1,15 +1,13 @@
 """Utility.  """
 from __future__ import annotations
-from dataclasses import dataclass
-from graphene_django_tools.core import get_modelnode
-import graphene
-
 
 import typing
+from dataclasses import dataclass
 
 import django.db.models
+import graphene
 
-from typing import Iterable
+from . import model_type
 
 
 @dataclass
@@ -50,7 +48,7 @@ class ID:
         """
         # pylint:disable=protected-access
         if (isinstance(expected, type) and issubclass(expected, django.db.models.Model)):
-            expected = get_modelnode(expected, is_autocreate=False)._meta.name
+            expected = model_type.get_model_typename(expected)
         if (isinstance(expected, type) and issubclass(expected, graphene.Node)):
             expected = expected._meta.name
         if self.type != expected:
