@@ -1,7 +1,9 @@
 Connection
 ====================
 
-Use ``ConnectionResolver`` to quick create relay compatible resolver.
+Use ``get_connection`` to quick create relay compatible github-like connection resolver.
+
+same name will returns same resolver, base on `CONNECTION_REGISTRY`.
 
 .. code:: python
 

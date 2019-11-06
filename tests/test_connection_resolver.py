@@ -32,30 +32,34 @@ type Item {
 }
 
 type ItemConnection {
-  pageInfo: PageInfoV2
-  edges: [ItemConnectionEdge]
+  edges: [ItemEdge]
+  nodes: [Item]
+  pageInfo: PageInfo!
+  totalCount: Int!
 }
 
-type ItemConnectionEdge {
+type ItemEdge {
   node: Item
   cursor: String!
 }
 
-type PageInfoV2 {
+type PageInfo {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
   startCursor: String
   endCursor: String
-  total: Int!
 }
 
 type Query {
-  items(first: Int, last: Int, before: String, after: String): ItemConnection
+  items(after: String, before: String, first: Int, last: Int): ItemConnection
 }
 '''
     result = schema.execute('''\
 {
     items{
+        nodes{
+            name
+        }
         edges {
             node{
                 name
@@ -63,27 +67,29 @@ type Query {
             cursor
         }
         pageInfo {
-            total
             hasNextPage
             hasPreviousPage
             startCursor
             endCursor
         }
+        totalCount
     }
 }
 ''')
     assert not result.errors
     assert result.data == {
         "items": {
+            "nodes": [{"name": "a"}, {"name": "b"}],
             "edges": [
                 {"node": {"name": "a"}, "cursor": "YXJyYXljb25uZWN0aW9uOjA="},
                 {"node": {"name": "b"}, "cursor": "YXJyYXljb25uZWN0aW9uOjE="}],
             "pageInfo": {
-                "total": 2,
                 "hasNextPage": False,
                 "hasPreviousPage": False,
                 "startCursor": "YXJyYXljb25uZWN0aW9uOjA=",
-                "endCursor": "YXJyYXljb25uZWN0aW9uOjE="}},
+                "endCursor": "YXJyYXljb25uZWN0aW9uOjE="},
+            "totalCount": 2,
+        },
     }
 
 
@@ -104,6 +110,9 @@ def test_dynamic():
     result = schema.execute('''\
 {
     items{
+        nodes {
+            name
+        }
         edges {
             node{
                 name
@@ -111,27 +120,29 @@ def test_dynamic():
             cursor
         }
         pageInfo {
-            total
             hasNextPage
             hasPreviousPage
             startCursor
             endCursor
         }
+        totalCount
     }
 }
 ''')
     assert not result.errors
     assert result.data == {
         "items": {
+            "nodes": [{"name": "a"}, {"name": "b"}],
             "edges": [
                 {"node": {"name": "a"}, "cursor": "YXJyYXljb25uZWN0aW9uOjA="},
                 {"node": {"name": "b"}, "cursor": "YXJyYXljb25uZWN0aW9uOjE="}],
             "pageInfo": {
-                "total": 2,
                 "hasNextPage": False,
                 "hasPreviousPage": False,
                 "startCursor": "YXJyYXljb25uZWN0aW9uOjA=",
-                "endCursor": "YXJyYXljb25uZWN0aW9uOjE="}},
+                "endCursor": "YXJyYXljb25uZWN0aW9uOjE="},
+            "totalCount": 2,
+        },
     }
 
 
@@ -179,11 +190,13 @@ type Bar {
 }
 
 type BarConnection {
-  pageInfo: PageInfoV2
-  edges: [BarConnectionEdge]
+  edges: [BarEdge]
+  nodes: [Bar]
+  pageInfo: PageInfo!
+  totalCount: Int!
 }
 
-type BarConnectionEdge {
+type BarEdge {
   node: Bar
   cursor: String!
 }
@@ -193,25 +206,26 @@ type Foo {
 }
 
 type FooConnection {
-  pageInfo: PageInfoV2
-  edges: [FooConnectionEdge]
+  edges: [FooEdge]
+  nodes: [Foo]
+  pageInfo: PageInfo!
+  totalCount: Int!
 }
 
-type FooConnectionEdge {
+type FooEdge {
   node: Foo
   cursor: String!
 }
 
-type PageInfoV2 {
+type PageInfo {
   hasNextPage: Boolean!
   hasPreviousPage: Boolean!
   startCursor: String
   endCursor: String
-  total: Int!
 }
 
 type Query {
-  fooList(extraArg: String, first: Int, last: Int, before: String, after: String): FooConnection
-  barList(first: Int, last: Int, before: String, after: String): BarConnection
+  fooList(extraArg: String, after: String, before: String, first: Int, last: Int): FooConnection
+  barList(after: String, before: String, first: Int, last: Int): BarConnection
 }
 '''
