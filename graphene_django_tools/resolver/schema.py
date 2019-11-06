@@ -206,7 +206,9 @@ class FieldDefinition:
                     },
                     **dict(
                         Meta=dict(
+                            name=self.name,
                             interfaces=self.interfaces,
+                            description=self.description,
                         )
                     )
                 })

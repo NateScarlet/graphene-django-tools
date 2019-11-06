@@ -1,4 +1,5 @@
 """Relay compatible connection resolver.  """
+import re
 import typing
 
 import graphene
@@ -46,9 +47,10 @@ def get_connection(
     if name in CONNECTION_REGISTRY:
         return CONNECTION_REGISTRY[name]
 
-    edge_name = f"{name}Edge".replace('ConnectionEdge', 'Edge')
+    edge_name = f"{re.sub('Connection$', '', name)}Edge"
     CONNECTION_REGISTRY[name] = type(name, (resolver.Resolver,), dict(schema=dict(
         name=name,
+        description=f"The connection type for {re.sub('Connection$', '', name)}.",
         args=dict(
             after={
                 'type': 'String',
@@ -93,8 +95,12 @@ def get_connection(
             'pageInfo': {
                 'type': graphene.relay.PageInfo,
                 'required': True,
+                'description': 'Information to aid in pagination.',
             },
-            'totalCount': 'Int!',
+            'totalCount': {
+                'type': 'Int!',
+                'description': 'Identifies the total count of items in the connection.',
+            },
         }
     )))
 
