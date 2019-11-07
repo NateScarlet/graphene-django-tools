@@ -327,3 +327,40 @@ type Query {
 ''')
     assert not result.errors
     assert result.data == {'foo': ["UGV0OjE="]}
+
+
+def test_default():
+    class Foo(gdtools.Resolver):
+        schema = {
+            'args': {
+                'input': {
+                    'type': 'Int',
+                    'default': 42,
+                },
+            },
+            'type': 'Int!',
+        }
+
+        def resolve(self, **kwargs):
+            return kwargs['input']
+
+    class Query(graphene.ObjectType):
+        foo = Foo.as_field()
+
+    schema = graphene.Schema(query=Query)
+    assert str(schema) == '''\
+schema {
+  query: Query
+}
+
+type Query {
+  foo(input: Int = 42): Int!
+}
+'''
+    result = schema.execute('''\
+{
+    foo
+}
+''')
+    assert not result.errors
+    assert result.data == {'foo': 42}

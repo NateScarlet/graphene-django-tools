@@ -29,6 +29,7 @@ class FieldDefinition:
     description: typing.Optional[str]
     deprecation_reason: typing.Optional[str]
     resolver: typing.Optional[typing.Callable]
+    default: typing.Any
 
     # Parse results:
     child_definition: typing.Any
@@ -124,6 +125,7 @@ class FieldDefinition:
         config.setdefault('description', None)
         config.setdefault('deprecation_reason', None)
         config.setdefault('resolver', None)
+        config.setdefault('default', None)
 
         return cls(
             type=config['type'],
@@ -134,6 +136,7 @@ class FieldDefinition:
             args=config['args'],
             interfaces=config['interfaces'],
             resolver=config['resolver'],
+            default=config['default'],
             child_definition=child_definition,
         )
 
@@ -162,6 +165,7 @@ class FieldDefinition:
             deprecation_reason=self.deprecation_reason,
             args=self.args,
             resolver=self.resolver,
+            default_value=self.default,
         )
 
         return {k: v for k, v in options.items() if k in allowed_options}
