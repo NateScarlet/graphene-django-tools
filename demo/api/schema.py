@@ -100,8 +100,8 @@ class DeleteNode(gdtools.NodeDeleteMutation):
 class Resolver(gdtools.Resolver):
     schema = {
         "args": {
-            "key": str,
-            "value": str,
+            "key": 'String',
+            "value": 'String',
         },
         "type": 'Int!',
         "description": "created from `Resolver`."
@@ -113,7 +113,7 @@ class Resolver(gdtools.Resolver):
 
 
 class FooResolver(gdtools.Resolver):
-    schema = int
+    schema = 'Int'
 
     def resolve(self, **kwargs):
         print({"parent": self.parent})
@@ -123,7 +123,7 @@ class FooResolver(gdtools.Resolver):
 class BarResolver(gdtools.Resolver):
     schema = {
         "args": {
-            "bar": int
+            "bar": 'Int'
         },
         "type": {
             "foo": FooResolver
@@ -167,17 +167,17 @@ class ModelFieldResolver(gdtools.Resolver):
 
 class ComplicatedResolver(gdtools.Resolver):
     _input_schema = {
-        "type": {"type": str},
+        "type": {"type": 'String'},
         "data": [
             {
                 "type":
                 {
                     "key": {
-                        "type": str,
+                        "type": 'String',
                         "required": True,
                         "description": "<description>",
                     },
-                    "value": int,
+                    "value": 'Int',
                     "extra": {
                         "type": ['String!'],
                         "deprecation_reason": "<deprecated>"
@@ -216,27 +216,22 @@ class CreateTask(gdtools.Resolver):
         return models.Task.objects.create(**kwargs)
 
 
-class TaskConnection(gdtools.ConnectionResolver):
-    schema = {'node': Task}
-
-
-class Tasks(TaskConnection):
+class Tasks(gdtools.Resolver):
+    schema = gdtools.get_connection(Task)
 
     def resolve(self, **kwargs):
-        return self.resolve_connection(models.Task.objects.all(), **kwargs)
+        return gdtools.resolve_connection(models.Task.objects.all(), **kwargs)
 
 
 class Item(gdtools.Resolver):
     schema = {'name': 'String!'}
 
 
-class ItemConnection(gdtools.ConnectionResolver):
-    schema = {'node': Item}
+class Items(gdtools.Resolver):
+    schema = gdtools.get_connection(Item)
 
-
-class Items(ItemConnection):
     def resolve(self, **kwargs):
-        return self.resolve_connection([{'name': 'a'}, {'name': 'b'}], **kwargs)
+        return gdtools.resolve_connection([{'name': 'a'}, {'name': 'b'}], **kwargs)
 
 
 class Mutation(graphene.ObjectType):
