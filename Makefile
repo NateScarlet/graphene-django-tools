@@ -1,18 +1,10 @@
-.venv/.make_success: requirements.txt dev-requirements.txt .venv
-	. ./scripts/activate-venv.sh && pip install -r requirements.txt -r dev-requirements.txt
-	echo > .venv/.make_success
+.PHONY: test dev
 
-.venv:
-	virtualenv .venv
+dist: graphene_django_tools pyproject.toml
+	poetry build
 
-.PHONY: test build dev
+dev:
+	poetry run python ./manage.py runserver
 
-dev: .venv/.make_success
-	. ./scripts/activate-venv.sh && ./manage.py runserver
-
-test: .venv/.make_success
-	. ./scripts/activate-venv.sh && pytest --cov=graphene_django_tools -vv
-
-build: .venv/.make_success
-	rm -rf build
-	. ./scripts/activate-venv.sh && python setup.py sdist bdist_wheel
+test:
+	poetry run pytest --cov=graphene_django_tools -vv
