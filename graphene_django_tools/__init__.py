@@ -1,7 +1,5 @@
 """Tools for use [graphene-django](https://github.com/graphql-python/graphene-django).  """
 
-__version__ = '0.19.0'
-
 from graphql.execution.base import ResolveInfo
 
 from . import interfaces, utils
