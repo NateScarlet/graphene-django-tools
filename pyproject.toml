@@ -18,8 +18,8 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.7"
 graphene = "^2.1"
-isodate = "^0.6.0"
-graphene-django = "^2.5,<2.6" #https://github.com/graphql-python/graphene-django/issues/792
+isodate = "^0.6"
+graphene-django = "^2.2, <2.6.0" #https://github.com/graphql-python/graphene-django/issues/792
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
