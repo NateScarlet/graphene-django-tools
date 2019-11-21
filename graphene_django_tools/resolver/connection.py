@@ -1,4 +1,5 @@
 """Relay compatible connection resolver.  """
+import lazy_object_proxy as lazy
 import re
 import typing
 
@@ -9,7 +10,7 @@ from graphql_relay.connection import arrayconnection
 from . import resolver
 from . import schema as schema_
 
-CONNECTION_REGISTRY: typing.Dict[str, typing.Type] = {}
+REGISTRY: typing.Dict[str, typing.Type] = {}
 
 
 def _get_node_name(node: typing.Union[resolver.Resolver, str, typing.Any]) -> str:
@@ -24,31 +25,26 @@ def _get_node_name(node: typing.Union[resolver.Resolver, str, typing.Any]) -> st
     return node_name
 
 
-def get_connection(
+def build_schema(
         node: typing.Union[resolver.Resolver, str, typing.Any],
         *,
-        name: str = None,
-) -> resolver.Resolver:
-    """Get a github-like connection resolver. see at https://developer.github.com/v4/explorer/
+        name: str = None,) -> dict:
+    """Build a github-like connection resolver schema.
+    see at https://developer.github.com/v4/explorer/
 
     Args:
         node (typing.Union[resolver.Resolver, str, typing.Any]): Node resolver or schema.
-        page_info (typing.Union[resolver.Resolver, typing.Any], optional):
-            Page resolver or schema, defaults to PageInfo.
         name (str, optional): Override default connection name,
             required when node name is not defined.
 
     Returns:
-        resolver.Resolver: Created connection resolver, same name will returns same resolver.
+        dict: dict for Resolver schema.
     """
 
     name = name or f'{_get_node_name(node)}Connection'
-
-    if name in CONNECTION_REGISTRY:
-        return CONNECTION_REGISTRY[name]
-
     edge_name = f"{re.sub('Connection$', '', name)}Edge"
-    CONNECTION_REGISTRY[name] = type(name, (resolver.Resolver,), dict(schema=dict(
+
+    return dict(
         name=name,
         description=f"The connection type for {re.sub('Connection$', '', name)}.",
         args=dict(
@@ -102,12 +98,40 @@ def get_connection(
                 'description': 'Identifies the total count of items in the connection.',
             },
         }
-    )))
-
-    return CONNECTION_REGISTRY[name]
+    )
 
 
-def resolve_connection(
+def get_type(
+        node: typing.Union[resolver.Resolver, str, typing.Any],
+        *,
+        name: str = None,
+) -> resolver.Resolver:
+    """Get connection resolver from registry.
+    one will be created with `build_schema` if not found in registry.
+
+    Args:
+        node (typing.Union[resolver.Resolver, str, typing.Any]): Node resolver or schema.
+        name (str, optional): Override default connection name,
+            required when node name is not defined.
+
+    Returns:
+        resolver.Resolver: Created connection resolver, same name will returns same resolver.
+    """
+
+    name = name or f'{_get_node_name(node)}Connection'
+
+    if name in REGISTRY:
+        return REGISTRY[name]
+
+    REGISTRY[name] = type(
+        name, (resolver.Resolver,),
+        dict(schema=build_schema(node, name=name))
+    )
+
+    return REGISTRY[name]
+
+
+def resolve(
         iterable,
         *,
         first: int = None,
@@ -139,25 +163,33 @@ def resolve_connection(
     if isinstance(last, int):
         start_offset = max(start_offset, end_offset - last)
 
-    nodes = list(iterable[start_offset:end_offset])
-    edges = [
+    nodes = lazy.Proxy(lambda: list(iterable[start_offset:end_offset]))
+    edges = lazy.Proxy(lambda: [
         dict(
             node=node,
             cursor=arrayconnection.offset_to_cursor(start_offset + i)
         )
         for i, node in enumerate(nodes)
-    ]
+    ])
 
     return dict(
         nodes=nodes,
         edges=edges,
-        pageInfo=dict(
+        pageInfo=lazy.Proxy(lambda: dict(
             start_cursor=edges[0]['cursor'] if edges else None,
             end_cursor=edges[-1]['cursor'] if edges else None,
             has_previous_page=isinstance(
                 last, int) and start_offset > (after_offset + 1 if after else 0),
             has_next_page=isinstance(
                 first, int) and end_offset < (before_offset if before else _len),
-        ),
+        )),
         totalCount=_len,
     )
+
+# TODO: remove at next minor version:
+# pylint:disable=invalid-name
+
+
+get_connection = get_type
+resolve_connection = resolve
+CONNECTION_REGISTRY = REGISTRY
