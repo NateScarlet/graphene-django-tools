@@ -4,7 +4,7 @@ Resolver
 Allow create graphql schema with `apollo-like <https://www.apollographql.com/docs/tutorial/resolvers/#what-is-a-resolver>`_
 resolver and and mongoose-like schema by using the ``Resolver`` class.
 
-Python doc string will be used as field description.
+Python docstring will not be used as field description, description should be defined in schema.
 
 Example
 -------------------
