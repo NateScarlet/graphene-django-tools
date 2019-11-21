@@ -1,4 +1,5 @@
 """Relay compatible connection resolver.  """
+import lazy_object_proxy as lazy
 import re
 import typing
 
@@ -162,26 +163,26 @@ def resolve(
     if isinstance(last, int):
         start_offset = max(start_offset, end_offset - last)
 
-    nodes = list(iterable[start_offset:end_offset])
-    edges = [
+    nodes = lazy.Proxy(lambda: list(iterable[start_offset:end_offset]))
+    edges = lazy.Proxy(lambda: [
         dict(
             node=node,
             cursor=arrayconnection.offset_to_cursor(start_offset + i)
         )
         for i, node in enumerate(nodes)
-    ]
+    ])
 
     return dict(
         nodes=nodes,
         edges=edges,
-        pageInfo=dict(
+        pageInfo=lazy.Proxy(lambda: dict(
             start_cursor=edges[0]['cursor'] if edges else None,
             end_cursor=edges[-1]['cursor'] if edges else None,
             has_previous_page=isinstance(
                 last, int) and start_offset > (after_offset + 1 if after else 0),
             has_next_page=isinstance(
                 first, int) and end_offset < (before_offset if before else _len),
-        ),
+        )),
         totalCount=_len,
     )
 

@@ -229,3 +229,51 @@ type Query {
   barList(after: String, before: String, first: Int, last: Int): BarConnection
 }
 '''
+
+
+def test_lazy_resolve():
+    class Item(gdtools.Resolver):
+        schema = {'name': 'String!'}
+
+    class Items(gdtools.Resolver):
+        schema = gdtools.get_connection(Item)
+
+        def resolve(self, **kwargs):
+            class DummyIterable:
+                def __len__(self):
+                    return 10
+
+            return gdtools.resolve_connection(DummyIterable(), **kwargs)
+
+    class Query(graphene.ObjectType):
+        items = Items.as_field()
+
+    assert isinstance(Query.items, graphene.Field)
+    assert isinstance(Query.items.type, type)
+    assert issubclass(Query.items.type, graphene.ObjectType)
+
+    schema = graphene.Schema(query=Query)
+    result = schema.execute('''\
+{
+    items{
+        totalCount
+    }
+}
+''')
+    assert not result.errors
+    assert result.data == {
+        "items": {
+            "totalCount": 10,
+        },
+    }
+    result = schema.execute('''\
+{
+    items{
+        nodes{
+            name
+        }
+    }
+}
+''')
+    assert (str(result.errors) ==
+            str([TypeError("'DummyIterable' object is not subscriptable")]))
