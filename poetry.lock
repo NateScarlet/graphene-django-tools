@@ -26,6 +26,7 @@ version = ">=1.4.0,<1.5"
 [[package]]
 category = "dev"
 description = "Atomic file writes."
+marker = "sys_platform == \"win32\""
 name = "atomicwrites"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
@@ -110,11 +111,11 @@ description = "Graphene Django integration"
 name = "graphene-django"
 optional = false
 python-versions = "*"
-version = "2.6.0"
+version = "2.5.0"
 
 [package.dependencies]
 Django = ">=1.11"
-graphene = ">=2.1.7,<3"
+graphene = ">=2.1.3,<3"
 graphql-core = ">=2.1.0,<3"
 promise = ">=2.1"
 singledispatch = ">=3.4.0.3"
@@ -304,7 +305,7 @@ description = "pytest: simple powerful testing with Python"
 name = "pytest"
 optional = false
 python-versions = ">=3.5"
-version = "5.2.4"
+version = "5.3.0"
 
 [package.dependencies]
 atomicwrites = ">=1.0"
@@ -432,7 +433,7 @@ version = "0.6.0"
 more-itertools = "*"
 
 [metadata]
-content-hash = "8302397b2dcc98771d0ce5397dbccfaf8224e52eb085eeeb25cee0543045d22c"
+content-hash = "13dbb830c51997ab9d70b08399617081a1b5e3bf589164b105cf80709084ee05"
 python-versions = "^3.7"
 
 [metadata.hashes]
@@ -446,7 +447,7 @@ coverage = ["08907593569fe59baca0bf152c43f3863201efb6113ecb38ce7e97ce339805a6", 
 django = ["16040e1288c6c9f68c6da2fe75ebde83c0a158f6f5d54f4c5177b0c1478c5b86", "89c2007ca4fa5b351a51a279eccff298520783b713bf28efb89dfb81c80ea49b"]
 django-filter = ["558c727bce3ffa89c4a7a0b13bc8976745d63e5fd576b3a9a851650ef11c401b", "c3deb57f0dd7ff94d7dce52a047516822013e2b441bed472b722a317658cfd14"]
 graphene = ["09165f03e1591b76bf57b133482db9be6dac72c74b0a628d3c93182af9c5a896", "2cbe6d4ef15cfc7b7805e0760a0e5b80747161ce1b0f990dfdc0d2cf497c12f9"]
-graphene-django = ["0d1404ab1ba7873a8e848d87d138f615391d100ed0c046482c164429cfb992ef", "fa9e815f63e3c972773adc96c3f3c81e537dba0edcd0f1be92c799bc0b6ed0a8"]
+graphene-django = ["25f2bdf41e30bc7b860c1c13bfb4ba5c3961712394f16e847d79a69fc25a06b1", "d75b3e468d8d765d5964bc809e403b44bf7c37556c0464230a5083bccf14581b"]
 graphql-core = ["1488f2a5c2272dc9ba66e3042a6d1c30cea0db4c80bd1e911c6791ad6187d91b", "da64c472d720da4537a2e8de8ba859210b62841bd47a9be65ca35177f62fe0e4"]
 graphql-relay = ["0e94201af4089e1f81f07d7bd8f84799768e39d70fa1ea16d1df505b46cc6335", "75aa0758971e252964cb94068a4decd472d2a8295229f02189e3cbca1f10dbb5", "7fa74661246e826ef939ee92e768f698df167a7617361ab399901eaebf80dce6"]
 importlib-metadata = ["aa18d7378b00b40847790e7c27e11673d7fed219354109d0e7b9e5b25dc3ad26", "d5f18a79777f3aa179c145737780282e27b508fc8fd688cb17c7a813e8bd39af"]
@@ -464,7 +465,7 @@ pylint = ["3db5468ad013380e987410a8d6956226963aed94ecb5f9d3a28acca6d9ac36cd", "8
 pylint-django = ["9bdb0e022b19881218a25ffb8ad05e83b83bc5cdbc58e5ee8ffbe99965193f6c", "9eea6a026eaa5ecfad5fed7a33faf77ef55a43cc78afbcaf2f6ddd071156b3f8"]
 pylint-plugin-utils = ["2f30510e1c46edf268d3a195b2849bd98a1b9433229bb2ba63b8d776e1fc4d0a", "57625dcca20140f43731311cd8fd879318bf45a8b0fd17020717a8781714a25a"]
 pyparsing = ["20f995ecd72f2a1f4bf6b072b63b22e2eb457836601e76d6e5dfcd75436acc1f", "4ca62001be367f01bd3e92ecbb79070272a9d4964dce6a48a82ff0b8bc7e683a"]
-pytest = ["8e256fe71eb74e14a4d20a5987bb5e1488f0511ee800680aaedc62b9358714e8", "ff0090819f669aaa0284d0f4aad1a6d9d67a6efdc6dd4eb4ac56b704f890a0d6"]
+pytest = ["1897d74f60a5d8be02e06d708b41bf2445da2ee777066bd68edf14474fc201eb", "f6a567e20c04259d41adce9a360bd8991e6aa29dd9695c5e6bd25a9779272673"]
 pytest-cov = ["cc6742d8bac45070217169f5f72ceee1e0e55b0221f54bcf24845972d3a47f2b", "cdbdef4f870408ebdbfeb44e63e07eb18bb4619fae852f6e760645fa36172626"]
 pytest-django = ["17592f06d51c2ef4b7a0fb24aa32c8b6998506a03c8439606cb96db160106659", "ef3d15b35ed7e46293475e6f282e71a53bcd8c6f87bdc5d5e7ad0f4d49352127"]
 pytz = ["1c557d7d0e871de1f5ccd5833f60fb2550652da6be2693c1e02300743d21500d", "b02c06db6cf09c12dd25137e563b31700d3b80fcc4ad23abb7a315f2789819be"]
