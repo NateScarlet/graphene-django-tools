@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import dataclasses
+import enum
 import typing
 
 import django.db.models
@@ -14,6 +15,37 @@ import graphene_django.registry
 
 from .. import texttools
 from . import typedef
+
+
+class SpecialType(enum.Enum):
+    """Indicate special type syntax used in schema.  """
+
+    MAPPING = enum.auto()
+    LIST = enum.auto()
+    ENUM = enum.auto()
+
+
+@dataclasses.dataclass
+class EnumFieldDefinition:
+    value: str
+    description: typing.Optional[str]
+
+    @classmethod
+    def parse(cls, v) -> EnumFieldDefinition:
+        """Parse schema for enum
+
+        Args:
+            v (typing.Any): schema item
+
+        Returns:
+            EnumFieldDefinition: Parsing result
+        """
+        if isinstance(v, str):
+            return cls(value=v, description=None)
+        elif isinstance(v, tuple) and len(v) == 2:
+            return cls(value=v[0], description=v[1])
+        raise ValueError(
+            f'Enum field should be a str or 2-value tuple, got {v}')
 
 
 @dataclasses.dataclass
@@ -112,12 +144,14 @@ class FieldDefinition:
                 type_def = type_def[:-1]
             config['type'] = type_def
         elif isinstance(type_def, typing.Mapping):
-            config['type'] = dict
+            config['type'] = SpecialType.MAPPING
             child_definition = type_def
-        elif isinstance(type_def, typing.Iterable):
-            config['type'] = list
-            assert len(type_def) == 1, type_def
+        elif isinstance(type_def, typing.Iterable) and len(type_def) == 1:
+            config['type'] = SpecialType.LIST
             child_definition = type_def[0]
+        elif isinstance(type_def, typing.Iterable) and len(type_def) > 1:
+            config['type'] = SpecialType.ENUM
+            child_definition = type_def
         else:
             config['type'] = type_def
 
@@ -194,7 +228,7 @@ class FieldDefinition:
             graphene.Argument if is_input else graphene.Field)
         ret = None
         # Mapping
-        if self.type is dict:
+        if self.type is SpecialType.MAPPING:
             assert self.child_definition
             _type: typing.Type = type(
                 namespace,
@@ -219,7 +253,7 @@ class FieldDefinition:
             registry[namespace] = _type
             ret = _type
         # Iterable
-        elif self.type is list:
+        elif self.type is SpecialType.LIST:
             assert self.child_definition
             _item_schema = self.parse(
                 self.child_definition,
@@ -234,6 +268,22 @@ class FieldDefinition:
                 _item_type,
                 **options
             )
+        elif self.type is SpecialType.ENUM:
+            assert self.child_definition
+            _enum_defs = [EnumFieldDefinition.parse(i)
+                          for i in self.child_definition]
+            _enum = enum.Enum( # type: ignore
+                namespace, {i.value: i.value for i in _enum_defs})
+
+            def _get_description(v):
+                if v is None:
+                    return self.description
+                return next(i for i in _enum_defs if i.value == v.value).description
+            ret = graphene.Enum.from_enum(
+                _enum,
+                description=_get_description
+            )
+
         # Unmounted type.
         elif (isinstance(self.type, type)
               and issubclass(self.type, graphene.types.unmountedtype.UnmountedType)):

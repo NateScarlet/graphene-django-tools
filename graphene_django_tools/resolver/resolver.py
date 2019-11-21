@@ -145,7 +145,7 @@ class Resolver:
         Returns:
             typing.Type[graphene.Interface]: Convert result, will cache on class.
         """
-        if cls._schema.type is not dict:
+        if cls._schema.type is not schema_.SpecialType.MAPPING:
             raise ValueError(
                 f'Schema can not use as interface, should be mapping: {cls.__name__}')
 

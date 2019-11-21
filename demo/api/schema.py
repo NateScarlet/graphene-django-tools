@@ -153,6 +153,20 @@ class EnumResolver(gdtools.Resolver):
         return kwargs['value']
 
 
+class SimpleEnumResolver(gdtools.Resolver):
+    schema = {
+        'type': ('a', 'b'),
+        'description': 'Auto created enum.',
+        'enum_descriptions': {
+            'a': 'This is a',
+            'b': 'This is b',
+        }
+    }
+
+    def resolve(self, **kwargs):
+        return 'a'
+
+
 class ModelFieldResolver(gdtools.Resolver):
     schema = {
         'args': {
@@ -277,6 +291,7 @@ class Query(graphene.ObjectType):
     nested_resolver = BarResolver.as_field()
     complicated_resolver = ComplicatedResolver.as_field()
     enum_resolver = EnumResolver.as_field()
+    simple_enum_resolver = SimpleEnumResolver.as_field()
     model_field_resolver = ModelFieldResolver.as_field()
     tasks = Tasks.as_field()
     items = Items.as_field()

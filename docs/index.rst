@@ -13,6 +13,7 @@ Welcome to graphene_django_tools's documentation!
   resolver
   dynamic
   connection
+  enum
 
 
 Indices and tables
