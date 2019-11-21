@@ -14,6 +14,7 @@ Welcome to graphene_django_tools's documentation!
   dynamic
   connection
   enum
+  union
 
 
 Indices and tables

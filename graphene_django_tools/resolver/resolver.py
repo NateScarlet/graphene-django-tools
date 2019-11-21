@@ -83,8 +83,15 @@ class Resolver:
             raise NotImplementedError(
                 f'Resolver schema is not defined: {cls.__name__}')
 
-        def resolve_fn(parent, info, **kwargs):
-            return cls(parent=parent, info=info).resolve(**kwargs)
+        def resolve_fn(parent, info: graphql.execution.base.ResolveInfo, **kwargs):
+            ret = cls(parent=parent, info=info).resolve(**kwargs)
+            if isinstance(ret, typing.Mapping) and '__typename' in ret:
+                type_ = info.schema.get_type(ret['__typename']).graphene_type
+                ret = type_(
+                    **{k: v for k, v in ret.items()
+                       if k in type_._meta.fields})
+            return ret
+
         cls._schema = schema_.FieldDefinition.parse(
             cls.schema,
             default={**default, 'resolver': resolve_fn}

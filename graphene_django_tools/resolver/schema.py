@@ -23,6 +23,7 @@ class SpecialType(enum.Enum):
     MAPPING = enum.auto()
     LIST = enum.auto()
     ENUM = enum.auto()
+    UNION = enum.auto()
 
 
 @dataclasses.dataclass
@@ -146,11 +147,17 @@ class FieldDefinition:
         elif isinstance(type_def, typing.Mapping):
             config['type'] = SpecialType.MAPPING
             child_definition = type_def
+        elif isinstance(type_def, typing.Iterable) and len(type_def) == 0:
+            raise ValueError('Can not use empty iterable as type.')
         elif isinstance(type_def, typing.Iterable) and len(type_def) == 1:
             config['type'] = SpecialType.LIST
             child_definition = type_def[0]
-        elif isinstance(type_def, typing.Iterable) and len(type_def) > 1:
+        elif (isinstance(type_def, typing.Iterable)
+              and all(isinstance(i, (str, tuple)) for i in type_def)):
             config['type'] = SpecialType.ENUM
+            child_definition = type_def
+        elif isinstance(type_def, typing.Iterable):
+            config['type'] = SpecialType.UNION
             child_definition = type_def
         else:
             config['type'] = type_def
@@ -272,7 +279,7 @@ class FieldDefinition:
             assert self.child_definition
             _enum_defs = [EnumFieldDefinition.parse(i)
                           for i in self.child_definition]
-            _enum = enum.Enum( # type: ignore
+            _enum = enum.Enum(  # type: ignore
                 namespace, {i.value: i.value for i in _enum_defs})
 
             def _get_description(v):
@@ -283,6 +290,21 @@ class FieldDefinition:
                 _enum,
                 description=_get_description
             )
+        elif self.type is SpecialType.UNION:
+            assert self.child_definition
+
+            def _dynamic():
+                _types = [FieldDefinition.parse(i, default={'name': f'{namespace}{index}'}).as_type()
+                          for index, i in enumerate(self.child_definition)]
+                _types = [i() if callable(i) and not isinstance(i, type) else i
+                          for i in _types]
+                return type(namespace, (graphene.Union,), dict(
+                    Meta=dict(
+                        types=_types,
+                        description=self.description,
+                    )
+                ))
+            ret = _dynamic
 
         # Unmounted type.
         elif (isinstance(self.type, type)

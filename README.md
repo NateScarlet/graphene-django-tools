@@ -203,6 +203,55 @@ enum with description:
     assert enum_type.get_value('c').description is None
 ```
 
+union:
+
+```python
+    class Foo(gdtools.Resolver):
+        schema = ({'a': 'String'}, {'b': 'Int'})
+
+        def resolve(self, **kwargs):
+            return {'__typename': 'Foo0', 'a': 'a'}
+
+    class Query(graphene.ObjectType):
+        foo = Foo.as_field()
+
+    schema = graphene.Schema(query=Query)
+    assert str(schema) == '''\
+schema {
+  query: Query
+}
+
+union Foo = Foo0 | Foo1
+
+type Foo0 {
+  a: String
+}
+
+type Foo1 {
+  b: Int
+}
+
+type Query {
+  foo: Foo
+}
+'''
+```
+
+```graphql
+{
+  foo {
+    __typename
+    ... on Foo0 {
+      a
+    }
+  }
+}
+```
+
+```json
+{ "foo": { "__typename": "Foo0", "a": "a" } }
+```
+
 complicated example:
 
 ```python
