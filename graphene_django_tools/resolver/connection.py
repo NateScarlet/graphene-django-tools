@@ -163,7 +163,7 @@ def resolve(
     if isinstance(last, int):
         start_offset = max(start_offset, end_offset - last)
 
-    nodes = lazy.Proxy(lambda: list(iterable[start_offset:end_offset]))
+    nodes = lazy.Proxy(lambda: iterable[start_offset:end_offset])
     edges = lazy.Proxy(lambda: [
         dict(
             node=node,

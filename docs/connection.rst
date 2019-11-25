@@ -5,6 +5,8 @@ Use ``get_connection`` to quick create relay compatible github-like connection r
 
 same name will returns same resolver, base on `CONNECTION_REGISTRY`.
 
+Use ``resolve_connection`` to handle standard connection args.
+
 .. code:: python
 
   import graphene
