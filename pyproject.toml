@@ -21,6 +21,7 @@ graphene = "^2.1"
 isodate = "^0.6"
 graphene-django = "^2.2, <2.6.0" #https://github.com/graphql-python/graphene-django/issues/792
 lazy-object-proxy = "^1.4"
+graphene-resolver = "^0.1.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
