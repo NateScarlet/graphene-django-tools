@@ -111,11 +111,11 @@ description = "Graphene Django integration"
 name = "graphene-django"
 optional = false
 python-versions = "*"
-version = "2.5.0"
+version = "2.7.1"
 
 [package.dependencies]
 Django = ">=1.11"
-graphene = ">=2.1.3,<3"
+graphene = ">=2.1.7,<3"
 graphql-core = ">=2.1.0,<3"
 promise = ">=2.1"
 singledispatch = ">=3.4.0.3"
@@ -455,7 +455,7 @@ version = "0.6.0"
 more-itertools = "*"
 
 [metadata]
-content-hash = "8ec0668641ad76b7a03855bd98b3c6411edbbf8f13cdddc9556880ef317d96eb"
+content-hash = "f7ec2d1a39e4e2196a7d325fd6fc7bd2c11fcae872e20d7a0e85c602d346e8dc"
 python-versions = "^3.7"
 
 [metadata.hashes]
@@ -469,7 +469,7 @@ coverage = ["08907593569fe59baca0bf152c43f3863201efb6113ecb38ce7e97ce339805a6", 
 django = ["16040e1288c6c9f68c6da2fe75ebde83c0a158f6f5d54f4c5177b0c1478c5b86", "89c2007ca4fa5b351a51a279eccff298520783b713bf28efb89dfb81c80ea49b"]
 django-filter = ["558c727bce3ffa89c4a7a0b13bc8976745d63e5fd576b3a9a851650ef11c401b", "c3deb57f0dd7ff94d7dce52a047516822013e2b441bed472b722a317658cfd14"]
 graphene = ["09165f03e1591b76bf57b133482db9be6dac72c74b0a628d3c93182af9c5a896", "2cbe6d4ef15cfc7b7805e0760a0e5b80747161ce1b0f990dfdc0d2cf497c12f9"]
-graphene-django = ["25f2bdf41e30bc7b860c1c13bfb4ba5c3961712394f16e847d79a69fc25a06b1", "d75b3e468d8d765d5964bc809e403b44bf7c37556c0464230a5083bccf14581b"]
+graphene-django = ["233037a82a56d9d4a1357f51743a2948016a358a0b58d071faa2ae56bf47e65d", "eab206e013eca3366b1a8f78ac9aa1024c7fbabed5cbd0c09fda6d325b37aa32"]
 graphene-resolver = ["59ade56e6839b3e551cb1ddf2704c0eb5b338aa7601aa58c450c3886bae1f3a2", "a8c941fa120ef05f082e03a682a7a7d4ecc4d12c2f8cfd6f6167d08bb56947c0"]
 graphql-core = ["1488f2a5c2272dc9ba66e3042a6d1c30cea0db4c80bd1e911c6791ad6187d91b", "da64c472d720da4537a2e8de8ba859210b62841bd47a9be65ca35177f62fe0e4"]
 graphql-relay = ["0e94201af4089e1f81f07d7bd8f84799768e39d70fa1ea16d1df505b46cc6335", "75aa0758971e252964cb94068a4decd472d2a8295229f02189e3cbca1f10dbb5", "7fa74661246e826ef939ee92e768f698df167a7617361ab399901eaebf80dce6"]
