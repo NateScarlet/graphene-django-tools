@@ -6,6 +6,7 @@
 ![django version](https://img.shields.io/pypi/djversions/graphene-django-tools)
 ![wheel](https://img.shields.io/pypi/wheel/graphene-django-tools)
 ![maintenance](https://img.shields.io/maintenance/yes/2019)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 
 Tools for use [`graphene-django`](https://github.com/graphql-python/graphene-django)
 
