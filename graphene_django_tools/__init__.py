@@ -1,12 +1,13 @@
 """Tools for use [graphene-django](https://github.com/graphql-python/graphene-django).  """
 
+import graphene_django.utils
 from graphql.execution.base import ResolveInfo
 
 from . import interfaces, utils
 from .core import create_modelnode, get_modelnode, get_node_id
 from .dataloader import (
     DataLoaderModelConnectionField, DataLoaderModelField,
-    DataLoaderModelFilterConnectionField, DataLoaderModelListField)
+    DataLoaderModelListField)
 from .model_type import MODEL_TYPENAME_REGISTRY, get_model_typename
 from .mutation import (
     ModelBulkCreationMutation, ModelBulkCreationMutationContext,
@@ -19,5 +20,9 @@ from .resolver import (
     CONNECTION_REGISTRY, Resolver, get_connection, resolve_connection)
 from .types import (
     CountableConnection, Duration, ModelConnectionField, ModelField,
-    ModelFilterConnectionField, ModelListField, ModelNode)
+    ModelListField, ModelNode)
 from .utils import ID, convert_id
+
+if graphene_django.utils.DJANGO_FILTER_INSTALLED:
+    from .dataloader import DataLoaderModelFilterConnectionField
+    from .types import ModelFilterConnectionField
