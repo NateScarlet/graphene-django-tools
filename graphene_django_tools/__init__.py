@@ -8,7 +8,9 @@ from .core import create_modelnode, get_modelnode, get_node_id
 from .dataloader import (
     DataLoaderModelConnectionField, DataLoaderModelField,
     DataLoaderModelListField)
-from .model_type import MODEL_TYPENAME_REGISTRY, get_model_typename
+from .model_type import (
+    MODEL_TYPENAME_REGISTRY, get_model_typename, get_models_for_typename,
+    get_typename_for_model)
 from .mutation import (
     ModelBulkCreationMutation, ModelBulkCreationMutationContext,
     ModelBulkMutation, ModelBulkUpdateMutation, ModelBulkUpdateMutationContext,

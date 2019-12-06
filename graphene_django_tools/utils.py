@@ -48,7 +48,7 @@ class ID:
         """
         # pylint:disable=protected-access
         if (isinstance(expected, type) and issubclass(expected, django.db.models.Model)):
-            expected = model_type.get_model_typename(expected)
+            expected = model_type.get_typename_for_model(expected)
         if (isinstance(expected, type) and issubclass(expected, graphene.Node)):
             expected = expected._meta.name
         if self.type != expected:
