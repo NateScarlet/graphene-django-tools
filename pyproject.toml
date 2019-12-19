@@ -31,7 +31,7 @@ autopep8 = "^1.4"
 rope = "^0.14"
 pylint = "^2.4"
 pylint-django = "^2.0"
-django = "^2.2"
+django = "^3.0"
 django-filter = "^2.2"
 
 [build-system]
