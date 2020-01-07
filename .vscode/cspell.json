@@ -7,8 +7,10 @@
         "Gmail",
         "graphene",
         "graphql",
+        "prefetch",
         "pylint",
         "pytest",
+        "queryset",
         "Unmmounted"
     ],
     "flagWords": []

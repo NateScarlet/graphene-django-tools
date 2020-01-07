@@ -16,6 +16,10 @@ Tools for use [`graphene-django`](https://github.com/graphql-python/graphene-dja
 
 ## Features
 
+- easy resolver creation.
+- github-like connection with totalCount.
+- optimize queryset with django `only`,`selected_related`,`prefetch_related` to only select fields that used in query.
+
 ### Resolver
 
 Using mongoose-like schema to write apollo-like resolver.

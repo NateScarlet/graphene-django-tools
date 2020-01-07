@@ -1,4 +1,5 @@
 # pylint:disable=missing-docstring,invalid-name,unused-variable
+from django.utils import timezone
 import django.db.models as djm
 import graphene
 import pytest
