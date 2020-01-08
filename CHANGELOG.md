@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.19.3](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/compare/v0.19.2...v0.19.3) (2020-01-08)
+
+
+### Bug Fixes
+
+* can not use without django filter ([ffba136](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/ffba136))
+
+
+### Features
+
+* add `connection.set_optimization_default` ([36eef88](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/36eef88))
+* add `get_models_for_typename` ([3d36963](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/3d36963))
+* add `queryset.optimize` ([43278d0](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/43278d0))
+
 ### [0.19.2](https://github.com/NateScarlet/graphene-django-tools/compare/v0.19.1...v0.19.2) (2019-12-02)
 
 ### Features
