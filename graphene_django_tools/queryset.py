@@ -188,7 +188,7 @@ def optimize(
     ast, return_type = _get_ast_and_return_type(info, path)
     optimization = _get_ast_optimization(
         ast, return_type, info.fragments, queryset.model)
-    LOGGER.error("Optimization queryset: optimization=%s, model=%s",
+    LOGGER.debug("Optimization queryset: optimization=%s, model=%s",
                  optimization, queryset.model)
     qs = queryset
     if optimization['select']:
