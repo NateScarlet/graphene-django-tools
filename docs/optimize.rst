@@ -63,6 +63,8 @@ select
 
   Lookups that key is ``None`` always used.
 
+  All ``select`` lookup will also used as ``only`` lookup during optimization.
+
 prefetch
 
   A map use graphql field name as key, django queryset ``prefetch__related`` lookup list as value.
