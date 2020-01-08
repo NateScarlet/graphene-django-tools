@@ -7,13 +7,27 @@ import django.db.models as djm
 import graphene_django.fields as _gd_impl
 from graphene_resolver.connection import (
     REGISTRY, build_schema as _build_schema, get_type as _get_type,
-    resolve as _resolve, resolver)
+    resolve as _resolve, resolver, _get_node_name)
 import graphql
 import lazy_object_proxy as lazy
 
 from .. import queryset as qs_
 
 build_schema = _build_schema
+
+
+def set_optimization_default(node: typing.Union[resolver.Resolver, str, typing.Any]):
+    """Set optimization default for connection.
+
+    Args:
+        node (typing.Union[resolver.Resolver, str, typing.Any]):
+            Connection resolver or name or schema.
+    """
+
+    name = _get_node_name(node)
+    opt = qs_.OPTIMIZATION_OPTIONS.setdefault(name, {})
+    opt.setdefault('only', {i: [] for i in build_schema('')['type']})
+    opt.setdefault('related', {'nodes': True, 'edges': True, })
 
 
 def get_type(
@@ -34,9 +48,7 @@ def get_type(
     """
 
     ret = _get_type(node, name=name)
-    opt = qs_.OPTIMIZATION_OPTIONS.setdefault(ret.schema['name'], {})
-    opt.setdefault('only', {i: [] for i in ret.schema['type'].keys()})
-    opt.setdefault('related', {'nodes': True, 'edges': True, })
+    set_optimization_default(ret)
     return ret
 
 
