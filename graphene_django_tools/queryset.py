@@ -195,5 +195,5 @@ def optimize(
         qs = qs.select_related(*optimization['select'])
     if optimization['prefetch']:
         qs = qs.prefetch_related(*optimization['prefetch'])
-    qs = qs.only(*optimization['only'])
+    qs = qs.only(*optimization['only'], *optimization['select'])
     return qs
