@@ -137,7 +137,6 @@ def optimize(
 
     ast, return_type = _get_ast_and_return_type(info, path)
     optimization = _get_ast_optimization(ast, return_type)
-    print(dict(optimization=optimization))
     qs = queryset
     if optimization['select']:
         qs = qs.select_related(*optimization['select'])
