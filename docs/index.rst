@@ -15,6 +15,7 @@ Welcome to graphene_django_tools's documentation!
   connection
   enum
   union
+  optimize
 
 
 Indices and tables

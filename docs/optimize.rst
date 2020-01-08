@@ -47,31 +47,33 @@ items:
 
 only
 
-  a map use graphql field name as key, django queryset ``only`` lookup list as value.
+  A map use graphql field name as key, django queryset ``only`` lookup list as value.
   
   ``queryset.optimize`` will use all lookup that field appeared in graphql query.
 
-  lookups that key is ``None`` always used.
+  Lookups that key is ``None`` always used.
+
+  For not configured field name, value is defaults to single lookup that field name converted to snake case.
 
 select
 
-  a map use graphql field name as key, django queryset ``select_related`` lookup list as value.
+  A map use graphql field name as key, django queryset ``select_related`` lookup list as value.
   
   ``queryset.optimize`` will use all lookup that field appeared in graphql query.
 
-  lookups that key is ``None`` always used.
+  Lookups that key is ``None`` always used.
 
 prefetch
 
-  a map use graphql field name as key, django queryset ``prefetch__related`` lookup list as value.
+  A map use graphql field name as key, django queryset ``prefetch__related`` lookup list as value.
   
   ``queryset.optimize`` will use all lookup that field appeared in graphql query.
 
-  lookups that key is ``None`` always used.
+  Lookups that key is ``None`` always used.
 
 related
 
-  a map use graphql field name as key, django related query name as value.
+  A map use graphql field name as key, django related query name as value.
   
   ``queryset.optimize`` will use collect OptimizeOption for that field when field appeared in graphql query then
   
