@@ -10,3 +10,4 @@ def _clear_registry():
     gdtools.resolver.CONNECTION_REGISTRY.clear()
     gdtools.resolver.GRAPHENE_TYPE_REGISTRY.clear()
     gdtools.resolver.GRAPHENE_TYPE_REGISTRY.update(**_DEFAULT_TYPE_REGISTRY)
+    gdtools.queryset.OPTIMIZATION_OPTIONS.clear()
