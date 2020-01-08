@@ -53,7 +53,7 @@ only
 
   Lookups that key is ``None`` always used.
 
-  For not configured field name, value is defaults to single lookup that field name converted to snake case.
+  For not configured field name, value is auto detected from queryset model.
 
 select
 

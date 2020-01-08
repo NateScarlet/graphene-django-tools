@@ -32,15 +32,10 @@ def set_optimization_default(
     name = _get_node_name(node)
     edge_name = edge_name or f"{re.sub('Connection$', '', name)}Edge"
 
-    connection_schema = build_schema('')
-
     opt = qs_.OPTIMIZATION_OPTIONS.setdefault(name, {})
-    opt.setdefault('only', {i: [] for i in connection_schema['type']})
     opt.setdefault('related', {'nodes': 'self', 'edges': 'self', })
 
     opt = qs_.OPTIMIZATION_OPTIONS.setdefault(edge_name, {})
-    opt.setdefault('only', {i: []
-                            for i in connection_schema['type']['edges']['type'][0]['type']})
     opt.setdefault('related', {'node': 'self'})
 
 

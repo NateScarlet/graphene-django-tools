@@ -1,6 +1,7 @@
 """Queryset optimization.  """
 
 from __future__ import annotations
+import logging
 import typing
 
 import django.db.models as djm
@@ -28,6 +29,7 @@ if typing.TYPE_CHECKING:
         prefetch: typing.List[str]
 
 
+LOGGER = logging.getLogger(__name__)
 OPTIMIZATION_OPTIONS: typing.Dict[str, dict] = {}
 
 
@@ -58,12 +60,33 @@ def _get_inner_type(return_type):
     return _get_inner_type(return_type.of_type)
 
 
-def _get_default_only(fieldname: str) -> typing.List[str]:
-    if fieldname.startswith('__'):
-        # Graphql special field.
+def _get_model_field(model: djm.Model, lookup: str) -> djm.Field:
+    _model = model
+    field = None
+    for i in lookup.split('__'):
+        field = _model._meta.get_field(i)
+        _model = field.related_model
+    assert field is not None
+    return field
+
+
+def _get_default_only_lookups(
+        fieldname: str, model: djm.Model, related_query_name: str) -> typing.List[str]:
+    field = None
+    for lookup in (
+            _format_related_name(related_query_name, fieldname),
+            _format_related_name(related_query_name,
+                                 phrases_case.snake(fieldname)),
+    ):
+        try:
+            field = _get_model_field(model, lookup)
+        except djm.FieldDoesNotExist:
+            continue
+
+    if field is None or field.many_to_one or field.many_to_many:
         return []
 
-    return [phrases_case.snake(fieldname)]
+    return [field.name]
 
 
 def _get_selection(ast: ast_.Node, fragments, is_recursive=True) -> typing.Iterator[ast_.Field]:
@@ -79,12 +102,14 @@ def _get_selection(ast: ast_.Node, fragments, is_recursive=True) -> typing.Itera
         raise ValueError(f'Unknown ast type: {ast}')
 
 
-def _get_ast_optimization(ast, return_type, fragments) -> Optimization:
+def _format_related_name(related_query_name, name):
+    if related_query_name is 'self':
+        return name
+    return f'{related_query_name}__{name}'
 
-    def _format_related_name(related_query_name, name):
-        if related_query_name is 'self':
-            return name
-        return f'{related_query_name}__{name}'
+
+def _get_ast_optimization(ast, return_type, fragments, model, related_query_name='self') -> Optimization:
+
     inner_type = _get_inner_type(return_type)
 
     opt = get_optimization_option(inner_type.name)
@@ -97,21 +122,29 @@ def _get_ast_optimization(ast, return_type, fragments) -> Optimization:
     for sub_ast in _get_selection(ast, fragments):
         fieldname = sub_ast.name.value
         ret['only'].extend(opt['only'].get(
-            fieldname, _get_default_only(fieldname)))
+            fieldname) or _get_default_only_lookups(fieldname, model, related_query_name))
         ret['select'].extend(opt['select'].get(fieldname, []))
         ret['prefetch'].extend(opt['prefetch'].get(fieldname, []))
-        related_query_name = opt['related'].get(fieldname)
 
-        if not related_query_name:
+        _related_query_name = opt['related'].get(fieldname)
+        if not _related_query_name:
             continue
         _optimization = _get_ast_optimization(
-            sub_ast, inner_type.fields[fieldname].type, fragments)
-        ret['only'].extend([_format_related_name(related_query_name, i)
-                            for i in _optimization['only']])
-        ret['select'].extend([_format_related_name(
-            related_query_name, i) for i in _optimization['select']])
-        ret['prefetch'].extend([_format_related_name(
-            related_query_name, i) for i in _optimization['prefetch']])
+            sub_ast,
+            inner_type.fields[fieldname].type,
+            fragments, model,
+            _related_query_name
+        )
+        ret['only'].extend(_optimization['only'])
+        ret['select'].extend(_optimization['select'])
+        ret['prefetch'].extend(_optimization['prefetch'])
+
+    ret['only'] = [_format_related_name(
+        related_query_name, i) for i in ret['only']]
+    ret['select'] = [_format_related_name(
+        related_query_name, i) for i in ret['select']]
+    ret['prefetch'] = [_format_related_name(
+        related_query_name, i) for i in ret['prefetch']]
     return ret
 
 
@@ -153,7 +186,10 @@ def optimize(
     """
 
     ast, return_type = _get_ast_and_return_type(info, path)
-    optimization = _get_ast_optimization(ast, return_type, info.fragments)
+    optimization = _get_ast_optimization(
+        ast, return_type, info.fragments, queryset.model)
+    LOGGER.error("Optimization queryset: optimization=%s, model=%s",
+                 optimization, queryset.model)
     qs = queryset
     if optimization['select']:
         qs = qs.select_related(*optimization['select'])
