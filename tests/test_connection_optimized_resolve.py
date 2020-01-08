@@ -61,18 +61,42 @@ def test_query_select_related(django_assert_num_queries):
                     firstName
                 }
             }
+            edges {
+                node {
+                    headline
+                }
+                cursor
+            }
+            pageInfo {
+                startCursor
+                endCursor
+            }
         }
     }
     ''')
         assert not result.errors
         assert result.data == {
-            'articles': {
-                'nodes': [
+            "articles": {
+                "nodes": [
                     {
-                        'headline': 'article1',
-                        'reporter': {'firstName': 'reporter1'}
+                        "headline": "article1",
+                        "reporter": {
+                            "firstName": "reporter1"
+                        }
                     }
-                ]
+                ],
+                "edges": [
+                    {
+                        "node": {
+                            "headline": "article1"
+                        },
+                        "cursor": "YXJyYXljb25uZWN0aW9uOjA="
+                    }
+                ],
+                "pageInfo": {
+                    "startCursor": "YXJyYXljb25uZWN0aW9uOjA=",
+                    "endCursor": "YXJyYXljb25uZWN0aW9uOjA="
+                }
             }
         }
 

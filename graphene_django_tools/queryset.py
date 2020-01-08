@@ -67,7 +67,7 @@ def _get_default_only(fieldname: str) -> typing.List[str]:
 
 def _get_ast_optimization(ast, return_type) -> Optimization:
     def _format_related_name(related_query_name, name):
-        if related_query_name is True:
+        if related_query_name is 'self':
             return name
         return f'{related_query_name}__{name}'
     inner_type = _get_inner_type(return_type)
@@ -137,7 +137,7 @@ def optimize(
 
     ast, return_type = _get_ast_and_return_type(info, path)
     optimization = _get_ast_optimization(ast, return_type)
-    print(optimization)
+    print(dict(optimization=optimization))
     qs = queryset
     if optimization['select']:
         qs = qs.select_related(*optimization['select'])

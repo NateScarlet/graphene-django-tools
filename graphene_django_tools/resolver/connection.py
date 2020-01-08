@@ -1,6 +1,7 @@
 """Relay compatible connection resolver.  """
 #pylint: disable=invalid-name
 
+import re
 import typing
 
 import django.db.models as djm
@@ -16,7 +17,11 @@ from .. import queryset as qs_
 build_schema = _build_schema
 
 
-def set_optimization_default(node: typing.Union[resolver.Resolver, str, typing.Any]):
+def set_optimization_default(
+        node: typing.Union[resolver.Resolver, str, typing.Any],
+        *,
+        edge_name: str = None
+) -> None:
     """Set optimization default for connection.
 
     Args:
@@ -25,9 +30,18 @@ def set_optimization_default(node: typing.Union[resolver.Resolver, str, typing.A
     """
 
     name = _get_node_name(node)
+    edge_name = edge_name or f"{re.sub('Connection$', '', name)}Edge"
+
+    connection_schema = build_schema('')
+
     opt = qs_.OPTIMIZATION_OPTIONS.setdefault(name, {})
-    opt.setdefault('only', {i: [] for i in build_schema('')['type']})
-    opt.setdefault('related', {'nodes': True, 'edges': True, })
+    opt.setdefault('only', {i: [] for i in connection_schema['type']})
+    opt.setdefault('related', {'nodes': 'self', 'edges': 'self', })
+
+    opt = qs_.OPTIMIZATION_OPTIONS.setdefault(edge_name, {})
+    opt.setdefault('only', {i: []
+                            for i in connection_schema['type']['edges']['type'][0]['type']})
+    opt.setdefault('related', {'node': 'self'})
 
 
 def get_type(

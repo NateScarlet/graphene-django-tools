@@ -77,6 +77,6 @@ related
   
   merge it to current option with django related query syntax.
 
-  When value is ``True``, sub OptimizeOption will merge to current option directly.
+  When value is ``"self"``, sub OptimizeOption will merge to current option directly.
 
 
