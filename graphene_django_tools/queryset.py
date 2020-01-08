@@ -83,7 +83,7 @@ def _get_default_only_lookups(
         except djm.FieldDoesNotExist:
             continue
 
-    if field is None or field.many_to_one or field.many_to_many:
+    if field is None or field.many_to_many or field.one_to_many:
         return []
 
     return [field.name]
