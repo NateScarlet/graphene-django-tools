@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.19.4](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/compare/v0.19.3...v0.19.4) (2020-01-09)
+
+
+### Bug Fixes
+
+* optimization default only lookup ([b736b46](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/b736b46))
+* optimize query with fragment ([2a81652](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/2a81652))
+
+
+### Features
+
+* add `select` to optimization `qs.only` lookup ([f95d518](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/f95d518))
+* queryset optimization auto detect `only` option ([6364355](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/6364355))
+
 ### [0.19.3](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/compare/v0.19.2...v0.19.3) (2020-01-08)
 
 
