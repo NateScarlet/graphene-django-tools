@@ -20,6 +20,9 @@ Documentation is placed in [docs folder](./docs).
 
 - django integration for [graphene-resolver](https://github.com/NateScarlet/graphene-resolver).
 - optimize queryset with django `only`,`selected_related`,`prefetch_related` to only select fields that used in query.
+- data loader graphene middleware.
+
+**Features below are deprecated and will be removed in future version. Explicit type definition is preferred for create a maintainable codebase.**
 
 ### Query
 
@@ -61,14 +64,6 @@ class ClientMutationID(graphene.Interface):
 
     client_mutation_id = graphene.String()
 ```
-
-### Data loader integrate
-
-Enable by add `'graphene_django_tools.dataloader.middleware.DataLoaderMiddleware'` to your django settings `GRAPHENE['MIDDLEWARE']`
-
-When enabled, you will have `get_data_loader` method on your resolve context object.
-It takes a django model type as argument, and returns corresponding `promise.DataLoader`.
-Data loader is cached in request scope with `data_loader_cache` key.
 
 ## Development
 
