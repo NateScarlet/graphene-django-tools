@@ -129,11 +129,11 @@ description = "Graphene Django integration"
 name = "graphene-django"
 optional = false
 python-versions = "*"
-version = "2.5.0"
+version = "2.8.0"
 
 [package.dependencies]
 Django = ">=1.11"
-graphene = ">=2.1.3,<3"
+graphene = ">=2.1.7,<3"
 graphql-core = ">=2.1.0,<3"
 promise = ">=2.1"
 singledispatch = ">=3.4.0.3"
@@ -519,7 +519,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["pathlib2", "contextlib2", "unittest2"]
 
 [metadata]
-content-hash = "823c017c39374d0ab4ac2ebe8c1809c6f0ee12b06a8c4b6cf32e8fc4c84156f0"
+content-hash = "30ba80c06a85a61ae45aebf96a4760d11b9df274df963a76d747cf69ce617c3f"
 python-versions = "^3.7"
 
 [metadata.files]
@@ -592,8 +592,8 @@ graphene = [
     {file = "graphene-2.1.8.tar.gz", hash = "sha256:2cbe6d4ef15cfc7b7805e0760a0e5b80747161ce1b0f990dfdc0d2cf497c12f9"},
 ]
 graphene-django = [
-    {file = "graphene-django-2.5.0.tar.gz", hash = "sha256:25f2bdf41e30bc7b860c1c13bfb4ba5c3961712394f16e847d79a69fc25a06b1"},
-    {file = "graphene_django-2.5.0-py2.py3-none-any.whl", hash = "sha256:d75b3e468d8d765d5964bc809e403b44bf7c37556c0464230a5083bccf14581b"},
+    {file = "graphene-django-2.8.0.tar.gz", hash = "sha256:85376ed02941f579849033c027cd8b1e31be72765b504a08706ccb9234ecdc26"},
+    {file = "graphene_django-2.8.0-py2.py3-none-any.whl", hash = "sha256:a290fc41a58ee61b43ff4b4885e866ef48bb8d66b0e7088fd8dc2bd677856e6a"},
 ]
 graphene-resolver = [
     {file = "graphene-resolver-0.1.7.tar.gz", hash = "sha256:a1c8b5885ef1e4be045d01abc14a364c09357027399700bd6386894c4c067ca6"},
