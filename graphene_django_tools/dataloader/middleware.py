@@ -2,10 +2,10 @@
 
 import logging
 
+import graphql
 from promise import Promise
 from promise.dataloader import DataLoader
 
-import graphene_django_tools as gdtools
 
 LOGGER = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class DataLoaderMiddleware:
 
     cache_attrname = 'data_loader_cache'
 
-    def resolve(self, resolve_next, parent, info: gdtools.ResolveInfo, **kwargs):
+    def resolve(self, resolve_next, parent, info: graphql.ResolveInfo, **kwargs):
         """Graphene middleware resolve method.  """
 
         def get_data_loader(model):

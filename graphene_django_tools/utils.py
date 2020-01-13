@@ -4,10 +4,7 @@ from __future__ import annotations
 import typing
 from dataclasses import dataclass
 
-import django.db.models
 import graphene
-
-from . import model_type
 
 
 @dataclass
@@ -33,12 +30,12 @@ class ID:
 
     def validate_type(
             self,
-            expected: typing.Union[str, django.db.models.Model, graphene.Node]
+            expected: typing.Union[str, typing.Tuple[str, ...]]
     ) -> ID:
         """Validate if id match expected type.
 
         Args:
-            expected (typing.Union[str, django.db.models.Model, graphene.Node]): type to match.
+            expected (typing.Union[str, typing.Tuple[str, ...]]): type name to match.
 
         Raises:
             ValueError: Type not match
@@ -46,12 +43,11 @@ class ID:
         Returns:
             ID: self, for function chain.
         """
-        # pylint:disable=protected-access
-        if (isinstance(expected, type) and issubclass(expected, django.db.models.Model)):
-            expected = model_type.get_typename_for_model(expected)
-        if (isinstance(expected, type) and issubclass(expected, graphene.Node)):
-            expected = expected._meta.name
-        if self.type != expected:
+
+        expected_types = expected
+        if not isinstance(expected_types, tuple):
+            expected_types = (expected_types,)
+        if self.type not in expected_types:
             raise ValueError(
                 f'Unexpected id type: expected={expected}, actual={self.type}.')
         return self

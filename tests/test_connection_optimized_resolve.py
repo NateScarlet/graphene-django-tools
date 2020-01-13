@@ -34,7 +34,7 @@ def test_query_select_related(django_assert_num_queries):
         schema = {'headline': 'String!', 'reporter': 'Reporter!'}
 
     class Articles(gdtools.Resolver):
-        schema = gdtools.get_connection(Article)
+        schema = gdtools.connection.get_type(Article)
 
         def resolve(self, **kwargs):
             qs = models.Article.objects.all()
@@ -146,7 +146,7 @@ def test_query_prefetch_related(django_assert_num_queries):
         schema = {'headline': 'String!', 'reporter': 'Reporter!'}
 
     class Articles(gdtools.Resolver):
-        schema = gdtools.get_connection(Article)
+        schema = gdtools.connection.get_type(Article)
 
         def resolve(self, **kwargs):
             qs = models.Article.objects.all()
@@ -234,7 +234,7 @@ def test_query_special_field(django_assert_num_queries):
         schema = {'headline': 'String!', 'reporter': 'Reporter!'}
 
     class Articles(gdtools.Resolver):
-        schema = gdtools.get_connection(Article)
+        schema = gdtools.connection.get_type(Article)
 
         def resolve(self, **kwargs):
             qs = models.Article.objects.all()

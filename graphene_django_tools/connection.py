@@ -5,16 +5,17 @@ import re
 import typing
 
 import django.db.models as djm
-import graphene_django.fields as _gd_impl
+
 from graphene_resolver.connection import (
-    REGISTRY, build_schema as _build_schema, get_type as _get_type,
-    resolve as _resolve, resolver, _get_node_name)
+    build_schema as _build_schema, get_type as _get_type,
+    resolve as _resolve, resolver, _get_node_name, REGISTRY as _REGISTRY)
 import graphql
 import lazy_object_proxy as lazy
 
-from .. import queryset as qs_
+from . import queryset as qs_
 
 build_schema = _build_schema
+REGISTRY = _REGISTRY
 
 
 def set_optimization_default(
@@ -73,8 +74,11 @@ def resolve(
     Returns:
         dict: Connection data.
     """
-    iterable = _gd_impl.maybe_queryset(iterable)
-    if isinstance(iterable, _gd_impl.QuerySet):
+
+    if isinstance(iterable, djm.Manager):
+        iterable = iterable.all()
+
+    if isinstance(iterable, djm.QuerySet):
         _len = lazy.Proxy(iterable.count)
     else:
         _len = len(iterable)
@@ -99,11 +103,3 @@ def optimized_resolve(
 
     qs = qs_.optimize(queryset.all(), info)
     return resolve(qs, **kwargs)
-
-# TODO: remove at next minor version:
-# pylint:disable=invalid-name
-
-
-get_connection = get_type
-resolve_connection = resolve
-CONNECTION_REGISTRY = REGISTRY
