@@ -25,6 +25,4 @@ Documentation is placed in [docs folder](./docs).
 
 ## Development
 
-run dev server: `make dev`
-
 test: `make test`
