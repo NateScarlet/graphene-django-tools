@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.20.0](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/compare/v0.19.4...v0.20.0) (2020-01-13)
+
+
+### ⚠ BREAKING CHANGES
+
+* removed `graphene-django` related code
+* removed alias related to connection,
+use `gdtools.connection.{function name}` instead.
+
+### Features
+
+* drop `graphene-django` dependency ([41eda52](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/41eda52))
+
 ### [0.19.4](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/compare/v0.19.3...v0.19.4) (2020-01-09)
 
 ### Bug Fixes
