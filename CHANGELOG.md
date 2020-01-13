@@ -2,32 +2,31 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## [0.20.0](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/compare/v0.19.4...v0.20.0) (2020-01-13)
-
+## [0.20.0](https://github.com/NateScarlet/graphene-django-tools/compare/v0.19.4...v0.20.0) (2020-01-13)
 
 ### ⚠ BREAKING CHANGES
 
-* removed `graphene-django` related code
-* removed alias related to connection,
-use `gdtools.connection.{function name}` instead.
+- removed `graphene-django` related code
+- removed alias related to connection,
+  use `gdtools.connection.{function name}` instead.
 
 ### Features
 
-* drop `graphene-django` dependency ([41eda52](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/41eda52))
+- drop `graphene-django` dependency ([41eda52](https://github.com/NateScarlet/graphene-django-tools/commit/41eda52))
 
-### [0.19.4](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/compare/v0.19.3...v0.19.4) (2020-01-09)
+### [0.19.4](https://github.com/NateScarlet/graphene-django-tools/compare/v0.19.3...v0.19.4) (2020-01-09)
 
 ### Bug Fixes
 
-- optimization default only lookup ([b736b46](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/b736b46))
-- optimize query with fragment ([2a81652](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/2a81652))
+- optimization default only lookup ([b736b46](https://github.com/NateScarlet/graphene-django-tools/commit/b736b46))
+- optimize query with fragment ([2a81652](https://github.com/NateScarlet/graphene-django-tools/commit/2a81652))
 
 ### Features
 
-- add `select` to optimization `qs.only` lookup ([f95d518](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/f95d518))
-- queryset optimization auto detect `only` option ([6364355](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/6364355))
+- add `select` to optimization `qs.only` lookup ([f95d518](https://github.com/NateScarlet/graphene-django-tools/commit/f95d518))
+- queryset optimization auto detect `only` option ([6364355](https://github.com/NateScarlet/graphene-django-tools/commit/6364355))
 
-### [0.19.3](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/compare/v0.19.2...v0.19.3) (2020-01-08)
+### [0.19.3](https://github.com/NateScarlet/graphene-django-tools/compare/v0.19.2...v0.19.3) (2020-01-08)
 
 ### Bug Fixes
 
