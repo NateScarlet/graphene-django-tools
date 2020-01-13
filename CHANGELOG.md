@@ -4,31 +4,27 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [0.19.4](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/compare/v0.19.3...v0.19.4) (2020-01-09)
 
-
 ### Bug Fixes
 
-* optimization default only lookup ([b736b46](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/b736b46))
-* optimize query with fragment ([2a81652](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/2a81652))
-
+- optimization default only lookup ([b736b46](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/b736b46))
+- optimize query with fragment ([2a81652](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/2a81652))
 
 ### Features
 
-* add `select` to optimization `qs.only` lookup ([f95d518](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/f95d518))
-* queryset optimization auto detect `only` option ([6364355](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/6364355))
+- add `select` to optimization `qs.only` lookup ([f95d518](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/f95d518))
+- queryset optimization auto detect `only` option ([6364355](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/6364355))
 
 ### [0.19.3](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/compare/v0.19.2...v0.19.3) (2020-01-08)
 
-
 ### Bug Fixes
 
-* can not use without django filter ([ffba136](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/ffba136))
-
+- can not use without django filter ([ffba136](https://github.com/NateScarlet/graphene-django-tools/commit/ffba136))
 
 ### Features
 
-* add `connection.set_optimization_default` ([36eef88](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/36eef88))
-* add `get_models_for_typename` ([3d36963](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/3d36963))
-* add `queryset.optimize` ([43278d0](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/43278d0))
+- add `connection.set_optimization_default` ([36eef88](https://github.com/NateScarlet/graphene-django-tools/commit/36eef88))
+- add `get_models_for_typename` ([3d36963](https://github.com/NateScarlet/graphene-django-tools/commit/3d36963))
+- add `queryset.optimize` ([43278d0](https://github.com/NateScarlet/graphene-django-tools/commit/43278d0))
 
 ### [0.19.2](https://github.com/NateScarlet/graphene-django-tools/compare/v0.19.1...v0.19.2) (2019-12-02)
 
@@ -43,6 +39,6 @@ All notable changes to this project will be documented in this file. See [standa
 
 - should not convert iterable to list ([7ef7ffc](https://github.com/NateScarlet/graphene-django-tools/commit/7ef7ffc1402186786061804499e591d61e6f2ba3))
 
-### [0.19.1](http://github.com/NateScarlet/graphene-django-tools/compare/v0.19.0...v0.19.1) (2019-11-19)
+### [0.19.1](https://github.com/NateScarlet/graphene-django-tools/compare/v0.19.0...v0.19.1) (2019-11-19)
 
 Correct `graphene-django` instal require from `>=2.5` to `>=2.2`.

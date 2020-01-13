@@ -10,11 +10,7 @@ Welcome to graphene_django_tools's documentation!
   :maxdepth: 2
   :caption: Contents:
 
-  resolver
-  dynamic
-  connection
-  enum
-  union
+  data_loader
   optimize
 
 
