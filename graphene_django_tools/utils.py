@@ -22,7 +22,11 @@ class ID:
         Returns:
             ID: Parse result
         """
-        type_, id_ = graphene.Node.from_global_id(v)
+        try:
+
+            type_, id_ = graphene.Node.from_global_id(v)
+        except (TypeError, ValueError) as ex:
+            raise ValueError(f'Invalid id: value={v}') from ex
         return cls(
             value=id_,
             type=type_
