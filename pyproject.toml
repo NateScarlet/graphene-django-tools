@@ -17,11 +17,11 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.6"
 graphene = "^2.1"
 isodate = "^0.6"
 lazy-object-proxy = "^1.4"
-graphene-resolver = "^0.1.1"
+graphene-resolver = "^0.1.8"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

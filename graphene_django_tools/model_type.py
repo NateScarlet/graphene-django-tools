@@ -1,6 +1,5 @@
 """handle relationship between django model and graphene type. """
 
-from __future__ import annotations
 from functools import lru_cache
 import typing
 
@@ -11,7 +10,7 @@ if typing.TYPE_CHECKING:
     from django.db.models import Model  # type: ignore
 
 
-REGISTRY: typing.Dict[typing.Type[Model], str] = {}
+REGISTRY: typing.Dict[typing.Type['Model'], str] = {}
 
 
 @lru_cache()

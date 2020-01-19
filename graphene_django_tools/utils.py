@@ -1,5 +1,4 @@
 """Utility.  """
-from __future__ import annotations
 
 import typing
 from dataclasses import dataclass
@@ -13,7 +12,7 @@ class ID:
     type: str
 
     @classmethod
-    def parse(cls, v: str) -> ID:
+    def parse(cls, v: str) -> 'ID':
         """Parse graphene global id
 
         Args:
@@ -35,7 +34,7 @@ class ID:
     def validate_type(
             self,
             expected: typing.Union[str, typing.Tuple[str, ...]]
-    ) -> ID:
+    ) -> 'ID':
         """Validate if id match expected type.
 
         Args:

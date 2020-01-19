@@ -1,6 +1,5 @@
 """Queryset optimization.  """
 
-from __future__ import annotations
 import logging
 import typing
 
@@ -33,7 +32,7 @@ LOGGER = logging.getLogger(__name__)
 OPTIMIZATION_OPTIONS: typing.Dict[str, dict] = {}
 
 
-def get_optimization_option(typename: str) -> OptimizationOption:
+def get_optimization_option(typename: str) -> 'OptimizationOption':
     """Get optimization options from typename.
 
     Args:
@@ -108,7 +107,7 @@ def _format_related_name(related_query_name, name):
     return f'{related_query_name}__{name}'
 
 
-def _get_ast_optimization(ast, return_type, fragments, model, related_query_name='self') -> Optimization:
+def _get_ast_optimization(ast, return_type, fragments, model, related_query_name='self') -> 'Optimization':
 
     inner_type = _get_inner_type(return_type)
 
@@ -149,7 +148,7 @@ def _get_ast_optimization(ast, return_type, fragments, model, related_query_name
 
 
 def _get_ast_and_return_type(
-        info: graphql.ResolverInfo,
+        info: graphql.execution.ResolveInfo,
         path: typing.Optional[typing.List[str]]
 ) -> typing.Tuple[graphql.GraphQLField, typing.Union[
     graphql.GraphQLList,
