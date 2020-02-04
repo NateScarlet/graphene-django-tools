@@ -3,6 +3,7 @@
 from functools import lru_cache
 import typing
 
+import django.contrib.contenttypes.models as ctm
 import django.db.models as djm
 
 
@@ -29,3 +30,23 @@ def get_models(v: str) -> typing.List[typing.Type[djm.Model]]:
         if typename == v:
             ret.append(model)
     return ret
+
+
+def get_content_type(typename: str) -> ctm.ContentType:
+    """Get django.contrib.contenttype for typename.
+
+    Args:
+        typename (str): Graphql typename.
+
+    Raises:
+        ValueError: When not exact one matched model for given typename.
+
+    Returns:
+        ctm.ContentType: ContentType object for given typename.
+    """
+
+    models = get_models(typename)
+    if len(models) != 1:
+        raise ValueError(
+            f"Can not determinate model from typename: typename={typename}")
+    return ctm.ContentType.objects.get_for_model(models[0])
