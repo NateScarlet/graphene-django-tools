@@ -3,15 +3,13 @@
 from functools import lru_cache
 import typing
 
-import django.contrib.contenttypes.models as ctm
 import django.db.models as djm
 
 
 if typing.TYPE_CHECKING:
-    from django.db.models import Model  # type: ignore
+    import django.contrib.contenttypes.models as ctm
 
-
-REGISTRY: typing.Dict[typing.Type['Model'], str] = {}
+REGISTRY: typing.Dict[typing.Type[djm.Model], str] = {}
 
 
 @lru_cache()
@@ -32,7 +30,7 @@ def get_models(v: str) -> typing.List[typing.Type[djm.Model]]:
     return ret
 
 
-def get_content_type(typename: str) -> ctm.ContentType:
+def get_content_type(typename: str) -> 'ctm.ContentType':
     """Get django.contrib.contenttype for typename.
 
     Args:
@@ -44,7 +42,9 @@ def get_content_type(typename: str) -> ctm.ContentType:
     Returns:
         ctm.ContentType: ContentType object for given typename.
     """
+    # pylint: disable=import-outside-toplevel
 
+    import django.contrib.contenttypes.models as ctm
     models = get_models(typename)
     if len(models) != 1:
         raise ValueError(
