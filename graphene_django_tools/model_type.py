@@ -30,6 +30,31 @@ def get_models(v: str) -> typing.List[typing.Type[djm.Model]]:
     return ret
 
 
+@lru_cache()
+def get_typename(model: typing.Type[djm.Model]) -> str:
+    """Get typename for model, support inheritance.
+
+    Args:
+        model (typing.Type[djm.Model]): Model.
+
+    Raises:
+        ValueError: When model is not registered.
+
+    Returns:
+        str: Typename for this model.
+    """
+
+    if model in REGISTRY:
+        return REGISTRY[model]
+
+    for k, v in REGISTRY.items():
+        if issubclass(model, k):
+            return v
+
+    raise ValueError(
+        f'Model is not registed or inheritant a register model: {repr(model)}')
+
+
 def get_content_type(typename: str) -> 'ctm.ContentType':
     """Get django.contrib.contenttype for typename.
 
