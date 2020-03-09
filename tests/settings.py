@@ -31,7 +31,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'tests'
+    'tests',
+    'django.contrib.contenttypes',
 ]
 
 MIDDLEWARE = []

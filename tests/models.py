@@ -2,7 +2,8 @@ from __future__ import absolute_import
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-
+import django.contrib.contenttypes.fields as ctf
+import django.contrib.contenttypes.models as ctm
 CHOICES = ((1, "this"), (2, _("that")))
 
 
@@ -110,3 +111,10 @@ class Article(models.Model):
 
     class Meta:
         ordering = ("headline",)
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=50)
+    content_type = models.ForeignKey(ctm.ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content = ctf.GenericForeignKey('content_type', 'object_id')

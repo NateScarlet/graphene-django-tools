@@ -82,10 +82,10 @@ def _get_default_only_lookups(
         except djm.FieldDoesNotExist:
             continue
 
-    if field is None or field.many_to_many or field.one_to_many:
+    if field is None or not hasattr(field, 'attname'):
         return []
 
-    return [field.name]
+    return [field.attname]
 
 
 def _get_selection(ast: ast_.Node, fragments, is_recursive=True) -> typing.Iterator[ast_.Field]:
