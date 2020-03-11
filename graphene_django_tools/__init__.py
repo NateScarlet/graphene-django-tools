@@ -2,5 +2,5 @@
 
 from graphene_resolver import Resolver
 
-from . import connection, queryset, utils, model_type
-from .utils import ID, convert_id
+from . import connection, model_type, queryset
+from .global_id import GlobalID
