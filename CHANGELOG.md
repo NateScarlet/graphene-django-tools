@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.20.1](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/compare/v0.20.0...v0.20.1) (2020-03-11)
+
+
+### Bug Fixes
+
+* default lookup for generic foreign key ([1195e38](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/1195e38))
+* import error on django contenttype ([fb8f29e](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/fb8f29e))
+
+
+### Features
+
+* add `model_type.get_content_type` ([2b0889c](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/2b0889c))
+* add model_type.get_typename ([b4476b1](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/b4476b1))
+* foramt invalid id message ([e63383d](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/e63383d))
+* support python3.6 ([1e83b8d](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/1e83b8d))
+
 ## [0.20.0](https://github.com/NateScarlet/graphene-django-tools/compare/v0.19.4...v0.20.0) (2020-01-13)
 
 ### ⚠ BREAKING CHANGES
