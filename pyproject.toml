@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "graphene_django_tools"
-version = "0.20.0"
+version = "0.20.1"
 description = "Tools for use [`graphene-django`](https://github.com/graphql-python/graphene-django)"
 authors = ["NateScarlet <NateScarlet@Gmail.com>"]
 license = "MIT"
