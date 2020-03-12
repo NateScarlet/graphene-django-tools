@@ -89,6 +89,8 @@ class GlobalID:
             GlobalID: cas result.
         """
 
+        if isinstance(value, GlobalID):
+            return value
         if isinstance(value, str):
             return cls.parse(value)
         if isinstance(value, djm.Model):
