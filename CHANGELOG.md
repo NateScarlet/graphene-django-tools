@@ -4,18 +4,14 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [0.21.0](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/compare/v0.20.1...v0.21.0) (2020-03-12)
 
-
 ### ⚠ BREAKING CHANGES
 
-* use abstract resolver for data loader
-* utils -> global_id
-
-* utils -> global_id ([ebc690f](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/ebc690f))
-
+- use abstract resolver for data loader
+- utils -> global_id ([ebc690f](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/ebc690f))
 
 ### Features
 
-* use abstract resolver for data loader ([4ed5bad](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/4ed5bad))
+- use abstract resolver for data loader ([4ed5bad](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/commit/4ed5bad))
 
 ### [0.20.1](http://git.zhouxuan.site:10022/Nate/graphene-django-tools/compare/v0.20.0...v0.20.1) (2020-03-11)
 
