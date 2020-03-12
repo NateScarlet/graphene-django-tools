@@ -61,7 +61,9 @@ class Resolver(graphene_resolver.Resolver, abstract=True):
         return loader.load(gid.value)
 
     def get_node(self, id_):
-        return self.resolve_gid(id_)
+        if not self.model:
+            return super().get_node(id_)
+        return self.get_loader(self.model).load(id_)
 
     def validate(self, value):
         if not self.model:
