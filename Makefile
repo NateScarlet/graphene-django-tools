@@ -1,6 +1,6 @@
 .PHONY: test dev
 
-dist: graphene_django_tools/* graphene_django_tools/*/* poetry.lock
+dist: graphene_django_tools/* graphene_django_tools/* poetry.lock
 	poetry build
 
 test:
