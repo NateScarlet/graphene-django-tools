@@ -20,7 +20,14 @@ def _get_model_batch_load_fn(model):
     return batch_load_fn
 
 
+def _get_model_cache_key(v):
+    if isinstance(v, int):
+        return str(v)
+    return v
+
+
 def get_for_model(model):
     """Create dataloader for model.  """
 
-    return DataLoader(_get_model_batch_load_fn(model))
+    return DataLoader(_get_model_batch_load_fn(model),
+                      get_cache_key=_get_model_cache_key)
