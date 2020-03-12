@@ -1,18 +1,21 @@
 """Relay compatible connection resolver.  """
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 
 import re
 import typing
 
 import django.db.models as djm
-
-from graphene_resolver.connection import (
-    build_schema as _build_schema, get_type as _get_type,
-    resolve as _resolve, resolver, _get_node_name, REGISTRY as _REGISTRY)
 import graphql
 import lazy_object_proxy as lazy
+from graphene_resolver.connection import REGISTRY as _REGISTRY
+from graphene_resolver.connection import _get_node_name
+from graphene_resolver.connection import build_schema as _build_schema
+from graphene_resolver.connection import get_type as _get_type
+from graphene_resolver.connection import resolve as _resolve
+from graphene_resolver.connection import resolver
 
 from . import queryset as qs_
+from .resolver import Resolver
 
 build_schema = _build_schema
 REGISTRY = _REGISTRY
@@ -92,6 +95,7 @@ def optimized_resolve(
         **kwargs,
 ) -> dict:
     """Resolve django queryset base on query selection.
+    And prime dataloader cache.
 
     Args:
         info (graphql.ResolveInfo): Resolve info.
@@ -102,4 +106,13 @@ def optimized_resolve(
     """
 
     qs = qs_.optimize(queryset.all(), info)
-    return resolve(qs, **kwargs)
+    ret = resolve(qs, **kwargs)
+
+    def _prime_nodes(v):
+        for i in v:
+            # Prime dataloader cache
+            Resolver(info=info).resolve_gid(i)
+        return v
+    nodes = ret['nodes']
+    ret['nodes'] = lazy.Proxy(lambda: _prime_nodes(nodes))
+    return ret

@@ -17,26 +17,6 @@ class GlobalID:
     def __str__(self):
         return graphene.Node.to_global_id(self.type, self.value)
 
-    @classmethod
-    def parse(cls, v: str) -> 'GlobalID':
-        """Parse graphene global id
-
-        Args:
-            v (str): value to parse
-
-        Returns:
-            ID: Parse result
-        """
-        try:
-
-            type_, id_ = graphene.Node.from_global_id(v)
-        except (TypeError, ValueError) as ex:
-            raise ValueError(f'Invalid id: value={v}') from ex
-        return cls(
-            value=id_,
-            type=type_
-        )
-
     def validate_type(
             self,
             expected: Union[str, Tuple[str, ...]]
@@ -60,6 +40,26 @@ class GlobalID:
             raise ValueError(
                 f'Unexpected id type: expected={expected}, actual={self.type}.')
         return self
+
+    @classmethod
+    def parse(cls, v: str) -> 'GlobalID':
+        """Parse graphene global id
+
+        Args:
+            v (str): value to parse
+
+        Returns:
+            ID: Parse result
+        """
+        try:
+
+            type_, id_ = graphene.Node.from_global_id(v)
+        except (TypeError, ValueError) as ex:
+            raise ValueError(f'Invalid id: value={v}') from ex
+        return cls(
+            value=id_,
+            type=type_
+        )
 
     @classmethod
     def from_object(cls, obj: djm.Model) -> str:

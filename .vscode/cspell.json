@@ -10,6 +10,7 @@
         "prefetch",
         "pylint",
         "pytest",
+        "pytestmark",
         "queryset",
         "Unmmounted"
     ],

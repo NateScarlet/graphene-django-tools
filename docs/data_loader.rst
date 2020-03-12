@@ -1,8 +1,9 @@
 Data loader integration
 ==========================================
 
-Enable by add `'graphene_django_tools.dataloader.middleware.DataLoaderMiddleware'` to your django settings `GRAPHENE['MIDDLEWARE']`
+Use ``Resolver.get_loader`` method get loader for given django model.
+It takes a django model type as argument, and returns corresponding ``promise.DataLoader``.
+Data loader is cached in request scope with `_django_model_loader_cache` key.
 
-When enabled, you will have `get_data_loader` method on your resolve context object.
-It takes a django model type as argument, and returns corresponding `promise.DataLoader`.
-Data loader is cached in request scope with `data_loader_cache` key.
+Use ``Resolver.resolve_gid`` method to resolve model object from graphene global node id.
+It returns a promise and prime object to data loader cache on resolve.

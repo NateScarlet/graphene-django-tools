@@ -1,10 +1,9 @@
 """handle relationship between django model and graphene type. """
 
-from functools import lru_cache
 import typing
+from functools import lru_cache
 
 import django.db.models as djm
-
 
 if typing.TYPE_CHECKING:
     import django.contrib.contenttypes.models as ctm
@@ -30,6 +29,26 @@ def get_models(v: str) -> typing.List[typing.Type[djm.Model]]:
     return ret
 
 
+def get_model(typename: str) -> typing.Type[djm.Model]:
+    """Get django model for typename.
+
+    Args:
+        typename (str): Graphql typename.
+
+    Raises:
+        ValueError: When not exact one matched model for given typename.
+
+    Returns:
+        typing.Type[djm.Model]: Model registered for given typename.
+    """
+
+    models = get_models(typename)
+    if len(models) != 1:
+        raise ValueError(
+            f"Can not determinate model from typename: typename={typename}")
+    return models[0]
+
+
 @lru_cache()
 def get_typename(model: typing.Type[djm.Model]) -> str:
     """Get typename for model, support inheritance.
@@ -52,7 +71,7 @@ def get_typename(model: typing.Type[djm.Model]) -> str:
             return v
 
     raise ValueError(
-        f'Model is not registed or inheritant a register model: {repr(model)}')
+        f'No typename has not registed for: {repr(model)}')
 
 
 def get_content_type(typename: str) -> 'ctm.ContentType':
@@ -70,8 +89,5 @@ def get_content_type(typename: str) -> 'ctm.ContentType':
     # pylint: disable=import-outside-toplevel
 
     import django.contrib.contenttypes.models as ctm
-    models = get_models(typename)
-    if len(models) != 1:
-        raise ValueError(
-            f"Can not determinate model from typename: typename={typename}")
-    return ctm.ContentType.objects.get_for_model(models[0])
+    model = get_model(typename)
+    return ctm.ContentType.objects.get_for_model(model)

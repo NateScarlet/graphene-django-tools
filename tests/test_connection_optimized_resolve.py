@@ -1,7 +1,8 @@
 # pylint:disable=missing-docstring,invalid-name,unused-variable
-from django.utils import timezone
+import django.http as http
 import graphene
 import pytest
+from django.utils import timezone
 
 import graphene_django_tools as gdtools
 
@@ -29,9 +30,11 @@ def test_query_select_related(django_assert_num_queries):
         schema = {
             'first_name': 'String!'
         }
+        model = models.Reporter
 
     class Article(gdtools.Resolver):
         schema = {'headline': 'String!', 'reporter': 'Reporter!'}
+        model = models.Article
 
     class Articles(gdtools.Resolver):
         schema = gdtools.connection.get_type(Article)
@@ -73,7 +76,7 @@ def test_query_select_related(django_assert_num_queries):
             }
         }
     }
-    ''')
+    ''', context=http.HttpRequest())
         assert not result.errors
         assert result.data == {
             "articles": {
@@ -141,9 +144,11 @@ def test_query_prefetch_related(django_assert_num_queries):
             'first_name': 'String!',
             'friends': ReporterFriends
         }
+        model = models.Reporter
 
     class Article(gdtools.Resolver):
         schema = {'headline': 'String!', 'reporter': 'Reporter!'}
+        model = models.Article
 
     class Articles(gdtools.Resolver):
         schema = gdtools.connection.get_type(Article)
@@ -184,7 +189,7 @@ def test_query_prefetch_related(django_assert_num_queries):
             }
         }
     }
-    ''')
+    ''',  context=http.HttpRequest())
         assert not result.errors
         assert result.data == {
             'articles': {
@@ -229,9 +234,11 @@ def test_query_special_field(django_assert_num_queries):
         schema = {
             'first_name': 'String!'
         }
+        model = models.Reporter
 
     class Article(gdtools.Resolver):
         schema = {'headline': 'String!', 'reporter': 'Reporter!'}
+        model = models.Article
 
     class Articles(gdtools.Resolver):
         schema = gdtools.connection.get_type(Article)
@@ -252,7 +259,8 @@ def test_query_special_field(django_assert_num_queries):
     }
 
     with django_assert_num_queries(1):
-        result = schema.execute('''\
+        result = schema.execute(
+            '''\
     {
         articles{
             nodes {
@@ -264,7 +272,9 @@ def test_query_special_field(django_assert_num_queries):
             }
         }
     }
-    ''')
+    ''',
+            context=http.HttpRequest()
+        )
         assert not result.errors
         assert result.data == {
             'articles': {

@@ -21,7 +21,7 @@ python = "^3.6"
 graphene = "^2.1"
 isodate = "^0.6"
 lazy-object-proxy = "^1.4"
-graphene-resolver = "^0.1.8"
+graphene-resolver = "^0.1.9"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
@@ -30,7 +30,6 @@ pytest-cov = "^2.8"
 autopep8 = "^1.4"
 rope = "^0.16"
 pylint = "^2.4"
-pylint-django = "^2.0"
 django = "^3.0"
 
 [build-system]

@@ -21,7 +21,7 @@ Documentation is placed in [docs folder](./docs).
 
 - django integration for [graphene-resolver](https://github.com/NateScarlet/graphene-resolver).
 - optimize queryset with django `only`,`selected_related`,`prefetch_related` to only select fields that used in query.
-- data loader graphene middleware.
+- data loader integration for django model.
 
 ## Development
 
