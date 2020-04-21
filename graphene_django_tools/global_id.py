@@ -20,7 +20,7 @@ class GlobalID:
     def validate_type(
             self,
             expected: Union[str, Tuple[str, ...]]
-    ) -> 'ID':
+    ) -> 'GlobalID':
         """Validate if id match expected type.
 
         Args:
@@ -30,7 +30,7 @@ class GlobalID:
             ValueError: Type not match
 
         Returns:
-            ID: self, for function chain.
+            GlobalID: self, for function chain.
         """
 
         expected_types = expected
@@ -62,14 +62,14 @@ class GlobalID:
         )
 
     @classmethod
-    def from_object(cls, obj: djm.Model) -> str:
+    def from_object(cls, obj: djm.Model) -> 'GlobalID':
         """Get global id from db model object.
 
         Args:
             obj (djm.Model): Object.
 
         Returns:
-            str: Global id.
+            GlobalID: id for obj.
         """
         typename = model_type.get_typename(obj._meta.model)
 
@@ -103,7 +103,7 @@ class GlobalID:
             cls,
             v: Any,
             validate_type: Union[str, Tuple[str, ...]] = None
-    ) -> Optional[Union['GlobalID', List['GlobalID']]]:
+    ) -> Optional[Union[str, List[str]]]:
         """Convert global id values to local db id.
 
         Args:
