@@ -9,6 +9,10 @@ import graphene
 from . import model_type
 
 
+class InvalidGlobalIDError(ValueError):
+    """Indicate global id is invalid.  """
+
+
 @dataclass
 class GlobalID:
     type: str
@@ -27,7 +31,7 @@ class GlobalID:
             expected: type name to match.
 
         Raises:
-            ValueError: Type not match
+            InvalidGlobalIDError: Type not match
 
         Returns:
             GlobalID: self, for function chain.
@@ -37,7 +41,7 @@ class GlobalID:
         if not isinstance(expected_types, tuple):
             expected_types = (expected_types,)
         if self.type not in expected_types:
-            raise ValueError(
+            raise InvalidGlobalIDError(
                 f'Unexpected id type: expected={expected}, actual={self.type}.')
         return self
 
@@ -55,7 +59,7 @@ class GlobalID:
 
             type_, id_ = graphene.Node.from_global_id(v)
         except (TypeError, ValueError) as ex:
-            raise ValueError(f'Invalid id: value={v}') from ex
+            raise InvalidGlobalIDError(f'Invalid id: value={v}') from ex
         return cls(
             value=id_,
             type=type_
@@ -96,7 +100,8 @@ class GlobalID:
         if isinstance(value, djm.Model):
             return cls.from_object(value)
 
-        raise ValueError(f"Can not cast value to global id: {repr(value)}")
+        raise InvalidGlobalIDError(
+            f"Can not cast value to global id: {repr(value)}")
 
     @classmethod
     def convert(
