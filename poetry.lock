@@ -385,7 +385,7 @@ python-versions = "*"
 
 [[package]]
 name = "rope"
-version = "0.18.0"
+version = "0.19.0"
 description = "a python refactoring library..."
 category = "dev"
 optional = false
@@ -457,7 +457,7 @@ testing = ["jaraco.itertools", "func-timeout"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "7b1485bf7012310356667af3431d9349d64e26d14cec16a3c1d747ddcf7edb19"
+content-hash = "991236ece865493b84e4a10482c5e9f7c438039facbf4c5f7759b48c5c5ba4f7"
 
 [metadata.files]
 aniso8601 = [
@@ -635,7 +635,7 @@ pytz = [
     {file = "pytz-2019.3.tar.gz", hash = "sha256:b02c06db6cf09c12dd25137e563b31700d3b80fcc4ad23abb7a315f2789819be"},
 ]
 rope = [
-    {file = "rope-0.18.0.tar.gz", hash = "sha256:786b5c38c530d4846aa68a42604f61b4e69a493390e3ca11b88df0fbfdc3ed04"},
+    {file = "rope-0.19.0.tar.gz", hash = "sha256:64e6d747532e1f5c8009ec5aae3e5523a5bcedf516f39a750d57d8ed749d90da"},
 ]
 rx = [
     {file = "Rx-1.6.1-py2.py3-none-any.whl", hash = "sha256:7357592bc7e881a95e0c2013b73326f704953301ab551fbc8133a6fadab84105"},
