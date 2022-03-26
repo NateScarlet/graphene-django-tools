@@ -24,7 +24,7 @@ lazy-object-proxy = "^1.4"
 graphene-resolver = "^0.1.9"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.2"
+pytest = "^7.1"
 pytest-django = "^3.7"
 pytest-cov = "^2.8"
 autopep8 = "^1.4"
