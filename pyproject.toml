@@ -25,7 +25,7 @@ graphene-resolver = "^0.1.9"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
-pytest-django = "^3.7"
+pytest-django = "^4.5"
 pytest-cov = "^2.8"
 autopep8 = "^1.4"
 rope = "^0.23"
